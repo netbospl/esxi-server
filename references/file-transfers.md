@@ -2,6 +2,8 @@
 
 Covers uploading and downloading ISOs, OVFs, VMDKs, and other files to/from ESXi datastores.
 
+Start from [`../SKILL.md`](../SKILL.md) for safety rules and environment conventions. Check datastore free space before uploads, restores, OVF/OVA imports, or VMDK transfers.
+
 Default target for transfers: **`backup_nfs41`** (100 GB NFS volume, purpose-built for this use case).
 Large VM disk files go to **`datastore1`** (3.37 TB free VMFS6).
 
@@ -16,6 +18,8 @@ https://$ESXI_HOST/folder/<path>?dcPath=ha-datacenter&dsName=<datastore-name>
 
 ### Upload an ISO
 
+Before uploading, verify the target directory and available space on `backup_nfs41`.
+
 ```bash
 curl -sk -T /local/path/to/ubuntu.iso \
   "https://$ESXI_HOST/folder/isos/ubuntu.iso?dcPath=ha-datacenter&dsName=backup_nfs41" \
@@ -23,6 +27,8 @@ curl -sk -T /local/path/to/ubuntu.iso \
 ```
 
 ### Upload a VMDK
+
+Before uploading, verify available space on `datastore1` and confirm the VMDK will not overwrite an existing disk.
 
 ```bash
 curl -sk -T /local/path/to/disk.vmdk \
@@ -66,6 +72,8 @@ curl -sk \
 ## Deploy an OVF/OVA
 
 For standalone ESXi 7.0, use `ovftool` (VMware's CLI tool) or the vSphere REST API OVF deploy endpoint.
+
+Preflight: check datastore free space, confirm target port group, and prefer `PG-RESTRICTED` unless the imported VM requires external access.
 
 ### Using ovftool (if installed locally)
 

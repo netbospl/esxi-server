@@ -1,5 +1,9 @@
 # ESXi SSH & esxcli Reference
 
+Start from [`../SKILL.md`](../SKILL.md) for safety rules, environment variables, and confirmation requirements.
+
+Prefer read-only SSH commands first. Do not run destructive `vim-cmd` or `esxcli` actions without explicit confirmation.
+
 ## Connecting via SSH
 
 ```bash
@@ -65,13 +69,15 @@ vim-cmd vmsvc/get.summary <vmid>
 # Get guest info (IP, hostname — requires VMware Tools running)
 vim-cmd vmsvc/get.guest <vmid>
 
-# Delete a VM (must be powered off first)
+# Delete a VM (destructive: requires explicit confirmation; must be powered off first)
 vim-cmd vmsvc/destroy <vmid>
 ```
 
 ---
 
 ## Snapshot Management via vim-cmd
+
+Snapshots consume datastore space. Check free space first, and require explicit confirmation before reverting, removing one snapshot, or removing all snapshots.
 
 ```bash
 # List snapshots for a VM

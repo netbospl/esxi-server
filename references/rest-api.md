@@ -3,7 +3,11 @@
 ESXi 7.0 exposes the vSphere REST API at `https://$ESXI_HOST/api` (port 443).
 The API requires session-based authentication — a session token is returned at login and passed as a header on all subsequent requests.
 
+Start from [`../SKILL.md`](../SKILL.md) for safety rules and environment conventions.
+
 **TLS note:** ESXi uses a self-signed certificate. Always pass `--insecure` / `-k` in curl, or the equivalent in code. This is expected and intentional for a private dedicated host.
+
+**Secret handling:** Do not print, log, or commit `$ESXI_PASS`, `$SESSION`, guest passwords, cookies, or API tokens.
 
 ---
 
@@ -17,7 +21,8 @@ SESSION=$(curl -sk -X POST \
   -u "$ESXI_USER:$ESXI_PASS" \
   -H "Content-Type: application/json" | tr -d '"')
 
-echo "Session token: $SESSION"
+# Do not echo or log the session token.
+printf 'REST session created for %s\n' "$ESXI_HOST"
 ```
 
 Store `$SESSION` and pass it as `vmware-api-session-id: $SESSION` on every subsequent request.
@@ -55,6 +60,8 @@ curl -sk "https://$ESXI_HOST/api/vcenter/vm/$VM_ID" \
 `$VM_ID` is the `vm` field from the list response (format: `vm-NNN`).
 
 ### Power operations
+
+Power operations can disrupt workloads. Check the VM power state and confirm impact before starting, stopping, rebooting, suspending, or hard-powering a VM.
 
 ```bash
 # Power on
@@ -109,11 +116,13 @@ curl -sk -X POST \
 
 Get datastore IDs from `GET /api/vcenter/datastore` and network IDs from `GET /api/vcenter/network`.
 
+**Preflight:** Check host memory, datastore free space, network ID, and target port group before creating a VM. Prefer `PG-RESTRICTED` unless external access is required.
+
 **RAM warning:** This host has 15.97 GB total. Keep per-VM allocation conservative and check total committed memory before creating.
 
 ### Delete a VM
 
-Power off first, then:
+Deleting a VM is destructive. Confirm the VM ID, display name, datastore path, and backup/snapshot expectations with the user before running the delete request. Power off first, then:
 
 ```bash
 curl -sk -X DELETE \
@@ -124,6 +133,8 @@ curl -sk -X DELETE \
 ---
 
 ## Snapshots
+
+Snapshots can consume datastore space quickly and are not a replacement for backups. Check datastore free space before creating snapshots, and require explicit confirmation before reverting or deleting snapshots.
 
 ```bash
 # List snapshots

@@ -1,0 +1,44 @@
+# OS clutter
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment and secret files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa
+id_ed25519
+known_hosts
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+.cache/
+
+# Python cache / test output
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node cache / tooling output
+node_modules/
+npm-debug.log*
+pnpm-lock.yaml
+
+# Local archive/build outputs
+dist/
+build/
+*.zip
+*.tar.gz
