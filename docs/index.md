@@ -8,6 +8,7 @@ This documentation set describes safe, experimental ESXi 7.0 operations for huma
 - [`../AGENTS.md`](../AGENTS.md) — concise instructions for AI agents using this repository
 - [`../README.md`](../README.md) — repository overview, quick start, safety notes, and maintenance guidance
 - [`../NOTICE.md`](../NOTICE.md) — AI-assisted / vibe-coded experimental-use notice
+- [`safety-workflow.md`](safety-workflow.md) — concise summary of discovery, planning, confirmation, rollback, and prompt-injection resistance
 
 ## References
 

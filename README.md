@@ -12,6 +12,18 @@ Commands and guidance must be reviewed by a human before use on real ESXi hosts.
 
 No warranty is provided. Operators remain responsible for validating commands, assessing risk, and adapting procedures to their own environment. See [`NOTICE.md`](NOTICE.md) for the standalone notice.
 
+## Operational model
+
+This skill is designed around a simple safety loop:
+
+1. Start with read-only discovery.
+2. Write a plan that shows commands/API calls, target objects, risk, and rollback ideas.
+3. Wait for explicit human approval.
+4. Apply only the approved scope.
+5. Verify the result and summarize what changed.
+
+Read the top-level [`SKILL.md`](SKILL.md) first for the exact operating modes, confirmation policy, rollback guidance, and untrusted-output rules.
+
 ## What this skill helps with
 
 Use this skill when managing or inspecting a VMware ESXi 7.0 host, including:
