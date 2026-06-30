@@ -40,6 +40,7 @@ Notes:
 - The folder path in the URL is relative to the datastore root. Create subdirectories as needed.
 - For large files, add `--limit-rate` or monitor with `--progress-bar`.
 - Authentication here uses HTTP basic auth (`-u`), not the session token.
+- If SSH/SFTP auth is flaky or only advertises `publickey,keyboard-interactive`, prefer the HTTPS `/folder/` datastore browser endpoint for browsing and uploads instead of repeating SSH retries.
 
 ---
 

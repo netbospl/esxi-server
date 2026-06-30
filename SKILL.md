@@ -33,6 +33,8 @@ printf 'Using ESXi host %s as user %s\n' "$ESXI_HOST" "$ESXI_USER"
 
 If required values are missing, ask the user to provide them through their shell, local environment, or secret manager. Never request that secrets be pasted into repository files.
 
+When working from a local repo that stores ESXi details on disk, confirm the exact filename instead of assuming `secrets.md`; this workspace used `ESXi_INFO.txt` for host details and `secrest.md` for credentials.
+
 ## Known Infrastructure Conventions
 
 These names are conventions used by the reference docs. Confirm live state before relying on them.
@@ -56,6 +58,8 @@ These names are conventions used by the reference docs. Confirm live state befor
 5. **Confirm networking.** Confirm port group choice before attaching or moving a VM NIC. Prefer least-privilege networking; use `PG-RESTRICTED` unless external access is required.
 6. **Show dangerous actions.** For destructive or disruptive operations, show the command/API request and wait for explicit confirmation.
 7. **Verify after changes.** Re-read VM, datastore, network, or snapshot state after any write operation.
+
+On standalone ESXi, a successful REST login does not guarantee every `vcenter/*` inventory endpoint is implemented. If inventory reads return `400`, empty, or inconsistent data, fall back to `/sdk` + pyVmomi or SSH inventory instead of assuming bad credentials.
 
 ## Destructive Operations Require Explicit Confirmation
 
@@ -89,7 +93,7 @@ Snapshots are not free backups. They consume datastore space and can grow quickl
 | Datastore free-space checks | REST API or SSH + `esxcli storage filesystem list` |
 | Datastore browsing | HTTPS datastore browser API or SSH path checks |
 | Low-level networking (`vSwitch`, `vmk`, port groups) | SSH + `esxcli`; confirm before changes |
-| Upload/download ISO, OVF, OVA, VMDK files | HTTPS datastore browser API, SCP, or `ovftool` |
+| Upload/download ISO, OVF, OVA, VMDK files | HTTPS datastore browser API (`/folder/`), SCP, or `ovftool`; prefer `/folder/` when SSH auth or SFTP is flaky |
 | Run commands inside a guest VM | REST Guest Processes API when VMware Tools is running |
 
 REST API sessions expire. If a request returns `401`, re-authenticate rather than reusing stale session tokens.

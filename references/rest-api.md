@@ -37,6 +37,8 @@ curl -sk -X DELETE \
 
 Sessions expire after inactivity. If any request returns HTTP 401, re-authenticate.
 
+Standalone ESXi caveat: a successful session does not guarantee every `vcenter/*` read endpoint is implemented. If inventory reads return `400`, empty data, or inconsistent fields, fall back to `/sdk` + pyVmomi or SSH-based inventory rather than treating it as a login failure.
+
 ---
 
 ## VM Lifecycle
