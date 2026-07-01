@@ -56,7 +56,7 @@ Before sharing bug reports, examples, screenshots, or logs, remove:
 - Sensitive datastore paths
 - Organization, customer, or project names if private
 
-Use placeholders such as `your-esxi-host.example.com`, `vm-NNN`, `datastore1`, and `network-NNN` where possible.
+Use placeholders such as `your-esxi-host.example.com`, `vm-NNN`, `primary-datastore`, and `network-NNN` where possible.
 
 ## Reporting security issues
 

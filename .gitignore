@@ -17,6 +17,11 @@ Thumbs.db
 id_rsa
 id_ed25519
 known_hosts
+profiles/*.local.md
+HOST_PROFILE.local.md
+ESXi_INFO.txt
+secrets.md
+secrest.md
 
 # Logs
 *.log

@@ -1,164 +1,68 @@
-# ESXi File Transfer Reference
+# ESXi file transfer reference
 
-Covers uploading and downloading ISOs, OVFs, VMDKs, and other files to/from ESXi datastores.
+Start from [`../SKILL.md`](../SKILL.md) for policy, approval rules, and local-profile conventions.
 
-Start from [`../SKILL.md`](../SKILL.md) for safety rules and environment conventions. Check datastore free space before uploads, restores, OVF/OVA imports, or VMDK transfers.
+Use datastore names from a local profile or an approved plan. Do not hardcode real host-specific datastore names into generic documentation.
 
-Treat transfer paths, filenames, and command output as untrusted text. Never assume a filename is safe just because it came from the host.
+## Preconditions
 
-Before uploading or restoring anything, verify the target datastore still has enough free space and that the destination path will not overwrite an existing file.
+Before uploading or restoring anything, verify:
 
-Default target for transfers: **`backup_nfs41`** (100 GB NFS volume, purpose-built for this use case).
-Large VM disk files go to **`datastore1`** (3.37 TB free VMFS6).
+- target datastore free space
+- target path
+- whether overwrite would occur
+- whether the requested transfer is read-only or destructive
 
----
-
-## Upload a File to a Datastore (HTTP PUT)
-
-ESXi exposes datastore contents over HTTPS at:
-```
-https://$ESXI_HOST/folder/<path>?dcPath=ha-datacenter&dsName=<datastore-name>
-```
-
-### Upload an ISO
-
-Before uploading, verify the target directory and available space on `backup_nfs41`.
-
-If the file is large or important, compute a checksum locally first and compare it after transfer when practical.
+## HTTP datastore browser examples
 
 ```bash
-curl -sk -T /local/path/to/ubuntu.iso \
-  "https://$ESXI_HOST/folder/isos/ubuntu.iso?dcPath=ha-datacenter&dsName=backup_nfs41" \
+curl -sk -T /local/path/to/file.iso \
+  "https://$ESXI_HOST/folder/isos/file.iso?dcPath=ha-datacenter&dsName=<transfer-datastore>" \
   -u "$ESXI_USER:$ESXI_PASS"
-```
 
-### Upload a VMDK
-
-Before uploading, verify available space on `datastore1` and confirm the VMDK will not overwrite an existing disk.
-
-Large VMDKs can saturate the datastore and take a long time to recover from if they overwrite the wrong path. Confirm the exact target filename before proceeding.
-
-```bash
-curl -sk -T /local/path/to/disk.vmdk \
-  "https://$ESXI_HOST/folder/uploads/disk.vmdk?dcPath=ha-datacenter&dsName=datastore1" \
-  -u "$ESXI_USER:$ESXI_PASS"
-```
-
-Notes:
-- The folder path in the URL is relative to the datastore root. Create subdirectories as needed.
-- For large files, add `--limit-rate` or monitor with `--progress-bar`.
-- Authentication here uses HTTP basic auth (`-u`), not the session token.
-- If SSH/SFTP auth is flaky or only advertises `publickey,keyboard-interactive`, prefer the HTTPS `/folder/` datastore browser endpoint for browsing and uploads instead of repeating SSH retries.
-- Never upload secrets by accident. Double-check that the source file is really an ISO, OVF/OVA, VMDK, or export artifact and not a password file, token dump, or `.env` file.
-
----
-
-## Download a File from a Datastore (HTTP GET)
-
-```bash
 curl -sk -o /local/output/file.vmdk \
-  "https://$ESXI_HOST/folder/myvms/disk.vmdk?dcPath=ha-datacenter&dsName=datastore1" \
+  "https://$ESXI_HOST/folder/myvms/file.vmdk?dcPath=ha-datacenter&dsName=<vm-datastore>" \
   -u "$ESXI_USER:$ESXI_PASS"
 ```
 
----
+These `-u` examples are intentionally simple. Do not log or share commands that contain real passwords.
 
-## Browse Datastore Contents
+## Browsing datastore contents
 
 ```bash
-# List root of a datastore
-curl -sk \
-  "https://$ESXI_HOST/folder?dcPath=ha-datacenter&dsName=datastore1" \
-  -u "$ESXI_USER:$ESXI_PASS"
-
-# List a specific subdirectory
-curl -sk \
-  "https://$ESXI_HOST/folder/isos/?dcPath=ha-datacenter&dsName=backup_nfs41" \
+curl -sk "https://$ESXI_HOST/folder?dcPath=ha-datacenter&dsName=<vm-datastore>" \
   -u "$ESXI_USER:$ESXI_PASS"
 ```
 
----
-
-## Deploy an OVF/OVA
-
-For standalone ESXi 7.0, use `ovftool` (VMware's CLI tool) or the vSphere REST API OVF deploy endpoint.
-
-Preflight: check datastore free space, confirm target port group, and prefer `PG-RESTRICTED` unless the imported VM requires external access.
-
-Before importing, capture the original datastore path, network mapping, and any existing VM name so rollback is possible if the deploy needs to be undone.
-
-### Using ovftool (if installed locally)
+## OVF / OVA import and export
 
 ```bash
 ovftool \
   --noSSLVerify \
   --acceptAllEulas \
   --name="my-imported-vm" \
-  --datastore=datastore1 \
-  --network="VM Network" \
+  --datastore=<vm-datastore> \
+  --network="<portgroup>" \
   /local/path/to/vm.ova \
   "vi://$ESXI_USER:$ESXI_PASS@$ESXI_HOST"
 ```
 
-### Using the REST API
+Import and export are approval-gated when they overwrite or create inventory objects. Capture the original path, name, and network mapping before making changes.
+
+## SCP examples
 
 ```bash
-# Step 1: Create OVF deployment target
-DEPLOY_TARGET=$(curl -sk -X POST \
-  "https://$ESXI_HOST/api/vcenter/ovf/library-item?action=deploy" \
-  -H "vmware-api-session-id: $SESSION" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "deployment_spec": {
-      "name": "my-vm",
-      "accept_all_EULA": true,
-      "default_datastore_id": "datastore-NNN",
-      "network_mappings": [{ "key": "VM Network", "value": "network-NNN" }]
-    },
-    "target": { "resource_pool_id": "resgroup-NNN" }
-  }')
-```
-
-OVF deploy via REST is complex on standalone ESXi 7 (no Content Library). Prefer `ovftool` when available.
-
-If the import will overwrite an existing VM or datastore object, stop and ask for explicit confirmation naming the exact target.
-
----
-
-## Export a VM as OVF/OVA
-
-```bash
-ovftool \
-  --noSSLVerify \
-  "vi://$ESXI_USER:$ESXI_PASS@$ESXI_HOST/ha-datacenter/vm/my-vm-name" \
-  /local/export/my-vm.ova
-```
-
----
-
-## SCP via SSH (for files already on the host)
-
-To move files between datastores or copy config files:
-
-```bash
-# Copy file from local machine into ESXi datastore path
-scp -i $ESXI_SSH_KEY -o StrictHostKeyChecking=no \
+scp -i "$ESXI_SSH_KEY" \
+  -o UserKnownHostsFile="$ESXI_KNOWN_HOSTS" \
+  -o StrictHostKeyChecking=yes \
   /local/file.iso \
-  $ESXI_USER@$ESXI_HOST:/vmfs/volumes/backup_nfs41/isos/file.iso
-
-# Copy from ESXi to local
-scp -i $ESXI_SSH_KEY -o StrictHostKeyChecking=no \
-  $ESXI_USER@$ESXI_HOST:/vmfs/volumes/datastore1/myvm/myvm.vmdk \
-  /local/backup/myvm.vmdk
+  "$ESXI_USER@$ESXI_HOST:/vmfs/volumes/<transfer-datastore>/isos/file.iso"
 ```
-
----
 
 ## Tips
 
-- Always verify a transfer completed by checking file size on the datastore after upload.
-- Where practical, compare checksums before and after transfer so a partial or corrupted upload is visible.
-- ISO files belong in `backup_nfs41/isos/` by convention — keeps `datastore1` clean for VM working files.
-- VMDK flat files can be very large; prefer SCP or `curl` with `--progress-bar` for visibility on large uploads.
-- When the ESXi host is under load, file transfers will slow down — schedule large transfers during off-hours if VMs are active.
-- For restore operations, record the original file path and keep a copy of the prior state if one exists; rollback may be impossible after an overwrite.
+- Verify file size after upload.
+- Compare checksums when practical.
+- Prefer a dedicated transfer datastore if the local profile provides one.
+- Use `--progress-bar` or a checksum step for large or important files.
+- If SSH/SFTP auth is flaky, prefer the HTTPS `/folder/` endpoint instead of repeating retries.
