@@ -24,6 +24,8 @@ Probe capabilities before choosing a communication path. Do not assume that stan
 4. If REST is incomplete or inconsistent, fall back to SSH read-only discovery.
 5. Record which transport worked and why it was chosen.
 
+For standalone ESXi 7.x, a `400` from `POST /api/session` or `POST /rest/com/vmware/cis/session` can be a normal capability miss even when credentials are valid for the HTTPS Host Client and `/folder/` datastore browser. Do not loop on REST authentication in that case; record the result and switch to a verified alternative.
+
 ## Decision rules
 
 - Prefer REST when it is available and reliable for the exact task.
@@ -31,6 +33,7 @@ Probe capabilities before choosing a communication path. Do not assume that stan
 - Do not continue if the capability probe itself fails in a way that blocks safe identification of the target.
 - Never guess at API support from a single successful endpoint.
 - Treat a 400/404 on one endpoint as a capability signal, not as proof that the host is down.
+- Treat a closed or unreachable SSH port as a transport capability result. Do not repeat aggressive SSH retries; use HTTPS Host Client, `/folder/`, or another verified path until SSH availability is restored.
 
 ## Example probe notes
 

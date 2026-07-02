@@ -34,6 +34,8 @@ curl -sk "https://$ESXI_HOST/folder?dcPath=ha-datacenter&dsName=<vm-datastore>" 
   -u "$ESXI_USER:$ESXI_PASS"
 ```
 
+This `/folder` listing path is a practical first check for standalone ESXi when the Host Client is reachable but REST session creation fails. A `200` response with an HTML listing confirms that credentials and datastore-browser access work; it does not prove that vCenter-style REST endpoints are available.
+
 ## OVF / OVA import and export
 
 ```bash
@@ -66,3 +68,4 @@ scp -i "$ESXI_SSH_KEY" \
 - Prefer a dedicated transfer datastore if the local profile provides one.
 - Use `--progress-bar` or a checksum step for large or important files.
 - If SSH/SFTP auth is flaky, prefer the HTTPS `/folder/` endpoint instead of repeating retries.
+- If SSH port 22 is closed or unreachable, do not retry SCP/SFTP loops. Use the HTTPS Host Client or `/folder/` endpoint and record SSH as unavailable for the session.

@@ -55,6 +55,7 @@ See [`references/dedicated-agent-user.md`](references/dedicated-agent-user.md) f
 Probe capabilities before choosing SSH, REST, or SDK-based access. Do not assume that every vCenter-style REST endpoint exists on standalone ESXi.
 
 - [`references/capability-probe.md`](references/capability-probe.md) defines the probe order.
+- [`references/validated-interaction-methods.md`](references/validated-interaction-methods.md) records tested standalone-ESXi access paths and fallback decisions.
 - Document the chosen transport and why it was selected.
 - If capability detection fails, stop and report what failed instead of guessing.
 
@@ -149,6 +150,7 @@ SSH host keys and HTTPS certificates are different trust mechanisms. A self-sign
 | Standalone inventory when REST fails | `/sdk` + pyVmomi |
 
 REST sessions expire. If a request returns `401`, re-authenticate rather than reusing stale session tokens.
+On standalone ESXi 7.x, `POST /api/session` and `POST /rest/com/vmware/cis/session` may return `400` even when the HTTPS Host Client and `/folder/` datastore browser are reachable with the same account. Treat that as a capability result and use the Host Client, `/folder/`, SSH, or `/sdk` instead of retrying REST blindly.
 
 ## Reference files
 
@@ -156,6 +158,7 @@ Load only the reference files needed for the task:
 
 - [`references/agent-communication-contract.md`](references/agent-communication-contract.md)
 - [`references/capability-probe.md`](references/capability-probe.md)
+- [`references/validated-interaction-methods.md`](references/validated-interaction-methods.md)
 - [`references/dedicated-agent-user.md`](references/dedicated-agent-user.md)
 - [`references/ssh-esxcli.md`](references/ssh-esxcli.md)
 - [`references/rest-api.md`](references/rest-api.md)

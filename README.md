@@ -161,6 +161,7 @@ Prefer a dedicated local ESXi user named `agent` for automation. Use a dedicated
 - [`SKILL.md`](SKILL.md) — top-level skill instructions, safety workflow, local profiles, and host conventions
 - [`references/agent-communication-contract.md`](references/agent-communication-contract.md) — how an AI agent should behave when operating ESXi
 - [`references/capability-probe.md`](references/capability-probe.md) — probe order for REST, SSH, VM inventory, datastore, network, and guest tools
+- [`references/validated-interaction-methods.md`](references/validated-interaction-methods.md) — tested standalone ESXi interaction paths and fallback decisions
 - [`references/dedicated-agent-user.md`](references/dedicated-agent-user.md) — least-privilege `agent` user guidance
 - [`references/ssh-esxcli.md`](references/ssh-esxcli.md) — SSH, `esxcli`, `vim-cmd`, networking, datastore, and resource checks
 - [`references/rest-api.md`](references/rest-api.md) — vSphere REST API sessions, VM lifecycle, snapshots, datastores, networking, and resource checks

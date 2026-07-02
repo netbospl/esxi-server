@@ -21,6 +21,8 @@ ssh -i "$ESXI_SSH_KEY" \
 
 `StrictHostKeyChecking=no` is not the default safe pattern. Use it only for lab-only or emergency recovery work after human acknowledgement. If the host key changes unexpectedly, stop and ask for verification.
 
+If port 22 is closed or unreachable, stop SSH probing after one harmless connectivity check and record SSH as unavailable. Do not run repeated password, keyboard-interactive, SCP, or SFTP retries against a live host; switch to the HTTPS Host Client, `/folder/` datastore browser, or another verified path.
+
 ## Read-only discovery
 
 ```bash

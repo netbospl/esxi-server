@@ -15,6 +15,8 @@ SESSION=$(curl -sk -X POST \
 
 Do not echo the session token. Keep it in memory only. Avoid putting passwords in shell history, logs, or markdown reports.
 
+On standalone ESXi 7.x, this endpoint can return `400` with an empty body even when the same account can reach the HTTPS Host Client and `/folder/` datastore browser. Treat that as an unsupported or incomplete REST surface for that host, not as a prompt to retry credentials repeatedly.
+
 ## Read-only discovery
 
 ```bash
