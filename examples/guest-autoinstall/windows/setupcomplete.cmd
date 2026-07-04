@@ -2,9 +2,10 @@
 setlocal enabledelayedexpansion
 
 rem TEMPLATE ONLY.
-rem This file runs at the end of Windows setup.
+rem This file runs after Windows Setup, not as the primary OOBE bypass mechanism.
 rem Keep secrets out of committed examples and replace placeholders before use.
 rem Safe placeholder: attempt a silent VMware Tools install if the installer is present.
+rem Do not use this file for activation or license bypass workflows.
 
 set "FOUND=0"
 for %%D in (D E F G H I J K L) do (

@@ -64,6 +64,67 @@ Common Windows notes:
 - `setupcomplete.cmd` runs after setup finishes and is a good place for a silent VMware Tools install attempt.
 - A safe placeholder example is to look for `setup64.exe` on the mounted installer media and run `setup64.exe /S /v "/qn REBOOT=R"` if found.
 
+## Windows 11 local account and OOBE notes
+
+### Preferred method: create a local account with Autounattend.xml
+
+For repeatable VM builds, prefer an unattended answer file with `Microsoft-Windows-Shell-Setup`, `UserAccounts`, and `LocalAccounts`.
+This is different from manually bypassing OOBE screens.
+
+Use the answer-file method whenever possible because it is deterministic and keeps the build flow documented.
+
+Warning: passwords in answer files are sensitive. In the repository, keep them as placeholders only and replace them with a secure local workflow before real use.
+
+### Manual fallback: Shift + F10 OOBE commands
+
+These commands are a manual rescue path for interactive installs, not a guaranteed automation API.
+
+1. Disconnect the VM from the network or leave the virtual NIC disconnected.
+2. At the network prompt, press `Shift + F10`.
+3. Run:
+
+```cmd
+OOBE\BYPASSNRO
+```
+
+4. The VM restarts.
+5. Continue setup and use an offline path if Windows offers one.
+6. Create a local account.
+
+Warning: this may not work on newer Windows 11 builds because Microsoft changes OOBE behavior over time.
+
+### Alternate manual command
+
+On some builds, this command may jump to local user creation:
+
+```cmd
+start ms-cxh:localonly
+```
+
+This is version-dependent and may be removed, blocked, or behave differently on newer Windows 11 builds.
+
+### Windows 11 Pro Domain Join path
+
+On Windows 11 Pro, during setup, choose the work/school or alternate sign-in path where available.
+If the installer shows `Domain join instead`, that path can lead to local account creation.
+This is not generally available in Windows 11 Home.
+
+### Rufus-created install media
+
+Rufus is a third-party bootable media creator.
+It may offer Windows 11 setup customization options, including local-account or online-account requirement bypass options depending on the Rufus version and ISO build.
+For ESXi, this is mainly useful when preparing media manually outside the unattended-answer-file path.
+Do not treat Rufus as the preferred enterprise deployment method.
+
+Common Windows notes:
+
+- Use `Autounattend.xml` as the root answer file name for install-time discovery.
+- For Windows 10 / 11 desktop installs, add OOBE suppression and generic local-account bootstrap only.
+- For Windows Server 2022, keep server-oriented defaults and avoid desktop-only assumptions.
+- `setupcomplete.cmd` runs after setup finishes and is a good place for a silent VMware Tools install attempt.
+- A safe placeholder example is to look for `setup64.exe` on the mounted installer media and run `setup64.exe /S /v "/qn REBOOT=R"` if found.
+- Verify against the exact Windows build or ISO because OOBE behavior changes over time.
+
 ## Ubuntu Autoinstall
 
 Ubuntu Server uses Subiquity/cloud-init autoinstall.
@@ -163,10 +224,12 @@ Template guidance:
 
 ## Source docs to consult
 
-- Microsoft Windows unattended setup docs: https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/
+- Microsoft Windows Unattended Setup Reference: https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/
+- Microsoft answer-file and component documentation: check the Windows setup automation docs for `Microsoft-Windows-Shell-Setup`, `UserAccounts`, and `LocalAccounts` details.
 - Canonical Ubuntu Server autoinstall docs: https://ubuntu.com/server/docs/install/autoinstall
 - Red Hat RHEL automatic installation docs: https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/automatically_installing_rhel/index
 - Debian Installer preseed appendix: https://www.debian.org/releases/stable/amd64/apbs02.en.html
 - HashiCorp Packer docs: https://developer.hashicorp.com/packer/docs
 - VMware/Broadcom Guest OS Compatibility Guide: consult the current VMware/Broadcom compatibility guide for the exact ESXi 7 guest/version matrix
 - VMware Tools / open-vm-tools docs: prefer vendor or distro packaging guidance for the guest OS you are installing
+- Manual Windows 11 OOBE fallback behavior: if you mention `OOBE\BYPASSNRO`, `start ms-cxh:localonly`, or Rufus, treat those as version-dependent community/manual notes rather than official deployment guidance.

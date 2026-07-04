@@ -70,7 +70,7 @@ Read [`SKILL.md`](SKILL.md) first for the exact workflow, approval rules, host-k
 
 See [`references/guest-os-autoinstall.md`](references/guest-os-autoinstall.md) for the safety notes, compatibility checklist, and the guest/host install distinction.
 
-A working template pack lives under [`examples/guest-autoinstall/`](examples/guest-autoinstall/README.md). It includes Windows answer-file templates, Ubuntu autoinstall seed files, Kickstart and preseed examples, Packer skeletons, and local helper scripts for creating seed media or serving HTTP content.
+A working template pack lives under [`examples/guest-autoinstall/`](examples/guest-autoinstall/README.md). It includes Windows answer-file templates, Windows 11 local-account notes, Ubuntu autoinstall seed files, Kickstart and preseed examples, Packer skeletons, and local helper scripts for creating seed media or serving HTTP content.
 
 ## Environment and local files
 

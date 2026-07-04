@@ -156,16 +156,24 @@ On standalone ESXi 7.x, `POST /api/session` and `POST /rest/com/vmware/cis/sessi
 
 Use [`references/guest-os-autoinstall.md`](references/guest-os-autoinstall.md) when the task is about installing a guest operating system inside a VM on ESXi 7.x.
 
+If the user asks about Windows 11 local accounts, OOBE bypass, offline install, Microsoft account avoidance during setup, or an `I don’t have internet` rescue flow, also load [`examples/guest-autoinstall/windows/oobe-local-account-notes.md`](examples/guest-autoinstall/windows/oobe-local-account-notes.md). Prefer unattended local account creation via `Autounattend.xml`; treat manual OOBE commands as version-dependent fallback methods.
+
+Refuse any request that tries to bypass Windows activation or licensing.
+
 This is separate from ESXi host scripted installation. The host installer uses `ks.cfg`; guest OS automation uses the guest-specific files and delivery paths described in the guest autoinstall reference.
 
 Before reporting a guest-install automation task complete:
 
 - [ ] Guest OS compatibility was checked against the VMware/Broadcom compatibility guide.
+- [ ] Windows edition/build was checked when the task involved Windows 11 local-account behavior.
 - [ ] Datastore free space was checked before creating answer media or seed media.
+- [ ] The local-account method was chosen deliberately: answer file vs manual OOBE fallback.
+- [ ] Network disconnect was used only when intentionally testing offline OOBE.
 - [ ] Answer files were sanitized and contain no real secrets.
 - [ ] Any destructive disk automation was explicitly acknowledged.
 - [ ] A VMware Tools or open-vm-tools installation plan was included.
 - [ ] A fallback path was documented if Packer or API automation is unavailable.
+- [ ] No activation or license bypass content was included.
 
 ## Reference files
 

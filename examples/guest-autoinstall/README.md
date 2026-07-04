@@ -21,6 +21,8 @@ examples/guest-autoinstall/
 │   ├── Autounattend.xml
 │   ├── autounattend-win10-win11.xml
 │   ├── autounattend-server2022.xml
+│   ├── autounattend-local-account-snippet.xml
+│   ├── oobe-local-account-notes.md
 │   └── setupcomplete.cmd
 ├── linux/
 │   ├── ubuntu/
@@ -45,6 +47,8 @@ examples/guest-autoinstall/
 - `windows/Autounattend.xml` is a generic baseline.
 - `windows/autounattend-win10-win11.xml` is a desktop-oriented variant.
 - `windows/autounattend-server2022.xml` is a server-oriented variant.
+- `windows/oobe-local-account-notes.md` documents version-dependent Windows 11 local-account rescue paths.
+- `windows/autounattend-local-account-snippet.xml` contains only the `UserAccounts` / `LocalAccounts` fragment.
 - `windows/setupcomplete.cmd` shows a safe VMware Tools silent install attempt.
 - `linux/ubuntu/user-data` and `linux/ubuntu/meta-data` form a NoCloud seed pair.
 - `linux/rhel-rocky-alma/ks.cfg` is a destructive Kickstart template for disposable VMs.
@@ -52,6 +56,14 @@ examples/guest-autoinstall/
 - `packer/*.pkr.hcl` sketches `vsphere-iso` usage and the vSphere API dependency.
 - `scripts/make-ubuntu-seed-iso.sh` and `scripts/make-windows-answer-iso.sh` create local ISO artifacts.
 - `scripts/serve-http.sh` serves Kickstart or preseed files over localhost by default.
+
+## Windows 11 local-account notes
+
+- Prefer `Autounattend.xml` for repeatable builds that need a local account during setup.
+- Use `windows/oobe-local-account-notes.md` when you need a rescue path for interactive Windows 11 setup on a lab VM.
+- The commands documented there are version-dependent fallback methods, not guaranteed automation interfaces.
+- Test against the exact Windows ISO/build because OOBE behavior changes over time.
+- Keep answer files sanitized; they can contain secrets.
 
 ## Safety reminders
 

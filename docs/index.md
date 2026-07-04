@@ -15,6 +15,7 @@ This documentation set describes safe, experimental ESXi operations for humans a
 - [`../profiles/README.md`](../profiles/README.md) — local-only profile naming and usage notes
 - [`../profiles/example-host.md`](../profiles/example-host.md) — sanitized example host profile
 - [`../examples/guest-autoinstall/README.md`](../examples/guest-autoinstall/README.md) — guest OS unattended install templates and helper scripts
+- [`../examples/guest-autoinstall/windows/oobe-local-account-notes.md`](../examples/guest-autoinstall/windows/oobe-local-account-notes.md) — Windows 11 local-account and OOBE fallback notes for lab VMs
 - [`../scripts/esxi-readonly-discovery.sh`](../scripts/esxi-readonly-discovery.sh) — read-only discovery helper script
 - [`../templates/change-plan.md`](../templates/change-plan.md) — structured change-plan template
 - [`../templates/approval-request.md`](../templates/approval-request.md) — explicit approval prompt template

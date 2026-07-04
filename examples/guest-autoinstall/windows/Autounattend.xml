@@ -113,14 +113,19 @@
         <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
         <ProtectYourPC>3</ProtectYourPC>
       </OOBE>
+      <!--
+        WARNING: plaintext passwords in answer files are sensitive.
+        Keep committed examples as placeholders only.
+      -->
       <UserAccounts>
         <LocalAccounts>
           <LocalAccount wcm:action="add">
             <Name>agent</Name>
             <Group>Administrators</Group>
             <DisplayName>Template Agent</DisplayName>
+            <Description>Local automation account placeholder</Description>
             <Password>
-              <Value>changeme</Value>
+              <Value>REPLACE_WITH_SECURE_PASSWORD_OR_HASH_PLACEHOLDER</Value>
               <PlainText>true</PlainText>
             </Password>
           </LocalAccount>
