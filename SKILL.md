@@ -152,6 +152,21 @@ SSH host keys and HTTPS certificates are different trust mechanisms. A self-sign
 REST sessions expire. If a request returns `401`, re-authenticate rather than reusing stale session tokens.
 On standalone ESXi 7.x, `POST /api/session` and `POST /rest/com/vmware/cis/session` may return `400` even when the HTTPS Host Client and `/folder/` datastore browser are reachable with the same account. Treat that as a capability result and use the Host Client, `/folder/`, SSH, or `/sdk` instead of retrying REST blindly.
 
+## Guest OS unattended installs
+
+Use [`references/guest-os-autoinstall.md`](references/guest-os-autoinstall.md) when the task is about installing a guest operating system inside a VM on ESXi 7.x.
+
+This is separate from ESXi host scripted installation. The host installer uses `ks.cfg`; guest OS automation uses the guest-specific files and delivery paths described in the guest autoinstall reference.
+
+Before reporting a guest-install automation task complete:
+
+- [ ] Guest OS compatibility was checked against the VMware/Broadcom compatibility guide.
+- [ ] Datastore free space was checked before creating answer media or seed media.
+- [ ] Answer files were sanitized and contain no real secrets.
+- [ ] Any destructive disk automation was explicitly acknowledged.
+- [ ] A VMware Tools or open-vm-tools installation plan was included.
+- [ ] A fallback path was documented if Packer or API automation is unavailable.
+
 ## Reference files
 
 Load only the reference files needed for the task:
@@ -167,6 +182,7 @@ Load only the reference files needed for the task:
 - [`references/network-firewall-ipv4-ipv6.md`](references/network-firewall-ipv4-ipv6.md)
 - [`references/certificates-letsencrypt.md`](references/certificates-letsencrypt.md)
 - [`references/vm-import-export.md`](references/vm-import-export.md)
+- [`references/guest-os-autoinstall.md`](references/guest-os-autoinstall.md)
 - [`references/troubleshooting.md`](references/troubleshooting.md)
 
 ## Completion checklist
@@ -182,3 +198,9 @@ Before reporting an ESXi task complete:
 - [ ] RAM, datastore free space, VM power state, and network choice were checked when relevant.
 - [ ] Post-change state was verified with a read-only command or API call.
 - [ ] No credentials, tokens, private hostnames/IPs, logs, SSH keys, or `.env` files were written to the repository.
+- [ ] Guest OS compatibility was checked when the task involved an unattended guest install.
+- [ ] Datastore free space was checked before answer media, seed media, or template artifacts were created.
+- [ ] Answer files were sanitized and do not contain real secrets.
+- [ ] Destructive disk automation was explicitly acknowledged when applicable.
+- [ ] A VMware Tools or open-vm-tools plan was documented when applicable.
+- [ ] A fallback path was documented if Packer or API automation could not be used.

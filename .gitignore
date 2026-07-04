@@ -45,5 +45,9 @@ pnpm-lock.yaml
 # Local archive/build outputs
 dist/
 build/
+*.iso
+*.img
+examples/guest-autoinstall/out/
+examples/guest-autoinstall/tmp/
 *.zip
 *.tar.gz

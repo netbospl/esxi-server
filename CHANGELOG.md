@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - AI-assisted / vibe-coded notice.
 - Agent instructions and documentation index.
 - Validated standalone ESXi interaction-method notes covering Host Client, `/folder`, REST fallback, and SSH-unavailable handling.
+- Guest OS unattended install reference docs, example templates, and helper scripts for Windows, Ubuntu, RHEL/Rocky/Alma, Debian, and Packer.
 
 ### Changed
 - Reviewed and clarified ESXi skill safety guidance.

@@ -36,11 +36,14 @@ Read [`SKILL.md`](SKILL.md) first for the exact workflow, approval rules, host-k
 │   ├── certificates-letsencrypt.md
 │   ├── dedicated-agent-user.md
 │   ├── file-transfers.md
+│   ├── guest-os-autoinstall.md
 │   ├── network-firewall-ipv4-ipv6.md
 │   ├── rest-api.md
 │   ├── ssh-esxcli.md
 │   ├── troubleshooting.md
 │   └── vm-import-export.md
+├── examples/
+│   └── guest-autoinstall/
 ├── scripts/
 │   └── esxi-readonly-discovery.sh
 ├── templates/
@@ -62,6 +65,12 @@ Read [`SKILL.md`](SKILL.md) first for the exact workflow, approval rules, host-k
 ├── .editorconfig
 └── .gitignore
 ```
+
+## Guest OS unattended install examples
+
+See [`references/guest-os-autoinstall.md`](references/guest-os-autoinstall.md) for the safety notes, compatibility checklist, and the guest/host install distinction.
+
+A working template pack lives under [`examples/guest-autoinstall/`](examples/guest-autoinstall/README.md). It includes Windows answer-file templates, Ubuntu autoinstall seed files, Kickstart and preseed examples, Packer skeletons, and local helper scripts for creating seed media or serving HTTP content.
 
 ## Environment and local files
 
@@ -170,6 +179,8 @@ Prefer a dedicated local ESXi user named `agent` for automation. Use a dedicated
 - [`references/network-firewall-ipv4-ipv6.md`](references/network-firewall-ipv4-ipv6.md) — network, firewall, and IP-stack checks
 - [`references/certificates-letsencrypt.md`](references/certificates-letsencrypt.md) — certificate handling and trust guidance
 - [`references/vm-import-export.md`](references/vm-import-export.md) — import/export workflow notes
+- [`references/guest-os-autoinstall.md`](references/guest-os-autoinstall.md) — guest OS unattended install templates, safety notes, and compatibility reminders
+- [`examples/guest-autoinstall/README.md`](examples/guest-autoinstall/README.md) — template pack for Windows, Ubuntu, RHEL/Rocky/Alma, Debian, and Packer examples
 - [`references/troubleshooting.md`](references/troubleshooting.md) — read-only troubleshooting and recovery guidance
 - [`AGENTS.md`](AGENTS.md) — concise operating rules for AI agents using this repository
 - [`SECURITY.md`](SECURITY.md) — secret handling and private reporting guidance

@@ -14,6 +14,7 @@ This documentation set describes safe, experimental ESXi operations for humans a
 
 - [`../profiles/README.md`](../profiles/README.md) — local-only profile naming and usage notes
 - [`../profiles/example-host.md`](../profiles/example-host.md) — sanitized example host profile
+- [`../examples/guest-autoinstall/README.md`](../examples/guest-autoinstall/README.md) — guest OS unattended install templates and helper scripts
 - [`../scripts/esxi-readonly-discovery.sh`](../scripts/esxi-readonly-discovery.sh) — read-only discovery helper script
 - [`../templates/change-plan.md`](../templates/change-plan.md) — structured change-plan template
 - [`../templates/approval-request.md`](../templates/approval-request.md) — explicit approval prompt template
@@ -30,6 +31,7 @@ This documentation set describes safe, experimental ESXi operations for humans a
 - [`../references/certificates-letsencrypt.md`](../references/certificates-letsencrypt.md) — certificate handling and trust guidance
 - [`../references/dedicated-agent-user.md`](../references/dedicated-agent-user.md) — least-privilege `agent` user guidance
 - [`../references/file-transfers.md`](../references/file-transfers.md) — datastore upload/download, OVF/OVA transfer patterns, and SCP notes
+- [`../references/guest-os-autoinstall.md`](../references/guest-os-autoinstall.md) — guest OS unattended install templates, compatibility notes, and safety guidance
 - [`../references/network-firewall-ipv4-ipv6.md`](../references/network-firewall-ipv4-ipv6.md) — network, firewall, and IP-stack checks
 - [`../references/rest-api.md`](../references/rest-api.md) — vSphere REST API sessions, VM lifecycle, snapshots, datastores, networking, and resource checks
 - [`../references/ssh-esxcli.md`](../references/ssh-esxcli.md) — SSH, `esxcli`, `vim-cmd`, networking, datastore, and resource checks

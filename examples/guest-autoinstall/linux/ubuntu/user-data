@@ -1,0 +1,27 @@
+#cloud-config
+autoinstall:
+  version: 1
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+  identity:
+    hostname: ubuntu-esxi-template
+    username: agent
+    # Replace with a real password hash before use.
+    # Example placeholder only: generate a SHA-512 hash for your local workflow.
+    password: REPLACE_WITH_PASSWORD_HASH
+  ssh:
+    install-server: true
+    allow-pw: true
+  packages:
+    - openssh-server
+    - open-vm-tools
+  network:
+    version: 2
+    ethernets:
+      eth0:
+        # Adjust the interface name if the installer reports something different.
+        dhcp4: true
+        optional: true
+  late-commands:
+    - curtin in-target --target=/target -- systemctl enable ssh || true
