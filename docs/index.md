@@ -15,6 +15,11 @@ This documentation set describes safe, experimental ESXi operations for humans a
 - [`../profiles/README.md`](../profiles/README.md) — local-only profile naming and usage notes
 - [`../profiles/example-host.md`](../profiles/example-host.md) — sanitized example host profile
 - [`../examples/guest-autoinstall/README.md`](../examples/guest-autoinstall/README.md) — guest OS unattended install templates and helper scripts
+- [`../examples/guest-autoinstall/windows/autounattend-win10-bios-mbr.xml`](../examples/guest-autoinstall/windows/autounattend-win10-bios-mbr.xml) — Windows 10 BIOS/MBR answer file
+- [`../examples/guest-autoinstall/windows/autounattend-win10-uefi-gpt.xml`](../examples/guest-autoinstall/windows/autounattend-win10-uefi-gpt.xml) — Windows 10 UEFI/GPT answer file
+- [`../examples/guest-autoinstall/windows/autounattend-win11-uefi-gpt.xml`](../examples/guest-autoinstall/windows/autounattend-win11-uefi-gpt.xml) — Windows 11 UEFI/GPT answer file
+- [`../examples/guest-autoinstall/windows/autounattend-server2022-uefi-gpt.xml`](../examples/guest-autoinstall/windows/autounattend-server2022-uefi-gpt.xml) — Windows Server 2022 UEFI/GPT answer file
+- [`../examples/guest-autoinstall/scripts/validate-inputs.sh`](../examples/guest-autoinstall/scripts/validate-inputs.sh) — shared placeholder and output-path validation
 - [`../examples/guest-autoinstall/windows/oobe-local-account-notes.md`](../examples/guest-autoinstall/windows/oobe-local-account-notes.md) — Windows 11 local-account and OOBE fallback notes for lab VMs
 - [`../scripts/esxi-readonly-discovery.sh`](../scripts/esxi-readonly-discovery.sh) — bounded read-only discovery helper with explicit SSH host-key acceptance
 - [`../tests/`](../tests/) — mock-only tests; no test contacts an ESXi host

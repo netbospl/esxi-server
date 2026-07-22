@@ -2,7 +2,10 @@
 
 This repository contains an experimental ESXi Server Skill for agentic workflows. It documents how a human or AI operations agent should safely interact with a standalone VMware ESXi host using SSH, `esxcli`, `vim-cmd`, the vSphere REST API, datastore file transfers, and related read-only discovery paths.
 
-The repository is documentation-only. It does not contain implementation code, dependencies, CI, credentials, hostnames, private IPs, passwords, tokens, or SSH keys.
+The repository contains safety documentation plus small local Bash helpers,
+mocked tests, ISO-media generators, a Makefile, and a GitHub Actions quality
+workflow. It contains no real credentials, hostnames, private IPs, passwords,
+tokens, or SSH keys.
 
 ## Safety-first operating model
 
@@ -37,6 +40,7 @@ Read [`SKILL.md`](SKILL.md) first for the exact workflow, approval rules, host-k
 │   ├── dedicated-agent-user.md
 │   ├── file-transfers.md
 │   ├── guest-os-autoinstall.md
+│   ├── host-configuration-backup.md
 │   ├── network-firewall-ipv4-ipv6.md
 │   ├── rest-api.md
 │   ├── ssh-esxcli.md
@@ -44,8 +48,17 @@ Read [`SKILL.md`](SKILL.md) first for the exact workflow, approval rules, host-k
 │   └── vm-import-export.md
 ├── examples/
 │   └── guest-autoinstall/
+│       ├── scripts/ (ISO generators and validate-inputs.sh)
+│       ├── windows/ (four explicit Windows answer-file variants)
+│       └── packer/ (vCenter vSphere-ISO templates)
 ├── scripts/
 │   └── esxi-readonly-discovery.sh
+├── tests/
+│   ├── test-esxi-readonly-discovery.sh
+│   ├── test-discovery-rest-state.sh
+│   └── test-media-generators.sh
+├── .github/workflows/quality.yml
+├── lychee.toml
 ├── templates/
 │   ├── approval-request.md
 │   ├── change-plan.md
@@ -71,6 +84,10 @@ Read [`SKILL.md`](SKILL.md) first for the exact workflow, approval rules, host-k
 See [`references/guest-os-autoinstall.md`](references/guest-os-autoinstall.md) for the safety notes, compatibility checklist, and the guest/host install distinction.
 
 A working template pack lives under [`examples/guest-autoinstall/`](examples/guest-autoinstall/README.md). It includes Windows answer-file templates, Windows 11 local-account notes, Ubuntu autoinstall seed files, Kickstart and preseed examples, Packer skeletons, and local helper scripts for creating seed media or serving HTTP content.
+
+The active Windows answer files are Windows 10 BIOS/MBR, Windows 10 UEFI/GPT,
+Windows 11 UEFI/GPT, and Windows Server 2022 UEFI/GPT. See the example README
+for destructive-disk and firmware notes.
 
 ## Environment and local files
 
@@ -135,7 +152,11 @@ Prefer a dedicated local ESXi user named `agent` for automation. Use a dedicated
 
 ## Additional checks and tooling
 
-- [`Makefile`](Makefile) provides `check` for syntax, mocked tests, XML and available linters/scanners; CI installs its mandatory tools and fails on errors.
+- [`Makefile`](Makefile) provides local and CI checks for syntax, mocked tests,
+  XML, Packer, linting, links, and secret scanning; the
+  [`quality` workflow](.github/workflows/quality.yml) installs mandatory CI tools.
+- [`tests/`](tests/) contains mock-only tests; no test connects to a real ESXi host.
+- [`lychee.toml`](lychee.toml) keeps the documented link-checker exception precise.
 - [`scripts/esxi-readonly-discovery.sh`](scripts/esxi-readonly-discovery.sh) performs bounded, read-only discovery only.
 - [`templates/`](templates/) contains structured prompts for plans, approvals, rollback notes, and summaries.
 

@@ -1,7 +1,8 @@
 // TEMPLATE ONLY.
 // This skeleton shows how a Packer vsphere-iso build can drive an Ubuntu Server autoinstall.
-// vSphere API write access may require licensed features; free/standalone ESXi can limit automation.
-// Keep a manual fallback documented: create the VM by hand and attach seed media if API automation is unavailable.
+// This is a vCenter path: datacenter and cluster inventory are required below.
+// Do not treat free/standalone ESXi as a supported builder target. Create the VM
+// manually and attach seed media when vCenter/licensed API automation is unavailable.
 
 packer {
   required_plugins {
@@ -14,7 +15,7 @@ packer {
 
 variable "vcenter_server" {
   type        = string
-  description = "vCenter or ESXi endpoint"
+  description = "vCenter Server endpoint; standalone ESXi is not supported by this template"
 }
 
 variable "username" {

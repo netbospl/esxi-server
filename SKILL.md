@@ -194,7 +194,7 @@ On standalone ESXi 7.x, `POST /api/session` and `POST /rest/com/vmware/cis/sessi
 
 Use [`references/guest-os-autoinstall.md`](references/guest-os-autoinstall.md) when the task is about installing a guest operating system inside a VM on ESXi 7.x.
 
-If the user asks about Windows 11 local accounts, OOBE bypass, offline install, Microsoft account avoidance during setup, or an `I don’t have internet` rescue flow, also load [`examples/guest-autoinstall/windows/oobe-local-account-notes.md`](examples/guest-autoinstall/windows/oobe-local-account-notes.md). Prefer unattended local account creation via `Autounattend.xml`; treat manual OOBE commands as version-dependent fallback methods.
+If the user asks about Windows 11 local accounts, OOBE bypass, offline install, Microsoft account avoidance during setup, or an `I don’t have internet` rescue flow, also load [`examples/guest-autoinstall/windows/oobe-local-account-notes.md`](examples/guest-autoinstall/windows/oobe-local-account-notes.md). Prefer the matching committed unattended answer-file variant; treat manual OOBE commands as version-dependent fallback methods.
 
 Refuse any request that tries to bypass Windows activation or licensing.
 

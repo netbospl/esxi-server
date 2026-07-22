@@ -25,7 +25,10 @@ or Packer-built VMs in a safe, repeatable way.
 
 | Guest / workflow | Typical automation file(s) | Delivery pattern |
 |---|---|---|
-| Windows 10 / 11 / Server 2022 | `Autounattend.xml`, optional `setupcomplete.cmd` | Floppy, secondary ISO, removable media, or boot-time injection |
+| Windows 10 BIOS/MBR | [`autounattend-win10-bios-mbr.xml`](../examples/guest-autoinstall/windows/autounattend-win10-bios-mbr.xml) | Secondary ISO or removable media |
+| Windows 10 UEFI/GPT | [`autounattend-win10-uefi-gpt.xml`](../examples/guest-autoinstall/windows/autounattend-win10-uefi-gpt.xml) | Secondary ISO or removable media |
+| Windows 11 UEFI/GPT | [`autounattend-win11-uefi-gpt.xml`](../examples/guest-autoinstall/windows/autounattend-win11-uefi-gpt.xml) | Secondary ISO or removable media |
+| Windows Server 2022 UEFI/GPT | [`autounattend-server2022-uefi-gpt.xml`](../examples/guest-autoinstall/windows/autounattend-server2022-uefi-gpt.xml) | Secondary ISO or removable media |
 | Ubuntu Server | `user-data`, `meta-data` | NoCloud seed ISO, or an equivalent cloud-init delivery path |
 | RHEL / Rocky / Alma | `ks.cfg` | `inst.ks=` via HTTP, ISO, or removable media |
 | Debian | `preseed.cfg` | `preseed/url=`, initrd preseed, or HTTP delivery |
@@ -36,7 +39,7 @@ or Packer-built VMs in a safe, repeatable way.
 Keep these separate:
 
 - **ESXi host scripted install** uses `ks.cfg` for the ESXi installer itself.
-- **Windows guest install** uses `Autounattend.xml`.
+- **Windows guest install** uses the selected explicit Windows answer-file variant.
 - **Ubuntu guest install** uses Subiquity/cloud-init autoinstall (`user-data` + `meta-data`).
 - **RHEL / Rocky / Alma guest install** uses Kickstart (`ks.cfg`).
 - **Debian guest install** uses preseed (`preseed.cfg`).
@@ -46,7 +49,7 @@ They solve different problems even though some file names are similar.
 
 ## Windows Autounattend
 
-Windows unattended installation commonly uses `Autounattend.xml` placed on virtual removable media or attached as a secondary ISO.
+Windows unattended installation commonly uses the selected explicit Windows answer-file variant placed on virtual removable media or attached as a secondary ISO.
 A floppy image can also work for small answer files.
 
 Safety notes:
@@ -58,7 +61,7 @@ Safety notes:
 
 Common Windows notes:
 
-- Use `Autounattend.xml` as the root answer file name for install-time discovery.
+- Use the selected explicit Windows answer-file variant as the root answer file name for install-time discovery.
 - For Windows 10 / 11 desktop installs, add OOBE suppression and generic local-account bootstrap only.
 - For Windows Server 2022, keep server-oriented defaults and avoid desktop-only assumptions.
 - `setupcomplete.cmd` runs after setup finishes and is a good place for a silent VMware Tools install attempt.
@@ -66,7 +69,7 @@ Common Windows notes:
 
 ## Windows 11 local account and OOBE notes
 
-### Preferred method: create a local account with Autounattend.xml
+### Preferred method: create a local account with the matching answer-file variant
 
 For repeatable VM builds, prefer an unattended answer file with `Microsoft-Windows-Shell-Setup`, `UserAccounts`, and `LocalAccounts`.
 This is different from manually bypassing OOBE screens.
@@ -118,7 +121,7 @@ Do not treat Rufus as the preferred enterprise deployment method.
 
 Common Windows notes:
 
-- Use `Autounattend.xml` as the root answer file name for install-time discovery.
+- Use the selected explicit Windows answer-file variant as the root answer file name for install-time discovery.
 - For Windows 10 / 11 desktop installs, add OOBE suppression and generic local-account bootstrap only.
 - For Windows Server 2022, keep server-oriented defaults and avoid desktop-only assumptions.
 - `setupcomplete.cmd` runs after setup finishes and is a good place for a silent VMware Tools install attempt.

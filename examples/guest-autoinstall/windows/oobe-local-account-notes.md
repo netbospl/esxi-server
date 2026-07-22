@@ -8,7 +8,7 @@ It does not cover activation bypassing, license circumvention, or Microsoft acco
 
 ## Preferred: answer-file local account
 
-For repeatable VM builds, prefer `Autounattend.xml` with `Microsoft-Windows-Shell-Setup` → `UserAccounts` → `LocalAccounts`.
+For repeatable VM builds, prefer the matching committed answer-file variant with `Microsoft-Windows-Shell-Setup` → `UserAccounts` → `LocalAccounts`.
 
 This is the preferred automation path when you want the installer to create a local account during unattended setup.
 
@@ -64,7 +64,7 @@ Do not treat Rufus as the primary enterprise deployment method.
 
 - Temporarily disconnect the VM network adapter if you are testing offline OOBE behavior.
 - Snapshot a disposable test VM before experimenting with OOBE flows.
-- Keep the answer ISO attached during setup if you are using `Autounattend.xml`.
+- Keep the answer ISO attached during setup if you are using an unattended answer file.
 - Verify VM firmware and boot order before first power-on.
 - Test against the exact Windows ISO/build you plan to deploy.
 - Use a clean test VM before turning the process into a template.
