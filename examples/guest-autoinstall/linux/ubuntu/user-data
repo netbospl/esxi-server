@@ -12,16 +12,14 @@ autoinstall:
     password: REPLACE_WITH_PASSWORD_HASH
   ssh:
     install-server: true
-    allow-pw: true
+    allow-pw: false
+    # Supply one or more local, non-committed public keys before use.
+    authorized-keys:
+      - REPLACE_WITH_SSH_PUBLIC_KEY
   packages:
     - openssh-server
     - open-vm-tools
-  network:
-    version: 2
-    ethernets:
-      eth0:
-        # Adjust the interface name if the installer reports something different.
-        dhcp4: true
-        optional: true
+  # Do not assume eth0: let the installer detect networking by default. Add a
+  # MAC-address match in a local copy only after verifying the target NIC.
   late-commands:
     - curtin in-target --target=/target -- systemctl enable ssh || true

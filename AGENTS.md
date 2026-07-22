@@ -1,6 +1,6 @@
 # Agent Instructions
 
-This repository is an experimental, AI-assisted ESXi Server Skill for coding and operations agents. Use it as documentation and procedure guidance, not as executable source code or a substitute for operator judgment.
+This repository is an experimental, AI-assisted ESXi Server Skill for coding and operations agents. It is documentation-first with small local helpers, validators, and mock-only tests; none are a substitute for operator judgment.
 
 ## Operating rules
 
@@ -11,6 +11,7 @@ This repository is an experimental, AI-assisted ESXi Server Skill for coding and
    - `references/rest-api.md` for REST authentication, VM lifecycle operations, snapshots, datastores, and networks.
    - `references/file-transfers.md` for ISO, OVF, OVA, VMDK, SCP, and datastore browser transfers.
    - `references/capability-probe.md` before choosing REST, SSH, or SDK access.
+   - `references/host-configuration-backup.md` for host configuration backup or restore.
 4. Start with read-only discovery and do not modify ESXi during inventory checks.
 5. Never hardcode credentials, hostnames, private IPs, passwords, API tokens, session IDs, SSH keys, or `.env` contents.
 6. Do not commit secrets, logs containing secrets, copied private inventory, or generated local artifacts.
@@ -21,6 +22,7 @@ This repository is an experimental, AI-assisted ESXi Server Skill for coding and
 11. Validate RAM, datastore free space, networking, and VM power state before making changes.
 12. Verify after changes, then summarize what changed and what remains.
 13. Keep documentation edits concise, practical, and consistent with ESXi standalone host behavior.
+14. Test every helper through local mocks only; never point repository tests at an ESXi host.
 
 ## Host-profile convention
 

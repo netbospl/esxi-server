@@ -17,6 +17,8 @@ Thumbs.db
 id_rsa
 id_ed25519
 known_hosts
+.ssh-known-hosts/
+*.known_hosts
 profiles/*.local.md
 HOST_PROFILE.local.md
 ESXi_INFO.txt
@@ -49,5 +51,11 @@ build/
 *.img
 examples/guest-autoinstall/out/
 examples/guest-autoinstall/tmp/
+*.pkrvars.hcl
+!examples/guest-autoinstall/packer/variables.pkrvars.example.hcl
+discovery-reports/
+*.discovery-report.txt
+*.discovery-report.json
+*.sha256
 *.zip
 *.tar.gz

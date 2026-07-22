@@ -26,6 +26,7 @@
       <DiskConfiguration>
         <Disk wcm:action="add">
           <DiskID>0</DiskID>
+          <!-- DANGER: true erases every partition and all data on disk 0. -->
           <WillWipeDisk>true</WillWipeDisk>
           <CreatePartitions>
             <CreatePartition wcm:action="add"><Order>1</Order><Type>EFI</Type><Size>100</Size></CreatePartition>

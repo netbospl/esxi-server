@@ -70,6 +70,48 @@ Use REST for read-only operations when it is available and reliable; fall back t
 5. **Verify after changes.** Re-read the relevant state and confirm the result.
 6. **Summarize honestly.** Report what changed, what was verified, what failed, and any remaining risk.
 
+## Canonical risk and consent model
+
+This section is the policy source of truth. References and templates must link
+here rather than reproduce it. Every state-changing action needs a written
+plan, exact target identification, preflight discovery, explicit scope, and
+post-change verification.
+
+| Class | Meaning | Discovery / approval | Rollback, backup, window, STOP |
+|---|---|---|---|
+| R0 | Read-only discovery. | Identify target and transport; no approval beyond the request. | No rollback or maintenance window. STOP on target ambiguity, failed trust validation, or unsafe output. |
+| R1 | Reversible low-risk change. | Re-read current state and obtain approval naming the target. | Document rollback and verify applicable backup; STOP if preconditions drift. |
+| R2 | Potentially service-disruptive change. | Full inventory/preflight and explicit approval for the exact target and downtime. | Tested rollback, backup check, maintenance window. STOP if management reachability or rollback is not credible. |
+| R3 | Destructive, difficult to reverse, or risks data/access loss. | Full preflight plus a second explicit acknowledgement of data/access-loss risk. | Verified independent backup, tested rollback where possible, maintenance window and out-of-band access. STOP on any uncertainty, missing backup, wrong UUID/VMID/datastore, or lost management path. |
+
+R2/R3 include networking, certificates that can disrupt access, host restore,
+disk wipe, VM deletion, snapshot revert/removal, unknown-production power-off,
+and datastore removal. A plan must record `plan_id`, timestamp, exact targets,
+preconditions/current state, commands/API calls, predicted downtime, success
+criteria, abort conditions, rollback commands and verification, consent scope
+and expiry, pre/post evidence, exit codes, deviations, skipped steps, and
+residual risk. Use the templates in `templates/`.
+
+## Task router
+
+Load only the listed references after reading this policy. "Transport" means
+the minimum safe route after capability probing; a capability miss is not an
+invitation to retry authentication aggressively.
+
+| Category | Load | Preflight / transport | Typical risk and STOP condition |
+|---|---|---|---|
+| Inventory/discovery | `capability-probe.md`, `ssh-esxcli.md` | Target identity, TLS/SSH trust; HTTPS or SSH | R0; STOP on reachability/trust ambiguity. |
+| VM lifecycle | `rest-api.md`, `ssh-esxcli.md` | Name, UUID, fresh VMID, power/RAM/datastore/network; REST or SSH | R1–R3; STOP if target identity or power impact is uncertain. |
+| Snapshots | `rest-api.md`, `ssh-esxcli.md`, `backup-restore.md` | Fresh VMID, snapshot tree, datastore free space | R1–R3; STOP without space, backup, or exact approval. |
+| Datastore/storage | `file-transfers.md`, `ssh-esxcli.md` | Datastore UUID/free space/mounted state | R0–R3; STOP before overwrite/delete. |
+| Backup/restore | `host-configuration-backup.md`, `backup-restore.md` | Build/UUID, backup integrity, maintenance window | R2–R3; STOP on incompatibility or missing out-of-band access. |
+| Networking | `network-firewall-ipv4-ipv6.md`, `ssh-esxcli.md` | Management VMkernel/uplink/vSwitch/VLAN/IPv4/IPv6 and console path | R2–R3; STOP without a proven management rollback path. |
+| Certificates | `certificates-letsencrypt.md` | Hostname/SAN, expiry, config backup, client verification | R1–R3; STOP if rollback cert/config is missing. |
+| File transfer | `file-transfers.md` | TLS trust, datastore path/free space/checksum | R1–R2; STOP on overwrite or checksum mismatch. |
+| VM import/export | `vm-import-export.md`, `file-transfers.md` | Datastore capacity, VM identity/network isolation | R1–R3; STOP before overwrite or external network attachment. |
+| Guest unattended install | `guest-os-autoinstall.md` and relevant `examples/` | ISO build/version, guest disk/network, placeholder validation | R2–R3; STOP before disk wipe or unresolved placeholders. |
+| Troubleshooting | `troubleshooting.md`, `validated-interaction-methods.md` | Preserve evidence and choose a read-only transport | R0–R2; STOP before speculative state changes. |
+
 ## Read-only and low-risk checks
 
 Examples of safe discovery commands:
@@ -116,15 +158,11 @@ For VM power and lifecycle commands, group them by risk:
 
 Use a dedicated known-hosts file and verify the host key explicitly.
 
-```bash
-mkdir -p "$(dirname "$ESXI_KNOWN_HOSTS")"
-ssh-keyscan -H "$ESXI_HOST" >> "$ESXI_KNOWN_HOSTS"
-
-ssh -i "$ESXI_SSH_KEY" \
-  -o UserKnownHostsFile="$ESXI_KNOWN_HOSTS" \
-  -o StrictHostKeyChecking=yes \
-  "$ESXI_USER@$ESXI_HOST" 'esxcli system version get'
-```
+Use `scripts/esxi-readonly-discovery.sh` for a guarded first probe. It shows a
+SHA-256 fingerprint but does **not** trust `ssh-keyscan` automatically. Verify
+the fingerprint through an independent channel, optionally set
+`ESXI_HOST_FINGERPRINT`, then explicitly use `--accept-new-host-key`. A changed
+key is a STOP condition. Keep `StrictHostKeyChecking=yes`.
 
 `StrictHostKeyChecking=no` is not the default safe pattern. Reserve it for lab-only or emergency recovery use after human acknowledgement. If a host key changes unexpectedly, stop and ask for verification.
 
@@ -187,6 +225,7 @@ Load only the reference files needed for the task:
 - [`references/rest-api.md`](references/rest-api.md)
 - [`references/file-transfers.md`](references/file-transfers.md)
 - [`references/backup-restore.md`](references/backup-restore.md)
+- [`references/host-configuration-backup.md`](references/host-configuration-backup.md)
 - [`references/network-firewall-ipv4-ipv6.md`](references/network-firewall-ipv4-ipv6.md)
 - [`references/certificates-letsencrypt.md`](references/certificates-letsencrypt.md)
 - [`references/vm-import-export.md`](references/vm-import-export.md)

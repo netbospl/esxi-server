@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  TEMPLATE ONLY: Windows 10 / Windows 11 desktop-oriented unattended setup.
+  TEMPLATE ONLY: UEFI/GPT desktop layout. Copy it to a version-specific local
+  file only after confirming the Windows 10 or Windows 11 ISO build and edition.
   Replace product keys, passwords, and any account details before use.
 -->
 <unattend xmlns="urn:schemas-microsoft-com:unattend"
@@ -26,6 +27,7 @@
       <DiskConfiguration>
         <Disk wcm:action="add">
           <DiskID>0</DiskID>
+          <!-- DANGER: true erases every partition and all data on disk 0. -->
           <WillWipeDisk>true</WillWipeDisk>
           <CreatePartitions>
             <CreatePartition wcm:action="add"><Order>1</Order><Type>EFI</Type><Size>100</Size></CreatePartition>
@@ -75,7 +77,7 @@
                versionScope="nonSxS">
       <OOBE>
         <HideEULAPage>true</HideEULAPage>
-        <HideLocalAccountScreen>true</HideLocalAccountScreen>
+
         <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
         <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
         <ProtectYourPC>3</ProtectYourPC>

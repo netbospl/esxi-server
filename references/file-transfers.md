@@ -16,11 +16,11 @@ Before uploading or restoring anything, verify:
 ## HTTP datastore browser examples
 
 ```bash
-curl -sk -T /local/path/to/file.iso \
+curl --fail --show-error -T /local/path/to/file.iso \
   "https://$ESXI_HOST/folder/isos/file.iso?dcPath=ha-datacenter&dsName=<transfer-datastore>" \
   -u "$ESXI_USER:$ESXI_PASS"
 
-curl -sk -o /local/output/file.vmdk \
+curl --fail --show-error -o /local/output/file.vmdk \
   "https://$ESXI_HOST/folder/myvms/file.vmdk?dcPath=ha-datacenter&dsName=<vm-datastore>" \
   -u "$ESXI_USER:$ESXI_PASS"
 ```
@@ -30,7 +30,7 @@ These `-u` examples are intentionally simple. Do not log or share commands that 
 ## Browsing datastore contents
 
 ```bash
-curl -sk "https://$ESXI_HOST/folder?dcPath=ha-datacenter&dsName=<vm-datastore>" \
+curl --fail --show-error "https://$ESXI_HOST/folder?dcPath=ha-datacenter&dsName=<vm-datastore>" \
   -u "$ESXI_USER:$ESXI_PASS"
 ```
 

@@ -16,7 +16,8 @@ This documentation set describes safe, experimental ESXi operations for humans a
 - [`../profiles/example-host.md`](../profiles/example-host.md) — sanitized example host profile
 - [`../examples/guest-autoinstall/README.md`](../examples/guest-autoinstall/README.md) — guest OS unattended install templates and helper scripts
 - [`../examples/guest-autoinstall/windows/oobe-local-account-notes.md`](../examples/guest-autoinstall/windows/oobe-local-account-notes.md) — Windows 11 local-account and OOBE fallback notes for lab VMs
-- [`../scripts/esxi-readonly-discovery.sh`](../scripts/esxi-readonly-discovery.sh) — read-only discovery helper script
+- [`../scripts/esxi-readonly-discovery.sh`](../scripts/esxi-readonly-discovery.sh) — bounded read-only discovery helper with explicit SSH host-key acceptance
+- [`../tests/`](../tests/) — mock-only tests; no test contacts an ESXi host
 - [`../templates/change-plan.md`](../templates/change-plan.md) — structured change-plan template
 - [`../templates/approval-request.md`](../templates/approval-request.md) — explicit approval prompt template
 - [`../templates/discovery-report.md`](../templates/discovery-report.md) — structured discovery report template
@@ -27,6 +28,7 @@ This documentation set describes safe, experimental ESXi operations for humans a
 
 - [`../references/agent-communication-contract.md`](../references/agent-communication-contract.md) — communication contract for AI agents
 - [`../references/backup-restore.md`](../references/backup-restore.md) — backup and restore workflow guidance
+- [`../references/host-configuration-backup.md`](../references/host-configuration-backup.md) — host configuration bundle backup/restore scope and R3 safeguards
 - [`../references/capability-probe.md`](../references/capability-probe.md) — probe order for REST, SSH, VM inventory, datastore, network, and guest tools
 - [`../references/validated-interaction-methods.md`](../references/validated-interaction-methods.md) — tested standalone ESXi interaction paths and fallback decisions
 - [`../references/certificates-letsencrypt.md`](../references/certificates-letsencrypt.md) — certificate handling and trust guidance

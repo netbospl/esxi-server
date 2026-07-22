@@ -6,7 +6,7 @@
 packer {
   required_plugins {
     vsphere = {
-      version = ">= 1.0.0"
+      version = "~> 1.4"
       source  = "github.com/hashicorp/vsphere"
     }
   }
@@ -26,6 +26,19 @@ variable "password" {
   type        = string
   sensitive   = true
   description = "API password"
+}
+
+variable "insecure_connection" {
+  type        = bool
+  default     = false
+  description = "Temporary opt-in only for a verified self-signed TLS exception."
+}
+
+variable "guest_ssh_password" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "Guest communicator secret; keep separate from API credentials."
 }
 
 variable "datacenter" {
@@ -72,7 +85,7 @@ source "vsphere-iso" "ubuntu" {
   vcenter_server      = var.vcenter_server
   username            = var.username
   password            = var.password
-  insecure_connection = true
+  insecure_connection = var.insecure_connection
 
   datacenter = var.datacenter
   cluster    = var.cluster
@@ -96,7 +109,7 @@ source "vsphere-iso" "ubuntu" {
 
   communicator   = "ssh"
   ssh_username   = "agent"
-  ssh_password   = "REPLACE_WITH_SSH_PASSWORD"
+  ssh_password   = var.guest_ssh_password
   ssh_timeout    = "6h"
 
   // Adapt the boot parameter to the Ubuntu release you are testing.

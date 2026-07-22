@@ -1,46 +1,47 @@
 # Capability probe
 
-Probe capabilities before choosing a communication path. Do not assume that standalone ESXi exposes the full vCenter-style REST surface.
+Start with the canonical policy and task router in [`../SKILL.md`](../SKILL.md).
+This is an R0, bounded, sanitised discovery procedure; it does not authorize
+any state change.
 
-## Preferred checks
+- **Supported scope:** standalone ESXi 7.x/8.x; vCenter is a distinct target.
+- **Last validated:** static documentation review, 2026-07-22.
+- **Lab status:** not tested on a live ESXi host by this repository revision.
 
-| Capability | Preferred check |
-|---|---|
-| REST session creation | `POST /api/session` |
-| REST VM listing | `GET /api/vcenter/vm` |
-| REST datastore listing | `GET /api/vcenter/datastore` |
-| REST network / portgroup visibility | available vSphere API network endpoints |
-| SSH basic command execution | `esxcli system version get` |
-| SSH VM listing | `vim-cmd vmsvc/getallvms` |
-| SSH datastore listing | `esxcli storage filesystem list` |
-| SSH network listing | `esxcli network vswitch standard portgroup list` |
-| Guest tools availability | per-VM VMware Tools state, for example `vim-cmd vmsvc/get.summary <vmid>` |
+## Classify every result
 
-## Suggested probe order
+Record the exact distinction below. Do not turn an endpoint capability miss into
+repeated credential attempts.
 
-1. Confirm `ESXI_HOST` and the preferred local profile.
-2. Try REST session creation if `ESXI_PASS` is available.
-3. Probe `GET /api/vcenter/vm`, `GET /api/vcenter/datastore`, and the network endpoint(s) the target version supports.
-4. If REST is incomplete or inconsistent, fall back to SSH read-only discovery.
-5. Record which transport worked and why it was chosen.
+| Result | Meaning | Safe next action |
+|---|---|---|
+| Reachability failure | DNS/TCP/connect-timeout route problem | Stop retries; verify target/path out of band. |
+| TLS failure | Certificate chain/name/CA trust failure | Keep TLS validation; add a verified CA bundle or explicitly document a temporary exception. |
+| Authentication failure | Credentials rejected (`401`) | Stop; do not retry aggressively. |
+| Authorization failure | Valid session lacks privilege (`403`) | Stop and request least-privilege correction. |
+| Endpoint unsupported | `400`/`404` or documented missing surface | Record it and select another verified transport. |
+| Transport unavailable | SSH/HTTPS/SDK path unavailable | Record it; do not infer host state. |
 
-For standalone ESXi 7.x, a `400` from `POST /api/session` or `POST /rest/com/vmware/cis/session` can be a normal capability miss even when credentials are valid for the HTTPS Host Client and `/folder/` datastore browser. Do not loop on REST authentication in that case; record the result and switch to a verified alternative.
+## Ordered probe matrix
 
-## Decision rules
+1. Identify target, version and build. Determine standalone ESXi versus vCenter
+   before selecting a vCenter-oriented endpoint.
+2. Verify HTTPS reachability to Host Client `/ui/` with TLS validation.
+3. Probe datastore browser `/folder/` only with an authorized, read-only request.
+4. If credentials are intentionally supplied, try modern REST
+   `POST /api/session` once; then the older
+   `POST /rest/com/vmware/cis/session` only when the first is unsupported and
+   the target/version makes it appropriate. Inspect HTTP status and token shape.
+5. Probe only needed REST inventory endpoints with one valid session.
+6. Record SOAP SDK `/sdk` reachability as a separate capability; it is a
+   fallback, not evidence that REST is complete.
+7. If SSH is authorized, verify the host key first, then run one read-only
+   `esxcli system version get` and one `vim-cmd vmsvc/getallvms` probe.
+8. Record required privileges, licence/API limitations, and per-VM VMware Tools
+   availability before proposing guest operations.
 
-- Prefer REST when it is available and reliable for the exact task.
-- Prefer SSH/`esxcli`/`vim-cmd` for standalone ESXi inventory and host checks when REST is incomplete.
-- Do not continue if the capability probe itself fails in a way that blocks safe identification of the target.
-- Never guess at API support from a single successful endpoint.
-- Treat a 400/404 on one endpoint as a capability signal, not as proof that the host is down.
-- Treat a closed or unreachable SSH port as a transport capability result. Do not repeat aggressive SSH retries; use HTTPS Host Client, `/folder/`, or another verified path until SSH availability is restored.
-
-## Example probe notes
-
-A discovery report should capture:
-
-- which capabilities were tested
-- which succeeded
-- which failed
-- the chosen transport
-- the reason the other transport was not selected
+`scripts/esxi-readonly-discovery.sh` implements a bounded local helper with
+text and optional sanitised JSON report output. It intentionally never prints
+passwords, session IDs, or Authorization headers. Local report paths are Git
+ignored. A `400` from standalone ESXi session endpoints can be a normal
+capability result even where Host Client and `/folder/` work.

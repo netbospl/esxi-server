@@ -100,32 +100,19 @@ Check that required variables are present without printing secrets:
 printf 'ESXi environment variables are set for host %s and user %s\n' "$ESXI_HOST" "$ESXI_USER"
 ```
 
-Safe SSH pattern:
+Safe SSH pattern: use the guarded local helper. It prints an untrusted scanned
+fingerprint and stops; verify it out of band before explicitly accepting it.
 
 ```bash
-mkdir -p .ssh-known-hosts
-ssh-keyscan -H "$ESXI_HOST" >> .ssh-known-hosts/esxi_known_hosts
-ssh -i "$ESXI_SSH_KEY" \
-  -o UserKnownHostsFile=.ssh-known-hosts/esxi_known_hosts \
-  -o StrictHostKeyChecking=yes \
-  "$ESXI_USER@$ESXI_HOST" 'esxcli system version get'
+ESXI_HOST_FINGERPRINT=SHA256:verified-out-of-band \
+scripts/esxi-readonly-discovery.sh --accept-new-host-key
 ```
 
-Create a REST API session:
-
-```bash
-SESSION=$(curl -sk -X POST \
-  "https://$ESXI_HOST/api/session" \
-  -u "$ESXI_USER:$ESXI_PASS" \
-  -H "Content-Type: application/json" | tr -d '"')
-```
-
-List VMs through the REST API:
-
-```bash
-curl -sk "https://$ESXI_HOST/api/vcenter/vm" \
-  -H "vmware-api-session-id: $SESSION"
-```
+The helper validates TLS by default, uses bounded requests and one REST session
+for its probe series, distinguishes transport/TLS/authentication/authorization/
+unsupported-endpoint outcomes, and never prints tokens. Use a verified
+`ESXI_CA_BUNDLE` when required; `ESXI_INSECURE_TLS=1` is a temporary explicit
+exception, never a default.
 
 ## Choosing SSH vs REST API
 
@@ -148,8 +135,8 @@ Prefer a dedicated local ESXi user named `agent` for automation. Use a dedicated
 
 ## Additional checks and tooling
 
-- [`Makefile`](Makefile) provides a `check` target that runs available quality checks without failing when optional tools are missing.
-- [`scripts/esxi-readonly-discovery.sh`](scripts/esxi-readonly-discovery.sh) performs best-effort read-only discovery only.
+- [`Makefile`](Makefile) provides `check` for syntax, mocked tests, XML and available linters/scanners; CI installs its mandatory tools and fails on errors.
+- [`scripts/esxi-readonly-discovery.sh`](scripts/esxi-readonly-discovery.sh) performs bounded, read-only discovery only.
 - [`templates/`](templates/) contains structured prompts for plans, approvals, rollback notes, and summaries.
 
 ## Safety notes
@@ -176,6 +163,7 @@ Prefer a dedicated local ESXi user named `agent` for automation. Use a dedicated
 - [`references/rest-api.md`](references/rest-api.md) — vSphere REST API sessions, VM lifecycle, snapshots, datastores, networking, and resource checks
 - [`references/file-transfers.md`](references/file-transfers.md) — datastore upload/download, OVF/OVA transfer patterns, and SCP notes
 - [`references/backup-restore.md`](references/backup-restore.md) — backup and restore workflow guidance
+- [`references/host-configuration-backup.md`](references/host-configuration-backup.md) — host configuration bundle backup/restore boundary and R3 runbook
 - [`references/network-firewall-ipv4-ipv6.md`](references/network-firewall-ipv4-ipv6.md) — network, firewall, and IP-stack checks
 - [`references/certificates-letsencrypt.md`](references/certificates-letsencrypt.md) — certificate handling and trust guidance
 - [`references/vm-import-export.md`](references/vm-import-export.md) — import/export workflow notes
@@ -193,5 +181,5 @@ Prefer a dedicated local ESXi user named `agent` for automation. Use a dedicated
 - Use placeholders for sensitive values.
 - Keep host-specific facts in local profiles or local notes, not in the generic skill.
 - Update this README and `docs/index.md` when adding or renaming reference files.
-- Do not add package managers, frameworks, CI systems, or dependencies unless the repository grows beyond documentation.
+- Keep helpers small, mock-tested, and dependency-light; do not add broad automation frameworks.
 - Validate new commands against a non-production ESXi host where possible.

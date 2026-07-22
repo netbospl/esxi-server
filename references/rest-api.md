@@ -1,85 +1,51 @@
 # ESXi vSphere REST API reference
 
-Start from [`../SKILL.md`](../SKILL.md) for policy, capability probing, and approval rules.
+Start with [`../SKILL.md`](../SKILL.md): its risk model and task router are
+canonical. This reference is for capability-aware REST operations, not a
+promise that standalone ESXi implements the vCenter REST surface.
 
-Use REST when it is available and reliable for the exact task. On standalone ESXi, do not assume every vCenter-style endpoint exists.
+- **Supported scope:** standalone ESXi 7.x/8.x where endpoints exist; vCenter
+  has a broader API surface.
+- **Last validated:** static review, 2026-07-22; no live host test was run.
 
-## Authentication
+## TLS and bounded requests
 
-```bash
-SESSION=$(curl -sk -X POST \
-  "https://$ESXI_HOST/api/session" \
-  -u "$ESXI_USER:$ESXI_PASS" \
-  -H "Content-Type: application/json" | tr -d '"')
-```
+TLS verification is the default. Use a verified CA bundle with `--cacert` when
+needed. `ESXI_INSECURE_TLS=1` is a documented, temporary, explicit exception;
+it does not relax SSH host-key verification. Use bounded `--connect-timeout`
+and `--max-time`. Do not aggressively retry authentication.
 
-Do not echo the session token. Keep it in memory only. Avoid putting passwords in shell history, logs, or markdown reports.
+`scripts/esxi-readonly-discovery.sh` handles these controls and keeps one
+session for its probe series. It never prints credentials, session IDs, or
+Authorization headers.
 
-On standalone ESXi 7.x, this endpoint can return `400` with an empty body even when the same account can reach the HTTPS Host Client and `/folder/` datastore browser. Treat that as an unsupported or incomplete REST surface for that host, not as a prompt to retry credentials repeatedly.
+## Session handling
 
-## Read-only discovery
+A valid REST session requires all of:
 
-```bash
-curl -sk "https://$ESXI_HOST/api/vcenter/vm" \
-  -H "vmware-api-session-id: $SESSION"
+1. successful `curl` exit status;
+2. expected HTTP `200`/`201`;
+3. a nonempty token of expected conservative shape;
+4. in-memory-only storage; never logs/reports.
 
-curl -sk "https://$ESXI_HOST/api/vcenter/datastore" \
-  -H "vmware-api-session-id: $SESSION"
+Classify `401` as authentication/session expiry, `403` as authorization,
+`400`/`404` as potentially unsupported endpoint, and transport/TLS failures
+separately. On `401` during a series, end the stale session and perform at most
+one deliberate re-authentication after checking the task context. On cleanup,
+attempt `DELETE /api/session` best-effort without exposing the result/token.
 
-curl -sk "https://$ESXI_HOST/api/vcenter/network" \
-  -H "vmware-api-session-id: $SESSION"
-```
+Standalone ESXi 7.x can return `400` from `POST /api/session` and
+`POST /rest/com/vmware/cis/session` while Host Client and `/folder/` work. That
+is a capability result, not evidence that credentials should be retried.
 
-If a read-only endpoint returns `400`, `404`, or inconsistent data, treat that as a capability signal and fall back to SSH or `/sdk` + pyVmomi instead of assuming bad credentials.
+## Operation controls
 
-## VM lifecycle
+Before any VM lifecycle or snapshot request, fresh discovery must confirm VM
+name, UUID, VMID, current power state, RAM, datastore free space, and intended
+network. Use IDs returned by the target; never assume a VMID is stable. Keep
+operations idempotent where possible. No automatic delete, overwrite, or
+power-off is permitted without explicit approval for the exact target.
 
-```bash
-curl -sk "https://$ESXI_HOST/api/vcenter/vm/$VM_ID" \
-  -H "vmware-api-session-id: $SESSION"
-
-curl -sk -X POST "https://$ESXI_HOST/api/vcenter/vm/$VM_ID/power?action=start" \
-  -H "vmware-api-session-id: $SESSION"
-```
-
-Power off, reboot, suspend, shutdown, and delete are state-changing. Ask for explicit approval before using them.
-
-## Snapshots
-
-```bash
-curl -sk "https://$ESXI_HOST/api/vcenter/vm/$VM_ID/snapshots" \
-  -H "vmware-api-session-id: $SESSION"
-
-curl -sk -X POST "https://$ESXI_HOST/api/vcenter/vm/$VM_ID/snapshots" \
-  -H "vmware-api-session-id: $SESSION" \
-  -H "Content-Type: application/json" \
-  -d '{"spec":{"name":"pre-change","description":"Before change","memory":false,"quiesce":false}}'
-```
-
-Snapshot revert and delete require explicit approval and a rollback plan. Check datastore free space before creating or keeping snapshots.
-
-## Datastores and network
-
-Use IDs from the listing endpoints or from a local profile. Do not hardcode host-specific datastore or portgroup names into generic skill logic.
-
-## Guest processes
-
-Guest execution requires VMware Tools and guest credentials.
-
-Prefer the guest process API over shelling into the host. Keep guest credentials separate from ESXi credentials.
-
-## Secret handling notes
-
-- Use `-u "$ESXI_USER:$ESXI_PASS"` only in simple examples or controlled scripts.
-- Prefer environment variables, protected config files, or prompt-based authentication for real workflows.
-- Never write passwords, tokens, or session IDs into markdown reports.
-- If a command needs to be copied into a chat or issue, redact credentials first.
-
-## Error handling
-
-- `401` usually means the session expired; re-authenticate.
-- `400` or missing data may mean the endpoint is not implemented on standalone ESXi.
-- `403` may mean a privilege mismatch.
-- `404` may mean the endpoint or object does not exist on that target version.
-
-When in doubt, record the capability probe result and fall back to SSH or `/sdk`.
+Guest operations require VMware Tools and guest credentials; keep them separate
+from ESXi/vCenter credentials. See the task router for reference selection and
+risk class.

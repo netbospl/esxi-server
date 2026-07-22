@@ -1,0 +1,32 @@
+name: quality
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.4.0
+        with:
+          node-version: '22.14.0'
+      - uses: hashicorp/setup-packer@v3
+        with:
+          version: '1.12.0'
+      - name: Install pinned validation tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes shellcheck libxml2-utils
+          npm install --global markdownlint-cli2@0.17.2
+          curl --fail --location --silent --show-error https://github.com/gitleaks/gitleaks/releases/download/v8.24.2/gitleaks_8.24.2_linux_x64.tar.gz | tar -xz -C /tmp
+          sudo install -m 0755 /tmp/gitleaks /usr/local/bin/gitleaks
+      - name: Validate repository
+        run: make check

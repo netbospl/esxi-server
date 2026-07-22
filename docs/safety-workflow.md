@@ -1,6 +1,9 @@
 # ESXi Safety Workflow
 
-This repo is documentation for safe ESXi 7.0 operations. Use it as a human-reviewed playbook, not as an autonomous authority.
+This documentation-first repository includes small local helpers, validators,
+mocked tests, and CI. Use it as a human-reviewed playbook, not as an
+autonomous authority. The canonical R0–R3 risk, consent, and task-router policy
+is [`../SKILL.md`](../SKILL.md); this page does not duplicate it.
 
 ## 1) Read-Only Discovery
 
@@ -39,7 +42,9 @@ Ask for explicit confirmation before destructive or disruptive changes, includin
 - restoring backups
 - changing firewall rules
 
-The confirmation must name the exact target.
+The confirmation must name the exact target. R2/R3 require explicit exact-target
+approval; R3 additionally requires acknowledgement of data/access-loss risk,
+an independent verified backup, and a maintenance window.
 
 ## 4) Rollback and Audit
 

@@ -15,7 +15,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Guest OS unattended install reference docs, example templates, and helper scripts for Windows, Ubuntu, RHEL/Rocky/Alma, Debian, and Packer.
 - Windows 11 OOBE/local-account notes for ESXi guest installs.
 - Windows 11 local-account answer-file snippet and manual fallback documentation.
+- Canonical R0–R3 risk model, task router, host-configuration backup runbook, local placeholder validation, mocked script tests, and GitHub Actions quality workflow.
 
 ### Changed
 - Reviewed and clarified ESXi skill safety guidance.
 - Clarified that Windows 11 OOBE bypass commands are version-dependent manual fallbacks, not licensing bypasses.
+- Hardened SSH host-key acceptance, REST/TLS session handling, ISO generators, Windows answer templates, guest examples, and Packer defaults.
