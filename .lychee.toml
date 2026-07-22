@@ -1,0 +1,5 @@
+# Red Hat documentation rejects GitHub Actions' unauthenticated link-checker
+# requests with HTTP 403; keep it documented and check the remaining links.
+exclude = [
+  "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/automatically_installing_rhel/index",
+]
