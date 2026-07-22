@@ -49,6 +49,21 @@ All answer files can erase the target disk. Review the `WillWipeDisk` warning
 and partition layout before use. `oobe-local-account-notes.md` contains only
 version-dependent interactive fallback guidance.
 
+### Build answer media from a local copy
+
+The descriptive XML names above identify repository templates; they are not the
+root filename expected by Windows Setup. Copy exactly one selected variant to a
+local working directory as `Autounattend.xml` before generating media:
+
+```bash
+mkdir -p /bezpieczna/lokalna/sciezka/windows-answer
+cp examples/guest-autoinstall/windows/autounattend-win11-uefi-gpt.xml \
+  /bezpieczna/lokalna/sciezka/windows-answer/Autounattend.xml
+```
+
+Run `scripts/make-windows-answer-iso.sh` against that local directory. The
+output media must contain `Autounattend.xml`; do not rename committed templates.
+
 ## Local media generators
 
 `make-ubuntu-seed-iso.sh` and `make-windows-answer-iso.sh` source

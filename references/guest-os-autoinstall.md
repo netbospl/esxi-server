@@ -52,6 +52,20 @@ They solve different problems even though some file names are similar.
 Windows unattended installation commonly uses the selected explicit Windows answer-file variant placed on virtual removable media or attached as a secondary ISO.
 A floppy image can also work for small answer files.
 
+The descriptive XML filenames in this repository identify templates only.
+Before creating answer media, copy exactly one selected template into a local
+working directory as `Autounattend.xml`, which is the root filename Windows
+Setup expects on the resulting media:
+
+```bash
+mkdir -p /bezpieczna/lokalna/sciezka/windows-answer
+cp examples/guest-autoinstall/windows/autounattend-win11-uefi-gpt.xml \
+  /bezpieczna/lokalna/sciezka/windows-answer/Autounattend.xml
+```
+
+Run the Windows answer-ISO generator against that local directory. Do not
+rename the descriptive template files committed to the repository.
+
 Safety notes:
 
 - Treat customized Windows answer files as sensitive; they can contain passwords, product keys, and domain join details.
@@ -61,7 +75,7 @@ Safety notes:
 
 Common Windows notes:
 
-- Use the selected explicit Windows answer-file variant as the root answer file name for install-time discovery.
+- Use a local copy of the selected variant named `Autounattend.xml` as the root answer file for install-time discovery.
 - For Windows 10 / 11 desktop installs, add OOBE suppression and generic local-account bootstrap only.
 - For Windows Server 2022, keep server-oriented defaults and avoid desktop-only assumptions.
 - `setupcomplete.cmd` runs after setup finishes and is a good place for a silent VMware Tools install attempt.
@@ -121,7 +135,7 @@ Do not treat Rufus as the preferred enterprise deployment method.
 
 Common Windows notes:
 
-- Use the selected explicit Windows answer-file variant as the root answer file name for install-time discovery.
+- Use a local copy of the selected variant named `Autounattend.xml` as the root answer file for install-time discovery.
 - For Windows 10 / 11 desktop installs, add OOBE suppression and generic local-account bootstrap only.
 - For Windows Server 2022, keep server-oriented defaults and avoid desktop-only assumptions.
 - `setupcomplete.cmd` runs after setup finishes and is a good place for a silent VMware Tools install attempt.
