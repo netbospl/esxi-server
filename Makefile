@@ -13,7 +13,7 @@ require-tool:
 bash:
 	@set -euo pipefail; while IFS= read -r file; do bash -n "$$file"; done < <(git ls-files '*.sh'); echo 'PASS: Bash syntax'
 shellcheck:
-	@set -e; $(MAKE) require-tool TOOL=shellcheck REQUIRE_TOOLS=$(REQUIRE_TOOLS); if command -v shellcheck >/dev/null 2>&1; then git ls-files '*.sh' | xargs -r shellcheck; echo 'PASS: ShellCheck'; fi
+	@set -e; $(MAKE) require-tool TOOL=shellcheck REQUIRE_TOOLS=$(REQUIRE_TOOLS); if command -v shellcheck >/dev/null 2>&1; then git ls-files '*.sh' | xargs -r shellcheck -x -P examples/guest-autoinstall/scripts; echo 'PASS: ShellCheck with sourced helper analysis'; fi
 tests:
 	@set -euo pipefail; for test in tests/test-*.sh; do bash "$$test"; done
 xml:

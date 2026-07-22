@@ -184,7 +184,13 @@ run_https_probe() {
   fi
   local classification; classification=$(classify_http "$RESPONSE_STATUS")
   report "RESULT: $classification (HTTP $RESPONSE_STATUS)."
-  record $([[ $auth_required == 1 ]] && printf rest || printf https) "$label" "$classification" "$RESPONSE_STATUS"
+  local transport
+  if [[ $auth_required == 1 ]]; then
+    transport=rest
+  else
+    transport=https
+  fi
+  record "$transport" "$label" "$classification" "$RESPONSE_STATUS"
   if [[ $RESPONSE_STATUS == 401 && $auth_required == 1 ]]; then
     REST_DISABLED=1
     REST_SESSION=''
