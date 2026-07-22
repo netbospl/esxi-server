@@ -42,43 +42,43 @@ variable "guest_winrm_password" {
 }
 
 variable "datacenter" {
-  type        = string
-  default     = "REPLACE_WITH_DATACENTER"
+  type    = string
+  default = "REPLACE_WITH_DATACENTER"
 }
 
 variable "cluster" {
-  type        = string
-  default     = "REPLACE_WITH_CLUSTER"
+  type    = string
+  default = "REPLACE_WITH_CLUSTER"
 }
 
 variable "host" {
-  type        = string
-  default     = "REPLACE_WITH_HOST"
+  type    = string
+  default = "REPLACE_WITH_HOST"
 }
 
 variable "datastore" {
-  type        = string
-  default     = "REPLACE_WITH_DATASTORE"
+  type    = string
+  default = "REPLACE_WITH_DATASTORE"
 }
 
 variable "network" {
-  type        = string
-  default     = "REPLACE_WITH_NETWORK"
+  type    = string
+  default = "REPLACE_WITH_NETWORK"
 }
 
 variable "iso_path" {
-  type        = string
-  default     = "REPLACE_WITH_ISO_PATH"
+  type    = string
+  default = "REPLACE_WITH_ISO_PATH"
 }
 
 variable "iso_checksum" {
-  type        = string
-  default     = "sha256:REPLACE_WITH_ISO_CHECKSUM"
+  type    = string
+  default = "sha256:REPLACE_WITH_ISO_CHECKSUM"
 }
 
 variable "vm_name" {
-  type        = string
-  default     = "win-template-vsphere-iso"
+  type    = string
+  default = "win-template-vsphere-iso"
 }
 
 source "vsphere-iso" "windows" {
@@ -93,31 +93,31 @@ source "vsphere-iso" "windows" {
   datastore  = var.datastore
   vm_name    = var.vm_name
 
-  guest_os_type = "windows2019srv_64Guest"
-  CPUs           = 2
-  RAM            = 4096
+  guest_os_type   = "windows2019srv_64Guest"
+  CPUs            = 2
+  RAM             = 4096
   RAM_reserve_all = false
-  disk_size      = 40960
+  disk_size       = 40960
 
   network_adapters {
     network      = var.network
     network_card = "vmxnet3"
   }
 
-  iso_paths   = ["[${var.datastore}] iso/${var.iso_path}"]
+  iso_paths    = ["[${var.datastore}] iso/${var.iso_path}"]
   iso_checksum = var.iso_checksum
 
-  communicator = "winrm"
+  communicator   = "winrm"
   winrm_username = "agent"
   winrm_password = var.guest_winrm_password
   winrm_timeout  = "6h"
 
   // Adapt these boot commands to the media layout you actually use.
   boot_wait    = "5s"
-  boot_command  = ["<spacebar>"]
+  boot_command = ["<spacebar>"]
 
   // If you generate an answer ISO or floppy image locally, document the attachment step here.
-  shutdown_command = "shutdown /s /t 10 /f"
+  shutdown_command    = "shutdown /s /t 10 /f"
   convert_to_template = false
 }
 

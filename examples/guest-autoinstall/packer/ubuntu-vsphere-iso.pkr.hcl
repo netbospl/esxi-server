@@ -42,43 +42,43 @@ variable "guest_ssh_password" {
 }
 
 variable "datacenter" {
-  type        = string
-  default     = "REPLACE_WITH_DATACENTER"
+  type    = string
+  default = "REPLACE_WITH_DATACENTER"
 }
 
 variable "cluster" {
-  type        = string
-  default     = "REPLACE_WITH_CLUSTER"
+  type    = string
+  default = "REPLACE_WITH_CLUSTER"
 }
 
 variable "host" {
-  type        = string
-  default     = "REPLACE_WITH_HOST"
+  type    = string
+  default = "REPLACE_WITH_HOST"
 }
 
 variable "datastore" {
-  type        = string
-  default     = "REPLACE_WITH_DATASTORE"
+  type    = string
+  default = "REPLACE_WITH_DATASTORE"
 }
 
 variable "network" {
-  type        = string
-  default     = "REPLACE_WITH_NETWORK"
+  type    = string
+  default = "REPLACE_WITH_NETWORK"
 }
 
 variable "iso_path" {
-  type        = string
-  default     = "REPLACE_WITH_ISO_PATH"
+  type    = string
+  default = "REPLACE_WITH_ISO_PATH"
 }
 
 variable "iso_checksum" {
-  type        = string
-  default     = "sha256:REPLACE_WITH_ISO_CHECKSUM"
+  type    = string
+  default = "sha256:REPLACE_WITH_ISO_CHECKSUM"
 }
 
 variable "vm_name" {
-  type        = string
-  default     = "ubuntu-template-vsphere-iso"
+  type    = string
+  default = "ubuntu-template-vsphere-iso"
 }
 
 source "vsphere-iso" "ubuntu" {
@@ -93,11 +93,11 @@ source "vsphere-iso" "ubuntu" {
   datastore  = var.datastore
   vm_name    = var.vm_name
 
-  guest_os_type = "ubuntu64Guest"
-  CPUs           = 2
-  RAM            = 4096
+  guest_os_type   = "ubuntu64Guest"
+  CPUs            = 2
+  RAM             = 4096
   RAM_reserve_all = false
-  disk_size      = 40960
+  disk_size       = 40960
 
   network_adapters {
     network      = var.network
@@ -107,18 +107,18 @@ source "vsphere-iso" "ubuntu" {
   iso_paths    = ["[${var.datastore}] iso/${var.iso_path}"]
   iso_checksum = var.iso_checksum
 
-  communicator   = "ssh"
-  ssh_username   = "agent"
-  ssh_password   = var.guest_ssh_password
-  ssh_timeout    = "6h"
+  communicator = "ssh"
+  ssh_username = "agent"
+  ssh_password = var.guest_ssh_password
+  ssh_timeout  = "6h"
 
   // Adapt the boot parameter to the Ubuntu release you are testing.
   // Example pattern: autoinstall ds=nocloud;s=/cdrom/
-  boot_wait   = "5s"
+  boot_wait    = "5s"
   boot_command = ["<esc><wait>autoinstall ds=nocloud;s=/cdrom/<enter>"]
 
-  shutdown_command     = "sudo shutdown -P now"
-  convert_to_template  = false
+  shutdown_command    = "sudo shutdown -P now"
+  convert_to_template = false
 }
 
 build {
