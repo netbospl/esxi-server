@@ -21,7 +21,7 @@ xml:
 yaml:
 	@set -e; $(MAKE) require-tool TOOL=cloud-init REQUIRE_TOOLS=$(REQUIRE_TOOLS); if command -v cloud-init >/dev/null 2>&1; then cloud-init schema --config-file examples/guest-autoinstall/linux/ubuntu/user-data; echo 'PASS: cloud-init schema'; fi
 packer:
-	@set -e; $(MAKE) require-tool TOOL=packer REQUIRE_TOOLS=$(REQUIRE_TOOLS); if command -v packer >/dev/null 2>&1; then packer init examples/guest-autoinstall/packer; packer fmt -check examples/guest-autoinstall/packer; for file in examples/guest-autoinstall/packer/*-vsphere-iso.pkr.hcl; do packer validate -syntax-only -var vcenter_server=example.invalid -var username=placeholder -var password=placeholder "$$file"; done; echo 'PASS: packer init, fmt, and validate'; fi
+	@set -euo pipefail; $(MAKE) require-tool TOOL=packer REQUIRE_TOOLS=$(REQUIRE_TOOLS); if command -v packer >/dev/null 2>&1; then packer fmt -check examples/guest-autoinstall/packer; for file in examples/guest-autoinstall/packer/*-vsphere-iso.pkr.hcl; do tmp=$$(mktemp -d); trap 'rm -rf "$$tmp"' EXIT; cp "$$file" "$$tmp/build.pkr.hcl"; packer init "$$tmp"; packer validate -syntax-only -var vcenter_server=example.invalid -var username=placeholder -var password=placeholder "$$tmp"; rm -rf "$$tmp"; trap - EXIT; done; echo 'PASS: isolated packer init, fmt, and validate'; fi
 markdown:
 	@set -e; $(MAKE) require-tool TOOL=markdownlint-cli2 REQUIRE_TOOLS=$(REQUIRE_TOOLS); if command -v markdownlint-cli2 >/dev/null 2>&1; then markdownlint-cli2 '**/*.md'; echo 'PASS: markdownlint-cli2'; fi
 secrets:
