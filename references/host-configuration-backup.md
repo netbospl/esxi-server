@@ -34,10 +34,15 @@
    vim-cmd hostsvc/firmware/backup_config
    ```
 
-4. Download the generated bundle to protected external storage using a verified
-   management path. Calculate a SHA-256 checksum after download and record it
-   with build, UUID, and date.
-5. Verify that the downloaded artifact is readable and that the checksum and
+4. Download the generated bundle only through the authenticated management
+   connection using certificate validation (or an explicitly verified CA/pin),
+   write it outside the host and repository with restrictive permissions, and
+   calculate SHA-256 after download. Record the checksum with build, UUID, and
+   date; do not put the URL, cookie, or bundle in a report or commit.
+5. The operator needs privileges sufficient for host firmware configuration
+   backup and for authenticated datastore/management download; verify the role
+   in the current Broadcom procedure rather than assuming a read-only role.
+6. Verify that the downloaded artifact is readable and that the checksum and
    metadata record are stored separately from the host.
 
 Do not treat the bundle as a VM backup: VM inventory and bootbank are not
@@ -48,9 +53,10 @@ contained. Keep an inventory/export plan for critical VMs separately.
 1. Require explicit approval naming the exact host, accepted downtime, and the
    data/access-loss risk. Ensure maintenance mode and a tested out-of-band
    console path.
-2. Verify the bundle checksum, source date, exact host UUID, and compatible ESXi
-   build before touching the host. **STOP** on UUID mismatch or uncertain build
-   compatibility.
+2. Verify the bundle checksum, source date, exact host UUID, and the
+   **identical ESXi build** before touching the host. Broadcom's restore
+   requirement is not merely a “compatible build”. **STOP** on UUID mismatch,
+   a different build, or uncertainty.
 3. ESXi 7.0 U2 and later hosts using TPM have additional restore limitations;
    consult the current Broadcom procedure before proceeding.
 4. Expect required restarts: restore can automatically reboot the host. Prepare

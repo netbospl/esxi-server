@@ -1,19 +1,24 @@
-# ESXi Post-Change Summary
+# Post-change Summary
 
-## What changed
+- **plan_id:**
+- **timestamp (UTC):**
+- **exact target:**
+- **risk class / approved scope:**
+
+## Preconditions and pre-change evidence
 - 
 
-## Commands/API calls executed
+## Commands/API calls and exit codes
 - 
 
-## Verification results
+## Post-change success evidence
 - 
 
-## Problems encountered
+## Deviations and abort conditions
 - 
 
-## Rollback status
+## Rollback performed or rollback verification
 - 
 
-## Recommended next steps
+## Residual risk / follow-up
 - 

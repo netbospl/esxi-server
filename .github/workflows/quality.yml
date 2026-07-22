@@ -11,22 +11,25 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
     steps:
-      - uses: actions/checkout@v4.2.2
-      - uses: actions/setup-node@v4.4.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22.14.0'
       - uses: hashicorp/setup-packer@v3
         with:
           version: '1.12.0'
-      - name: Install pinned validation tools
+      - name: Install mandatory validation tools
         run: |
+          set -euo pipefail
           sudo apt-get update
-          sudo apt-get install --yes shellcheck libxml2-utils
+          sudo apt-get install --yes shellcheck libxml2-utils cloud-init cargo
           npm install --global markdownlint-cli2@0.17.2
-          curl --fail --location --silent --show-error https://github.com/gitleaks/gitleaks/releases/download/v8.24.2/gitleaks_8.24.2_linux_x64.tar.gz | tar -xz -C /tmp
+          curl --fail --location --silent --show-error --output /tmp/gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/download/v8.24.2/gitleaks_8.24.2_linux_x64.tar.gz
+          echo 'fa0500f6b7e41d28791ebc680f5dd9899cd42b58629218a5f041efa899151a8e  /tmp/gitleaks.tar.gz' | sha256sum --check --strict
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp
           sudo install -m 0755 /tmp/gitleaks /usr/local/bin/gitleaks
+          cargo install actionlint --locked
+          cargo install lychee --locked
       - name: Validate repository
-        run: make check
+        run: make check-ci

@@ -1,19 +1,24 @@
-# ESXi Rollback Notes
+# Rollback Notes
 
-## Target
+- **plan_id:**
+- **timestamp (UTC):**
+- **exact target:**
+- **risk class / approved rollback scope:**
+
+## Trigger, abort criterion, and preconditions
 - 
 
-## Original state
+## Pre-rollback evidence
 - 
 
-## Rollback trigger
+## Exact rollback commands/API calls and exit codes
 - 
 
-## Rollback steps
+## Rollback verification and post-change evidence
 - 
 
-## Verification after rollback
+## Deviations
 - 
 
-## Residual risk
+## Residual risk / escalation
 - 

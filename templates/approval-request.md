@@ -1,19 +1,25 @@
-# ESXi Approval Request
+# Approval Request
 
-## Target
+- **plan_id:**
+- **timestamp (UTC):**
+- **exact target:**
+- **risk class (R0–R3):**
+- **approval scope:**
+- **approval expiry (UTC):**
+
+## Preconditions
+- Identity, power state, capacity, network path, and backup evidence attached.
+
+## Proposed commands/API calls
 - 
 
-## Proposed action
+## Success criteria
 - 
 
-## Commands / API calls
+## Abort criteria
 - 
 
-## Risk summary
+## Rollback and verification
 - 
 
-## Rollback idea
-- 
-
-## Approval needed
-Please reply with explicit approval naming the exact target.
+Approve only by naming this `plan_id`, exact target, and scope.

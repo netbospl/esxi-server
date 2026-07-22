@@ -1,23 +1,25 @@
-# ESXi Discovery Report
+# Discovery Report
 
-## Context
-- Target:
-- Local profile loaded:
-- Capability probe result:
-- Chosen transport:
+- **plan_id:**
+- **timestamp (UTC):**
+- **exact target:**
+- **risk class:** R0
+- **scope / expiry:**
 
-## Read-only findings
-- Host version:
-- Memory:
-- Datastores:
-- Networks / port groups:
-- VM inventory:
-- Snapshot state:
-- Guest tools state:
+## Preconditions and method
+- Read-only commands/API calls:
 
-## Risks noticed
-- 
+## Results and pre-change evidence
+-
 
-## Notes
-- Command or API failures:
-- Anything that needs human confirmation:
+## Exit codes / transport classification
+-
+
+## Abort criteria reached
+-
+
+## Deviations
+-
+
+## Residual risk and next approval needed
+-

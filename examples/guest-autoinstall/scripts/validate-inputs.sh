@@ -2,8 +2,24 @@
 # Shared local Bash validation helpers for example-media generators.
 # ShellCheck source=validate-inputs.sh
 
+placeholder_rule() {
+  local line=$1
+  case $line in
+    *REPLACE_WITH_*) printf 'REPLACE_WITH_' ;;
+    *[Cc][Hh][Aa][Nn][Gg][Ee][Mm][Ee]*) printf 'changeme' ;;
+    *example.com*|*example.org*|*example.net*|*example.local*) printf 'example-domain' ;;
+    *'<Value>'*'</Value>'*) printf 'empty-xml-value' ;;
+    *) printf 'placeholder' ;;
+  esac
+}
+
 placeholder_matches() {
-  grep -Ein -- 'REPLACE_WITH_|changeme|example\.(com|org|net|local)|sha256:(REPLACE|[[:space:]]*$)|<Value>[[:space:]]*</Value>' "$@" || true
+  local file line_no line rule
+  while IFS=: read -r file line_no line; do
+    rule=$(placeholder_rule "$line")
+    # Do not emit a matching line: it can contain a password or token.
+    printf '%s:%s: %s: value redacted\n' "$file" "$line_no" "$rule"
+  done < <(grep -EinH -- 'REPLACE_WITH_|changeme|example\.(com|org|net|local)|sha256:(REPLACE|[[:space:]]*$)|<Value>[[:space:]]*</Value>' "$@" || true)
 }
 
 validate_placeholders() {
@@ -47,8 +63,9 @@ prepare_output() {
   local output=$1 force=$2
   output=$(python3 -c 'import os, sys; print(os.path.abspath(sys.argv[1]))' "$output")
   [[ -d $(dirname "$output") ]] || { printf 'error: output directory does not exist: %s\n' "$(dirname "$output")" >&2; return 1; }
-  if [[ -e $output && $force != 1 ]]; then
-    printf 'error: refusing to overwrite existing ISO without --force: %s\n' "$output" >&2
+  [[ ! -L $output && ! -L $output.sha256 ]] || { printf 'error: refusing symlink output or checksum path\n' >&2; return 1; }
+  if [[ (-e $output || -e $output.sha256) && $force != 1 ]]; then
+    printf 'error: refusing to overwrite existing ISO or checksum without --force: %s\n' "$output" >&2
     return 1
   fi
   printf '%s\n' "$output"
@@ -56,5 +73,6 @@ prepare_output() {
 
 write_checksum() {
   local output=$1
-  sha256sum "$output" >"$output.sha256"
+  [[ ! -L $output.sha256 ]] || { printf 'error: refusing symlink checksum path\n' >&2; return 1; }
+  (cd "$(dirname "$output")" && sha256sum "$(basename "$output")") >"$output.sha256"
 }
