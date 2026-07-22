@@ -29,7 +29,8 @@ jobs:
           echo 'fa0500f6b7e41d28791ebc680f5dd9899cd42b58629218a5f041efa899151a8e  /tmp/gitleaks.tar.gz' | sha256sum --check --strict
           tar -xzf /tmp/gitleaks.tar.gz -C /tmp
           sudo install -m 0755 /tmp/gitleaks /usr/local/bin/gitleaks
-          cargo install actionlint --locked
+          curl --fail --location --silent --show-error https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash -s -- 1.7.7 /tmp/actionlint
+          sudo install -m 0755 /tmp/actionlint/actionlint /usr/local/bin/actionlint
           cargo install lychee --locked
       - name: Validate repository
         run: make check-ci
