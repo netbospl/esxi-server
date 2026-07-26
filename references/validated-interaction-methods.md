@@ -40,13 +40,24 @@ Do not paste real passwords into chat, logs, or committed files. These examples 
 : "${ESXI_USER:=agent}"
 : "${ESXI_PASS:?ESXI_PASS is required for HTTPS auth}"
 
-curl -sk --fail --show-error "https://$ESXI_HOST/ui/" >/dev/null
+tls_args=()
+if [[ -n ${ESXI_CA_BUNDLE:-} ]]; then
+  tls_args+=(--cacert "$ESXI_CA_BUNDLE")
+fi
 
-curl -sk --fail --show-error \
+curl --silent --show-error --fail "${tls_args[@]}" \
+  "https://$ESXI_HOST/ui/" >/dev/null
+
+curl --silent --show-error --fail "${tls_args[@]}" \
   -u "$ESXI_USER:$ESXI_PASS" \
   "https://$ESXI_HOST/folder?dcPath=ha-datacenter&dsName=<datastore>" \
-  >/tmp/esxi-folder-listing.html
+  >/dev/null
 ```
+
+Do not add `-k` or `--insecure` to a safe default. When a verified CA bundle is
+not yet available, use the guarded helper with the explicit temporary
+`ESXI_INSECURE_TLS=1` exception and record why trust validation was disabled.
+This exception does not weaken SSH host-key validation.
 
 For SSH, probe once before any `esxcli`, `vim-cmd`, SCP, or SFTP workflow:
 

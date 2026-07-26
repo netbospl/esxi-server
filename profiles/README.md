@@ -25,4 +25,6 @@ A local profile can define sanitized or real values such as:
 - Primary VM datastore
 - Transfer datastore
 - Management, restricted, and unrestricted port groups
+- Current owner of any public IP, default gateway, and provider MAC constraints
+- Independent console path for management-network recovery
 - Any host-specific rollback or maintenance notes

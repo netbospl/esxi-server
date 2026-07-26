@@ -33,7 +33,8 @@ For any non-read-only task:
 
 ## 3) Confirmation Policy
 
-Ask for explicit confirmation before destructive or disruptive changes, including:
+R0 discovery needs no additional approval. Ask for explicit confirmation before
+every R1–R3 state change, including:
 
 - deleting VMs, disks, snapshots, datastore files, or datastores
 - changing networking or moving VMs between networks
@@ -42,9 +43,9 @@ Ask for explicit confirmation before destructive or disruptive changes, includin
 - restoring backups
 - changing firewall rules
 
-The confirmation must name the exact target. R2/R3 require explicit exact-target
-approval; R3 additionally requires acknowledgement of data/access-loss risk,
-an independent verified backup, and a maintenance window.
+The confirmation must name the exact target. R2 additionally requires downtime
+approval; R3 requires a second acknowledgement of data/access-loss risk, an
+independent verified backup, and a maintenance window.
 
 ## 4) Rollback and Audit
 

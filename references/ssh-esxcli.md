@@ -50,6 +50,9 @@ vim-cmd vmsvc/get.guest <vmid>
 
 ### State-changing operations
 
+Obtain R1–R3 approval for the exact VM and intended power impact before using
+any command in this section.
+
 ```bash
 vim-cmd vmsvc/power.on <vmid>
 vim-cmd vmsvc/power.shutdown <vmid>   # requires VMware Tools
@@ -63,7 +66,7 @@ vim-cmd vmsvc/power.off <vmid>
 vim-cmd vmsvc/destroy <vmid>
 ```
 
-Power-off and destroy require explicit approval and a rollback plan.
+Power-off and destroy require R2/R3 approval and a rollback plan.
 
 ## Snapshot operations
 

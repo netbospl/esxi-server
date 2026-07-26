@@ -15,7 +15,7 @@ Use this guide for OVF, OVA, and VMDK import/export work on standalone ESXi.
 Common import paths include:
 
 - `ovftool` when available locally
-- REST `/folder/` or OVF deployment endpoints when they are supported on the target version
+- HTTPS `/folder/` with Basic Auth or OVF deployment endpoints when they are supported on the target version
 - datastore browser uploads for the raw files that the import consumes
 
 Use host-specific datastore and portgroup names from a local profile, not from the generic skill.

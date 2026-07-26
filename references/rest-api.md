@@ -4,8 +4,9 @@ Start with [`../SKILL.md`](../SKILL.md): its risk model and task router are
 canonical. This reference is for capability-aware REST operations, not a
 promise that standalone ESXi implements the vCenter REST surface.
 
-- **Supported scope:** standalone ESXi 7.x/8.x where endpoints exist; vCenter
-  has a broader API surface.
+- **Supported scope:** standalone ESXi 7.x primary and ESXi 8.x conditional
+  where endpoints exist; ESXi 9.x is unsupported; vCenter has a broader API
+  surface.
 - **Last validated:** static review, 2026-07-22; no live host test was run.
 
 ## TLS and bounded requests
@@ -37,6 +38,9 @@ attempt `DELETE /api/session` best-effort without exposing the result/token.
 Standalone ESXi 7.x can return `400` from `POST /api/session` and
 `POST /rest/com/vmware/cis/session` while Host Client and `/folder/` work. That
 is a capability result, not evidence that credentials should be retried.
+Probe `/folder/` independently with Basic Auth before creating a REST session.
+The guarded helper tries the legacy session endpoint exactly once only when the
+modern endpoint is unsupported; it does not fall back after `401` or `403`.
 
 ## Operation controls
 

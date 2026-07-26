@@ -4,7 +4,8 @@ Start with the canonical policy and task router in [`../SKILL.md`](../SKILL.md).
 This is an R0, bounded, sanitised discovery procedure; it does not authorize
 any state change.
 
-- **Supported scope:** standalone ESXi 7.x/8.x; vCenter is a distinct target.
+- **Supported scope:** standalone ESXi 7.x primary; ESXi 8.x conditional;
+  ESXi 9.x unsupported; vCenter is a distinct target.
 - **Last validated:** static documentation review, 2026-07-22.
 - **Lab status:** not tested on a live ESXi host by this repository revision.
 
@@ -27,7 +28,8 @@ repeated credential attempts.
 1. Identify target, version and build. Determine standalone ESXi versus vCenter
    before selecting a vCenter-oriented endpoint.
 2. Verify HTTPS reachability to Host Client `/ui/` with TLS validation.
-3. Probe datastore browser `/folder/` only with an authorized, read-only request.
+3. Probe datastore browser `/folder/` independently with one authorized,
+   read-only Basic Auth request. Do not require a REST session for this probe.
 4. If credentials are intentionally supplied, try modern REST
    `POST /api/session` once; then the older
    `POST /rest/com/vmware/cis/session` only when the first is unsupported and
@@ -40,8 +42,9 @@ repeated credential attempts.
 8. Record required privileges, licence/API limitations, and per-VM VMware Tools
    availability before proposing guest operations.
 
-`scripts/esxi-readonly-discovery.sh` implements a bounded local helper with
-text and optional sanitised JSON report output. It intentionally never prints
-passwords, session IDs, or Authorization headers. Local report paths are Git
-ignored. A `400` from standalone ESXi session endpoints can be a normal
-capability result even where Host Client and `/folder/` work.
+`scripts/esxi-readonly-discovery.sh` implements this order, including one legacy
+session fallback only when the modern endpoint is unsupported. It reports
+status only by default and emits `PASS`, `PARTIAL`, `BLOCKED`, `AUTH_FAILED`, or
+`AUTHZ_FAILED`. Full inventory requires `--include-inventory` and is sensitive;
+`--redact-identifiers` does not sanitize deliberately included command output.
+The helper never prints passwords, session IDs, or Authorization headers.

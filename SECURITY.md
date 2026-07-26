@@ -24,11 +24,21 @@ If you share commands or logs, redact secrets first. Do not include `.env` conte
 
 ## TLS and certificates
 
-Standalone ESXi commonly uses a self-signed TLS certificate. The references may use `-k`, `--insecure`, `--noSSLVerify`, or equivalent TLS verification overrides. That is expected for this environment, but any production usage should clearly document why certificate verification is disabled and which host is being contacted.
+TLS certificate verification is the default. Prefer a verified CA bundle or
+certificate trust configured for the exact host. `-k`, `--insecure`,
+`--noSSLVerify`, and equivalent overrides are prohibited in safe default
+examples. Use `ESXI_INSECURE_TLS=1` only as a temporary, explicit exception
+after acknowledging the interception risk and recording the exact target and
+reason. A TLS exception never relaxes SSH host-key verification.
 
-## Destructive operations require confirmation
+## State changes require confirmation
 
-Confirm intent before performing operations that can disrupt workloads or destroy data, including:
+Follow the canonical R0–R3 model in [`SKILL.md`](SKILL.md). R0 discovery needs
+no additional approval beyond the request. Every R1–R3 state change needs
+explicit approval naming the target; R2 adds downtime approval, and R3 adds a
+second acknowledgement of data-loss or access-loss risk.
+
+High-risk examples include:
 
 - Deleting VMs
 - Deleting snapshots
@@ -40,7 +50,8 @@ Confirm intent before performing operations that can disrupt workloads or destro
 - Uploading files that could overwrite existing datastore contents without explicit target confirmation
 - Changing ESXi firewall rules or other host services
 
-For dangerous operations, show the exact command or API request first and wait for explicit approval. The approval must name the exact target object or setting.
+For every state change, show the exact command or API request first and wait
+for the approval required by its risk class.
 
 ## Sanitizing bug reports
 

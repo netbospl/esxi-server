@@ -16,11 +16,16 @@ Before uploading or restoring anything, verify:
 ## HTTP datastore browser examples
 
 ```bash
-curl --fail --show-error -T /local/path/to/file.iso \
+tls_args=()
+if [[ -n ${ESXI_CA_BUNDLE:-} ]]; then
+  tls_args+=(--cacert "$ESXI_CA_BUNDLE")
+fi
+
+curl --fail --show-error "${tls_args[@]}" -T /local/path/to/file.iso \
   "https://$ESXI_HOST/folder/isos/file.iso?dcPath=ha-datacenter&dsName=<transfer-datastore>" \
   -u "$ESXI_USER:$ESXI_PASS"
 
-curl --fail --show-error -o /local/output/file.vmdk \
+curl --fail --show-error "${tls_args[@]}" -o /local/output/file.vmdk \
   "https://$ESXI_HOST/folder/myvms/file.vmdk?dcPath=ha-datacenter&dsName=<vm-datastore>" \
   -u "$ESXI_USER:$ESXI_PASS"
 ```
@@ -30,7 +35,8 @@ These `-u` examples are intentionally simple. Do not log or share commands that 
 ## Browsing datastore contents
 
 ```bash
-curl --fail --show-error "https://$ESXI_HOST/folder?dcPath=ha-datacenter&dsName=<vm-datastore>" \
+curl --fail --show-error "${tls_args[@]}" \
+  "https://$ESXI_HOST/folder?dcPath=ha-datacenter&dsName=<vm-datastore>" \
   -u "$ESXI_USER:$ESXI_PASS"
 ```
 
@@ -40,16 +46,19 @@ This `/folder` listing path is a practical first check for standalone ESXi when 
 
 ```bash
 ovftool \
-  --noSSLVerify \
   --acceptAllEulas \
   --name="my-imported-vm" \
   --datastore=<vm-datastore> \
   --network="<portgroup>" \
   /local/path/to/vm.ova \
-  "vi://$ESXI_USER:$ESXI_PASS@$ESXI_HOST"
+  "vi://$ESXI_USER@$ESXI_HOST"
 ```
 
 Import and export are approval-gated when they overwrite or create inventory objects. Capture the original path, name, and network mapping before making changes.
+Let `ovftool` prompt for the password instead of embedding it in the URI. Trust
+the exact ESXi certificate before transfer. Do not add `--noSSLVerify` to the
+safe default; document a temporary exception separately when no trusted path is
+available and the user explicitly accepts the TLS risk.
 
 ## SCP examples
 

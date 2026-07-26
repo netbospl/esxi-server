@@ -41,6 +41,7 @@ This documentation set describes safe, experimental ESXi operations for humans a
 - [`../references/file-transfers.md`](../references/file-transfers.md) — datastore upload/download, OVF/OVA transfer patterns, and SCP notes
 - [`../references/guest-os-autoinstall.md`](../references/guest-os-autoinstall.md) — guest OS unattended install templates, compatibility notes, and safety guidance
 - [`../references/network-firewall-ipv4-ipv6.md`](../references/network-firewall-ipv4-ipv6.md) — network, firewall, and IP-stack checks
+- [`../references/single-public-ip-router-migration.md`](../references/single-public-ip-router-migration.md) — staged R3 runbook for a router VM taking ownership of the only public IPv4
 - [`../references/rest-api.md`](../references/rest-api.md) — vSphere REST API sessions, VM lifecycle, snapshots, datastores, networking, and resource checks
 - [`../references/ssh-esxcli.md`](../references/ssh-esxcli.md) — SSH, `esxcli`, `vim-cmd`, networking, datastore, and resource checks
 - [`../references/troubleshooting.md`](../references/troubleshooting.md) — read-only troubleshooting and recovery guidance
