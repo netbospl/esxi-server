@@ -5,8 +5,9 @@
 > R1; restore is R3 and requires exact-target approval, verified rollback,
 > maintenance window, and out-of-band management.
 
-- **Supported scope:** standalone ESXi 7.x/8.x procedures; command availability
-  and exact workflow must be checked on the target build.
+- **Supported scope:** standalone ESXi 7.x primary and ESXi 8.x conditional;
+  command availability and the exact workflow must be checked on the target
+  build. ESXi 9.x is unsupported.
 - **Last validated:** documentation review, 2026-07-22.
 - **Validation status:** static documentation only; no ESXi host was contacted.
 - **Primary source:** [Broadcom KB 313510](https://knowledge.broadcom.com/external/article/313510/how-to-back-up-and-restore-the-esxi-host.html).

@@ -14,6 +14,7 @@ This documentation set describes safe, experimental ESXi operations for humans a
 
 - [`../profiles/README.md`](../profiles/README.md) — local-only profile naming and usage notes
 - [`../profiles/example-host.md`](../profiles/example-host.md) — sanitized example host profile
+- [`../profiles/example-dual-public-router.md`](../profiles/example-dual-public-router.md) — sanitized retained-management plus failover-IP router profile
 - [`../examples/guest-autoinstall/README.md`](../examples/guest-autoinstall/README.md) — guest OS unattended install templates and helper scripts
 - [`../examples/guest-autoinstall/windows/autounattend-win10-bios-mbr.xml`](../examples/guest-autoinstall/windows/autounattend-win10-bios-mbr.xml) — Windows 10 BIOS/MBR answer file
 - [`../examples/guest-autoinstall/windows/autounattend-win10-uefi-gpt.xml`](../examples/guest-autoinstall/windows/autounattend-win10-uefi-gpt.xml) — Windows 10 UEFI/GPT answer file
@@ -24,6 +25,7 @@ This documentation set describes safe, experimental ESXi operations for humans a
 - [`../scripts/esxi-readonly-discovery.sh`](../scripts/esxi-readonly-discovery.sh) — bounded read-only discovery helper with explicit SSH host-key acceptance
 - [`../tests/`](../tests/) — mock-only tests; no test contacts an ESXi host
 - [`../templates/change-plan.md`](../templates/change-plan.md) — structured change-plan template
+- [`../templates/dual-public-router-plan.md`](../templates/dual-public-router-plan.md) — topology-specific plan for a failover `/32` and provider virtual MAC
 - [`../templates/approval-request.md`](../templates/approval-request.md) — explicit approval prompt template
 - [`../templates/discovery-report.md`](../templates/discovery-report.md) — structured discovery report template
 - [`../templates/post-change-summary.md`](../templates/post-change-summary.md) — post-change summary template
@@ -41,6 +43,8 @@ This documentation set describes safe, experimental ESXi operations for humans a
 - [`../references/file-transfers.md`](../references/file-transfers.md) — datastore upload/download, OVF/OVA transfer patterns, and SCP notes
 - [`../references/guest-os-autoinstall.md`](../references/guest-os-autoinstall.md) — guest OS unattended install templates, compatibility notes, and safety guidance
 - [`../references/network-firewall-ipv4-ipv6.md`](../references/network-firewall-ipv4-ipv6.md) — network, firewall, and IP-stack checks
+- [`../references/dedibox-dual-public-router-vm.md`](../references/dedibox-dual-public-router-vm.md) — retained public ESXi management plus a dedicated failover IPv4 on a router VM
+- [`../references/single-public-ip-router-migration.md`](../references/single-public-ip-router-migration.md) — staged R3 runbook for a router VM taking ownership of the only public IPv4
 - [`../references/rest-api.md`](../references/rest-api.md) — vSphere REST API sessions, VM lifecycle, snapshots, datastores, networking, and resource checks
 - [`../references/ssh-esxcli.md`](../references/ssh-esxcli.md) — SSH, `esxcli`, `vim-cmd`, networking, datastore, and resource checks
 - [`../references/troubleshooting.md`](../references/troubleshooting.md) — read-only troubleshooting and recovery guidance

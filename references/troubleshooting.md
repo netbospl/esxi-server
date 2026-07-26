@@ -34,7 +34,7 @@ Stop and ask for human verification if:
 - the management network might be affected
 - the capability probe cannot identify a safe path
 - the target version differs from the documentation in a material way
-- a destructive step has not been approved
+- a state change has not been approved at the level required by R1–R3
 
 ## Useful follow-up data
 

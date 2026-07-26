@@ -25,5 +25,8 @@ ESXI_PASS=use-secret-manager-or-local-env-only
 ## Notes
 
 - This profile is deliberately fake and safe to commit.
+- For a retained public management IP plus a provider failover IP on a router
+  VM, use [`example-dual-public-router.md`](example-dual-public-router.md)
+  instead.
 - Keep any real host-specific data in a local-only `*.local.md` file.
 - Never put passwords, private keys, tokens, or session IDs in a profile file.
