@@ -19,7 +19,8 @@ for token in \
   '<ESXI_MANAGEMENT_IPV4>' \
   '<FAILOVER_IPV4>' \
   '<PROVIDER_GATEWAY>' \
-  '<PROVIDER_VMAC>'; do
+  '<PROVIDER_VMAC>' \
+  '<ROUTER_FQDN>'; do
   grep -Fq "$token" "$reference" || fail "reference missing placeholder: $token"
   grep -Fq "$token" "$profile" || fail "profile missing placeholder: $token"
 done
@@ -38,6 +39,16 @@ grep -Fq 'does not filter the retained public' "$reference" ||
   fail 'public ESXi residual-risk warning is missing'
 grep -Fiq 'generic provider documentation as a reference candidate only' "$reference" ||
   fail 'provider source-authority guard is missing'
+grep -Fq 'forward and reverse DNS' "$reference" ||
+  fail 'forward/reverse DNS identity gate is missing'
+grep -Fq 'DNS only' "$reference" ||
+  fail 'Cloudflare DNS-only gate is missing'
+grep -Fq 'does not assign an address' "$reference" ||
+  fail 'DNS-versus-routing boundary is missing'
+grep -Fq 'Linux guest guidance only' "$reference" ||
+  fail 'provider Linux IPv6 guidance boundary is missing'
+grep -Fq 'WebGUI and SSH closed on WAN' "$reference" ||
+  fail 'WAN management exposure guard is missing'
 
 for file in "$reference" "$profile" "$template"; do
   if grep -Eq '(^|[^0-9])([0-9]{1,3}\.){3}[0-9]{1,3}([^0-9]|$)' "$file"; then

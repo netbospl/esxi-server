@@ -11,7 +11,8 @@ addresses, MAC addresses, VM inventory, datastore paths, or approval records.
 - Router VM UUID and fresh VMID:
 - Approved maintenance window:
 - Independent console test:
-- Out-of-scope freeze: certificates / DNS / IPv6 / ESXi upgrade / host reboot
+- Out-of-scope freeze: certificates / DNS record changes / IPv6 / ESXi
+  upgrade / host reboot
 
 ## Risk and approval split
 
@@ -34,6 +35,11 @@ Second R3 acknowledgement, when required:
 - Provider evidence source and timestamp:
 - Conflicting source present: yes / no
 - Conflict resolution evidence:
+- Canonical router FQDN:
+- Cloudflare A record and proxy state:
+- Provider-managed PTR:
+- Resolver 1 / resolver 2:
+- Forward/reverse normalization and agreement evidence:
 
 STOP if any provider source disagrees or is stale.
 
@@ -71,7 +77,9 @@ changes during execution.
 ## Success tests
 
 - Interface-specific route to the provider gateway:
-- Two DNS resolver tests:
+- Resolver 1 and resolver 2 return the failover IPv4 for the router FQDN:
+- Resolver 1 and resolver 2 return the normalized router FQDN for PTR:
+- Cloudflare record remains DNS only:
 - HTTPS egress endpoint 1 reports the failover IPv4:
 - HTTPS egress endpoint 2 reports the failover IPv4:
 - Actual Netgate installer/package metadata source succeeds:
@@ -86,6 +94,7 @@ changes during execution.
 ## Abort conditions
 
 - Provider MAC, gateway, or ownership mismatch
+- Forward A, reverse PTR, or Cloudflare proxy-state mismatch
 - Egress source differs from the failover IPv4
 - ESXi management path, route, DNS, certificate, or IPv6 drift
 - Unexpected uplink, VLAN, port-group security, or disk state

@@ -34,6 +34,12 @@ esxcli network vswitch standard portgroup policy security get -p "<PORTGROUP>"
 - Keep the existing ESXi default gateway unless the approved task explicitly
   changes management routing. A router VM's non-local `/32` gateway belongs
   inside the guest, not as a second ESXi default route.
+- Treat forward A and reverse PTR records as identity evidence only. DNS does
+  not assign an IP, register a provider virtual MAC, or install a route.
+- Treat provider Netplan, `dhclient`, systemd, and
+  `/etc/network/interfaces` examples as Linux-only instructions. Do not copy
+  them into ESXi, and verify the pfSense-specific persistence method
+  separately.
 - Treat any management-network or firewall change as a lockout risk.
 - Stop and ask for human approval if a proposed change could cut off SSH or Host Client access.
 - Do not continue after detecting a likely network lockout.

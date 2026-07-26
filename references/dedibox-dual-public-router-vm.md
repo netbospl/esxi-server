@@ -19,6 +19,7 @@ instead.
 
 - [Risk split and required topology](#risk-split-and-required-topology)
 - [Source authority and profile contract](#source-authority-and-profile-contract)
+- [Router DNS identity](#router-dns-identity)
 - [Safety invariants](#safety-invariants)
 - [Constrained-host sizing](#constrained-host-sizing)
 - [Read-only preflight](#read-only-preflight)
@@ -79,6 +80,8 @@ The local profile must contain:
 
 - `<ESXI_MANAGEMENT_IPV4>`, `<MANAGEMENT_VMK>`, current prefix and gateway;
 - `<FAILOVER_IPV4>/32`, `<PROVIDER_GATEWAY>`, and `<PROVIDER_VMAC>`;
+- `<ROUTER_FQDN>`, its forward A record, provider-managed PTR record, and
+  Cloudflare proxy state;
 - evidence source, timestamp, and server-assignment status for provider values;
 - public vSwitch, uplink, WAN port group, VLAN, and effective security policy;
 - internal vSwitch and LAN port group, explicitly recording no uplink;
@@ -88,6 +91,45 @@ The local profile must contain:
 
 Do not commit the populated profile, provider screenshots, VM inventory, IP
 addresses, MAC addresses, datastore paths, or support-ticket content.
+
+## Router DNS identity
+
+Treat DNS identity and IP routing as separate control planes. An A record or PTR
+record does not assign an address, register a virtual MAC, create the `/32`
+route, or open a service. Record the existing DNS state during R0 discovery;
+changing it remains outside this network runbook.
+
+For a router identity such as `<ROUTER_FQDN>`, require all of the following:
+
+1. The Cloudflare A record for `<ROUTER_FQDN>` returns exactly
+   `<FAILOVER_IPV4>` with no conflicting A or CNAME record.
+2. The provider-managed PTR for `<FAILOVER_IPV4>` returns
+   `<ROUTER_FQDN>.`.
+3. Compare names after lowercasing and removing one trailing dot. Store the
+   canonical profile value without the trailing dot.
+4. Keep the Cloudflare record at **DNS only** when the name identifies a
+   router, VPN, or other non-HTTP service. A separately designed supported web
+   service may use the Cloudflare HTTP proxy, but never infer that the proxy
+   can front arbitrary pfSense, VPN, or ESXi protocols.
+5. Verify forward and reverse DNS through two independent recursive resolvers
+   before relying on the name for a certificate or production service.
+
+Example read-only checks:
+
+```bash
+dig @<DNS_RESOLVER_1> +short <ROUTER_FQDN> A
+dig @<DNS_RESOLVER_2> +short <ROUTER_FQDN> A
+dig @<DNS_RESOLVER_1> +short -x <FAILOVER_IPV4>
+dig @<DNS_RESOLVER_2> +short -x <FAILOVER_IPV4>
+```
+
+The two A results must equal `<FAILOVER_IPV4>`. The normalized PTR result must
+equal `<ROUTER_FQDN>`. STOP if the provider panel, Cloudflare dashboard,
+authoritative DNS, or recursive-resolver results disagree. Preserve the
+screenshots or command output only in protected local evidence.
+
+The FQDN is an identity, not permission to expose administration. Keep pfSense
+WebGUI and SSH closed on WAN even when forward and reverse DNS agree.
 
 ## Safety invariants
 
@@ -115,8 +157,12 @@ These are STOP conditions, not preferences:
   VPN design.
 - Do not repurpose an apparently available physical NIC based only on link
   state; prove cabling, speed, upstream switch behavior, and provider support.
-- Do not combine this work with certificate, DNS, IPv6, ESXi upgrade, or public
-  management retirement changes.
+- Do not combine this work with certificate, DNS-record, IPv6, ESXi upgrade, or
+  public management retirement changes. Existing DNS may be observed and
+  validated read-only.
+- Treat provider Netplan, `/etc/network/interfaces`, `dhclient`, or systemd
+  examples as Linux guest guidance only. Never apply them directly to ESXi or
+  assume they describe pfSense persistence.
 - Verify independent out-of-band console access before any R2/R3 network step.
 
 The router VM protects guests behind it. It does not filter the retained public
@@ -149,14 +195,16 @@ Record without publishing output:
    link/speed.
 2. Management VMkernel, public vSwitch/uplink, port groups, VLANs, IPv4/IPv6,
    route table, DNS, and effective port-group security settings.
-3. Proof that `<FAILOVER_IPV4>` is absent from every VMkernel adapter and other
+3. Current Cloudflare A/proxy state and provider PTR for `<ROUTER_FQDN>`, plus
+   forward and reverse DNS results from two independent resolvers.
+4. Proof that `<FAILOVER_IPV4>` is absent from every VMkernel adapter and other
    VM.
-4. Router VM UUID and fresh VMID, powered-off state, virtual hardware version,
+5. Router VM UUID and fresh VMID, powered-off state, virtual hardware version,
    both vNIC mappings, configured MACs, ISO attachment, and disk backing.
-5. Proof that the only installer target is the intended blank virtual disk,
+6. Proof that the only installer target is the intended blank virtual disk,
    including its capacity and datastore path.
-6. Current external ESXi management reachability from a separate client.
-7. Independent console access and a checksummed host configuration bundle
+7. Current external ESXi management reachability from a separate client.
+8. Independent console access and a checksummed host configuration bundle
    stored outside the host.
 
 STOP on stale VMID, uncertain disk identity, changed uplink, virtual-MAC
@@ -193,7 +241,8 @@ Before allowing an installer to write:
 2. Verify upstream reachability. Do not treat a failed gateway ping alone as
    failure when the provider does not answer ICMP; use route, neighbor, DNS,
    and HTTPS evidence together.
-3. Resolve through two recorded DNS resolvers.
+3. Verify `<ROUTER_FQDN>` forward and reverse DNS through two recorded
+   resolvers and confirm the Cloudflare record remains DNS only.
 4. Complete HTTPS requests to two independent egress-IP endpoints and prove
    both report exactly `<FAILOVER_IPV4>`.
 5. Reach the actual Netgate installer metadata/version source used by this
@@ -226,10 +275,12 @@ After installation:
 2. Verify LAN addressing, DHCP, DNS forwarding, outbound NAT, and default
    inbound blocking with an isolated test guest. Confirm WebGUI and SSH are not
    reachable through WAN.
-3. Verify the primary ESXi management path and confirm its route did not
+3. Re-run the two-resolver A/PTR checks for `<ROUTER_FQDN>` without opening
+   WebGUI or SSH on WAN.
+4. Verify the primary ESXi management path and confirm its route did not
    change.
-4. Confirm `<FAILOVER_IPV4>` remains absent from all VMkernel adapters.
-5. Save an encrypted/protected pfSense `config.xml` backup outside the VM and
+5. Confirm `<FAILOVER_IPV4>` remains absent from all VMkernel adapters.
+6. Save an encrypted/protected pfSense `config.xml` backup outside the VM and
    repository.
 
 ## Autostart and shutdown
@@ -286,6 +337,7 @@ console if management degrades.
 
 - [Scaleway: configure a VM network on a Dedibox host](https://www.scaleway.com/en/docs/dedibox-ip-failover/how-to/configure-network-virtual-machine/)
 - [Scaleway: create a virtual MAC for a failover IP](https://www.scaleway.com/en/docs/dedibox-ip-failover/how-to/create-virtual-mac/)
+- [Cloudflare: DNS proxy status](https://developers.cloudflare.com/dns/proxy-status/)
 - [Netgate: gateway settings](https://docs.netgate.com/pfsense/en/latest/routing/gateway-configure.html)
 - [Netgate: virtualize pfSense on ESXi](https://docs.netgate.com/pfsense/en/latest/recipes/virtualize-esxi.html)
 - [Netgate: Open-VM-Tools package](https://docs.netgate.com/pfsense/en/latest/packages/open-vm-tools.html)

@@ -32,3 +32,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Split sole-public-IP migration from retained-management dual-public topology;
   added allocation-source authority, `/32` non-local gateway, virtual-MAC,
   strict port-group, isolated-LAN, constrained-host, and autostart safeguards.
+- Added forward/reverse DNS identity checks, Cloudflare DNS-only guidance, and
+  a guard against applying provider Linux IPv6 examples to ESXi or pfSense.

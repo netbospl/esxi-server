@@ -15,6 +15,7 @@ Use one of these evidence states for every material fact:
 
 - [Change boundary](#change-boundary)
 - [Public address ownership](#public-address-ownership)
+- [Router DNS identity](#router-dns-identity)
 - [ESXi network topology](#esxi-network-topology)
 - [Router VM](#router-vm)
 - [Network and recovery tests](#network-and-recovery-tests)
@@ -52,6 +53,23 @@ Use one of these evidence states for every material fact:
   `<COMMAND_OR_UI_EVIDENCE_REFERENCE>`
 - Proof that each public IPv4 has one owner:
   `<OWNERSHIP_EVIDENCE_REFERENCE>`
+
+## Router DNS identity
+
+| Field | Value | State / evidence |
+|---|---|---|
+| Canonical router FQDN | `<ROUTER_FQDN>` | `provider-confirmed / <TIMESTAMP>` |
+| Forward A record | `<ROUTER_FQDN>` → `<FAILOVER_IPV4>` | `observed / <DNS_CONTROL_PLANE_AND_TIMESTAMP>` |
+| Reverse PTR record | `<FAILOVER_IPV4>` → `<ROUTER_FQDN>.` | `provider-confirmed / <TIMESTAMP>` |
+| Cloudflare proxy state | `DNS only` | `observed / <TIMESTAMP>` |
+| Resolver 1 | `<DNS_RESOLVER_1>` | `<STATE_AND_EVIDENCE>` |
+| Resolver 2 | `<DNS_RESOLVER_2>` | `<STATE_AND_EVIDENCE>` |
+| Forward-confirmed reverse DNS | `<ALIGNED_OR_STOP>` | `<STATE_AND_EVIDENCE>` |
+
+- Normalize the PTR by lowercasing it and removing one trailing dot before
+  comparison.
+- DNS record changes remain frozen; read-only verification is allowed.
+- The FQDN does not authorize pfSense WebGUI or SSH exposure on WAN.
 
 ## ESXi network topology
 
@@ -92,7 +110,8 @@ WAN port-group effective security:
 | Non-local gateway route | `<PROVIDER_GATEWAY>` reachable through WAN | `<STATE_AND_EVIDENCE>` |
 | Egress check 1 | `<EGRESS_IP_CHECK_1>` reports `<FAILOVER_IPV4>` | `<STATE_AND_EVIDENCE>` |
 | Egress check 2 | `<EGRESS_IP_CHECK_2>` reports `<FAILOVER_IPV4>` | `<STATE_AND_EVIDENCE>` |
-| DNS | Two recorded resolvers succeed | `<STATE_AND_EVIDENCE>` |
+| Forward DNS | Both resolvers return `<FAILOVER_IPV4>` for `<ROUTER_FQDN>` | `<STATE_AND_EVIDENCE>` |
+| Reverse DNS | Both resolvers return `<ROUTER_FQDN>.` for `<FAILOVER_IPV4>` | `<STATE_AND_EVIDENCE>` |
 | Netgate metadata | Installer/package version list loads | `<STATE_AND_EVIDENCE>` |
 | LAN | DHCP, DNS, NAT, default inbound block | `<STATE_AND_EVIDENCE>` |
 | WAN management | WebGUI and SSH unreachable from WAN | `<STATE_AND_EVIDENCE>` |
