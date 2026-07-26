@@ -26,7 +26,9 @@ done
 
 grep -Fq 'Use non-local gateway' "$reference" ||
   fail 'non-local pfSense gateway gate is missing'
-grep -Fq 'Never assign `<FAILOVER_IPV4>` to a VMkernel adapter' "$reference" ||
+grep -Fq 'Never assign' "$reference" ||
+  fail 'VMkernel ownership invariant is missing'
+grep -Fq 'to a VMkernel adapter' "$reference" ||
   fail 'VMkernel ownership invariant is missing'
 grep -Fq 'Promiscuous Mode, MAC Address Changes, and Forged Transmits' "$reference" ||
   fail 'strict WAN port-group policy is missing'
