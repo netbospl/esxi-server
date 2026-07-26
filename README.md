@@ -21,7 +21,8 @@ Read [`SKILL.md`](SKILL.md) first for the exact workflow, approval rules, host-k
 
 - It packages a reusable ESXi safety workflow for humans and agents.
 - It keeps generic skill logic separate from host-specific data.
-- It provides a sanitized example profile plus templates for change plans, approvals, rollback notes, and post-change summaries.
+- It provides sanitized general and dual-public-router profiles plus templates
+  for change plans, approvals, rollback notes, and post-change summaries.
 - It includes a small read-only discovery helper script and optional quality checks.
 
 ## Repository layout
@@ -31,7 +32,8 @@ Read [`SKILL.md`](SKILL.md) first for the exact workflow, approval rules, host-k
 ├── SKILL.md
 ├── profiles/
 │   ├── README.md
-│   └── example-host.md
+│   ├── example-host.md
+│   └── example-dual-public-router.md
 ├── references/
 │   ├── agent-communication-contract.md
 │   ├── backup-restore.md
@@ -42,6 +44,7 @@ Read [`SKILL.md`](SKILL.md) first for the exact workflow, approval rules, host-k
 │   ├── guest-os-autoinstall.md
 │   ├── host-configuration-backup.md
 │   ├── network-firewall-ipv4-ipv6.md
+│   ├── dedibox-dual-public-router-vm.md
 │   ├── single-public-ip-router-migration.md
 │   ├── rest-api.md
 │   ├── ssh-esxcli.md
@@ -59,12 +62,14 @@ Read [`SKILL.md`](SKILL.md) first for the exact workflow, approval rules, host-k
 │   ├── test-discovery-rest-state.sh
 │   ├── test-discovery-capability-matrix.sh
 │   ├── test-discovery-privacy-and-status.sh
+│   ├── test-dual-public-policy.sh
 │   └── test-media-generators.sh
 ├── .github/workflows/quality.yml
 ├── lychee.toml
 ├── templates/
 │   ├── approval-request.md
 │   ├── change-plan.md
+│   ├── dual-public-router-plan.md
 │   ├── discovery-report.md
 │   ├── post-change-summary.md
 │   └── rollback-notes.md
@@ -105,6 +110,14 @@ Use local environment variables or a secret manager. Do **not** commit real valu
 | `ESXI_KNOWN_HOSTS` | Dedicated SSH known-hosts file path |
 
 Example placeholders live in [`profiles/example-host.md`](profiles/example-host.md) and [`.env.example`](.env.example). Local host profiles such as `profiles/*.local.md` and `HOST_PROFILE.local.md` are ignored by Git and may be loaded locally, but they must never be committed.
+
+For a host that retains public ESXi management while a separate provider
+failover `/32` belongs to a router VM, start from
+[`profiles/example-dual-public-router.md`](profiles/example-dual-public-router.md)
+and load
+[`references/dedibox-dual-public-router-vm.md`](references/dedibox-dual-public-router-vm.md).
+This is intentionally separate from moving a sole public address away from
+ESXi.
 
 > **Warning:** never commit `.env`, private keys, API tokens, session IDs, private hostnames, private IP addresses, passwords, or screenshots/logs containing sensitive ESXi inventory details.
 
@@ -194,6 +207,7 @@ Prefer a dedicated local ESXi user named `agent` for automation. Use a dedicated
 - [`references/backup-restore.md`](references/backup-restore.md) — backup and restore workflow guidance
 - [`references/host-configuration-backup.md`](references/host-configuration-backup.md) — host configuration bundle backup/restore boundary and R3 runbook
 - [`references/network-firewall-ipv4-ipv6.md`](references/network-firewall-ipv4-ipv6.md) — network, firewall, and IP-stack checks
+- [`references/dedibox-dual-public-router-vm.md`](references/dedibox-dual-public-router-vm.md) — retained ESXi management plus provider failover `/32`, virtual MAC, isolated LAN, and router-VM gates
 - [`references/single-public-ip-router-migration.md`](references/single-public-ip-router-migration.md) — R3 staged runbook for moving a sole public IPv4 from ESXi management to a router VM
 - [`references/certificates-letsencrypt.md`](references/certificates-letsencrypt.md) — certificate handling and trust guidance
 - [`references/vm-import-export.md`](references/vm-import-export.md) — import/export workflow notes
@@ -208,6 +222,8 @@ Prefer a dedicated local ESXi user named `agent` for automation. Use a dedicated
 
 - Keep examples practical and safe by default.
 - Keep ESXi 7.x compatibility in mind.
+- Keep dual-public and sole-public-IP router variants separate; never infer an
+  allocation-specific gateway or MAC from a generic example.
 - Use placeholders for sensitive values.
 - Keep host-specific facts in local profiles or local notes, not in the generic skill.
 - Update this README and `docs/index.md` when adding or renaming reference files.

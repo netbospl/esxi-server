@@ -12,6 +12,11 @@ This repository is an experimental, AI-assisted ESXi Server Skill for coding and
    - `references/file-transfers.md` for ISO, OVF, OVA, VMDK, SCP, and datastore browser transfers.
    - `references/capability-probe.md` before choosing REST, SSH, or SDK access.
    - `references/host-configuration-backup.md` for host configuration backup or restore.
+   - `references/dedibox-dual-public-router-vm.md` when ESXi keeps its public
+     management IP and a provider failover `/32` plus virtual MAC belongs to a
+     router VM.
+   - `references/single-public-ip-router-migration.md` only when the router
+     takes the sole public IP away from ESXi.
 4. Start with read-only discovery and do not modify ESXi during inventory checks.
 5. Never hardcode credentials, hostnames, private IPs, passwords, API tokens, session IDs, SSH keys, or `.env` contents.
 6. Do not commit secrets, logs containing secrets, copied private inventory, or generated local artifacts.
@@ -28,7 +33,8 @@ This repository is an experimental, AI-assisted ESXi Server Skill for coding and
 
 - Generic repo docs should stay host-agnostic.
 - Host-specific datastore names, port groups, filenames, and credentials belong in local-only profiles or secret stores.
-- Use `profiles/example-host.md` as the committed sanitized example.
+- Use `profiles/example-host.md` or
+  `profiles/example-dual-public-router.md` as the committed sanitized example.
 
 ## Confirmation required
 

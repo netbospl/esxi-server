@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Windows 11 local-account answer-file snippet and manual fallback documentation.
 - Canonical R0–R3 risk model, task router, host-configuration backup runbook, local placeholder validation, mocked script tests, and GitHub Actions quality workflow.
 - Single-public-IP router migration runbook.
+- Dedibox dual-public IPv4 router-VM runbook, sanitized local-profile template,
+  topology-specific change-plan template, and policy regression test.
 
 ### Changed
 - Reviewed and clarified ESXi skill safety guidance.
@@ -27,3 +29,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Suppressed sensitive inventory by default and added explicit result states and strict mode.
 - Aligned TLS verification, version support boundaries, and R0–R3 approval policy across the skill.
 - Expanded mocked regression coverage and hardened CI dependency pinning.
+- Split sole-public-IP migration from retained-management dual-public topology;
+  added allocation-source authority, `/32` non-local gateway, virtual-MAC,
+  strict port-group, isolated-LAN, constrained-host, and autostart safeguards.

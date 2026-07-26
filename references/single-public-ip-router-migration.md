@@ -4,6 +4,12 @@ Use this runbook when one public IPv4 currently belongs to the ESXi management
 VMkernel and the intended design moves that address to a router VM such as
 pfSense while guest VMs use a private LAN with DHCP, DNS, NAT, and firewalling.
 
+Do not use this variant when ESXi keeps its existing management IPv4 and a
+separate provider failover IPv4 plus virtual MAC belongs to the router WAN.
+Use [`dedibox-dual-public-router-vm.md`](dedibox-dual-public-router-vm.md) for
+that topology. Mixing the variants can create duplicate IP ownership or
+unnecessarily remove the working management path.
+
 Treat the migration as R3. A mistake can remove the only remote management path.
 Do not begin without independent console access, a maintenance window, exact
 target approval, a verified host-configuration backup, and a tested rollback.
