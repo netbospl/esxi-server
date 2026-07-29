@@ -36,3 +36,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   strict port-group, isolated-LAN, constrained-host, and autostart safeguards.
 - Added forward/reverse DNS identity checks, Cloudflare DNS-only guidance, and
   a guard against applying provider Linux IPv6 examples to ESXi or pfSense.
+- Clarified that a Dedibox failover `/32` gateway must come from protected
+  provider evidence rather than an adjacent-address assumption, and documented
+  trusted pfSense installation, `config.xml` restore, and recovery-image
+  boundaries without publishing real infrastructure addresses.

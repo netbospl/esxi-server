@@ -27,6 +27,16 @@ done
 
 grep -Fq 'Use non-local gateway' "$reference" ||
   fail 'non-local pfSense gateway gate is missing'
+grep -Fq 'Never calculate' "$reference" ||
+  fail 'failover gateway derivation guard is missing'
+grep -Fq 'official installer ISO' "$reference" ||
+  fail 'trusted pfSense installation path is missing'
+grep -Fq 'Configuration Restore' "$reference" ||
+  fail 'supported config.xml restore path is missing'
+grep -Fq 'third-party preconfigured pfSense image' "$reference" ||
+  fail 'untrusted preconfigured image guard is missing'
+grep -Fq 'never be powered on alongside the original VM' "$reference" ||
+  fail 'duplicate recovery-VM ownership guard is missing'
 grep -Fq 'Never assign' "$reference" ||
   fail 'VMkernel ownership invariant is missing'
 grep -Fq 'to a VMkernel adapter' "$reference" ||

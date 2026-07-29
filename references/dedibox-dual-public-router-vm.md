@@ -7,7 +7,7 @@ the provider to a registered virtual MAC address and may use a `/32` prefix
 with a gateway outside that prefix.
 
 - **Target:** standalone ESXi 7.x with a Dedibox failover IPv4 and router VM.
-- **Last documentation review:** 2026-07-26.
+- **Last documentation review:** 2026-07-29.
 - **Validation status:** static documentation and mock-policy validation only;
   no ESXi host, provider account, or router VM was contacted.
 
@@ -19,9 +19,11 @@ instead.
 
 - [Risk split and required topology](#risk-split-and-required-topology)
 - [Source authority and profile contract](#source-authority-and-profile-contract)
+- [Failover gateway selection](#failover-gateway-selection)
 - [Router DNS identity](#router-dns-identity)
 - [Safety invariants](#safety-invariants)
 - [Constrained-host sizing](#constrained-host-sizing)
+- [Trusted installation and recovery media](#trusted-installation-and-recovery-media)
 - [Read-only preflight](#read-only-preflight)
 - [Staged implementation gates](#staged-implementation-gates)
 - [Autostart and shutdown](#autostart-and-shutdown)
@@ -91,6 +93,36 @@ The local profile must contain:
 
 Do not commit the populated profile, provider screenshots, VM inventory, IP
 addresses, MAC addresses, datastore paths, or support-ticket content.
+
+## Failover gateway selection
+
+Treat `<FAILOVER_IPV4>` as an individual provider failover address, not as proof
+that it belongs to a conventional directly connected subnet. A `/32` has no
+usable adjacent host range from which a gateway can be derived.
+
+- Never calculate `<PROVIDER_GATEWAY>` by replacing the final octet of
+  `<FAILOVER_IPV4>` with another value.
+- Never reuse the ESXi management default gateway merely because both
+  allocations use the same physical uplink.
+- Resolve `<PROVIDER_GATEWAY>` through the source-authority order above.
+- Current generic Dedibox documentation describes a shared non-local gateway
+  for failover-IP virtual machines. Keep its literal value only in protected
+  local context, because the provider console or allocation-specific support
+  response remains authoritative.
+- Configure pfSense WAN as `<FAILOVER_IPV4>/32`, create the gateway on WAN, and
+  enable **Use non-local gateway through interface-specific route**.
+- Keep the ESXi management gateway and default route unchanged. The pfSense
+  gateway exists only inside the router VM.
+
+The required route shape is:
+
+```text
+<PROVIDER_GATEWAY>/32 -> directly reachable through pfSense WAN
+default               -> <PROVIDER_GATEWAY> through pfSense WAN
+```
+
+Do not publish literal allocation or gateway addresses in tracked plans,
+examples, test output, issues, pull requests, or chat summaries.
 
 ## Router DNS identity
 
@@ -180,6 +212,57 @@ commitment, and CPU contention. Keep packages minimal. Do not add IDS/IPS,
 proxying, or other resource-heavy services until measured CPU, RAM, storage,
 and throughput data justify them. Do not add CPU or memory reservations
 blindly; treat a reservation as a separate resource-allocation decision.
+
+## Trusted installation and recovery media
+
+Netgate's current ESXi procedure creates a new VM and installs pfSense from the
+official installer ISO. It does not provide a general-purpose, preconfigured
+ESXi OVA or VMDK as the documented installation path.
+
+Do not deploy an arbitrary third-party preconfigured pfSense image on the
+provider-facing WAN. Its base system, update source, credentials, SSH host
+keys, packages, firewall rules, and build provenance may be unknown. A checksum
+published by the same untrusted image distributor does not establish Netgate
+provenance.
+
+Use one of these approaches:
+
+1. **Preferred fresh installation:** create the VM with the approved virtual
+   hardware and install from the verified official Netgate media.
+2. **Configuration-assisted installation:** restore a protected, previously
+   validated `config.xml` through the installer's supported
+   **Configuration Restore** feature. Netgate documents restore media using a
+   FAT/FAT32 partition, including a virtual optical or removable drive.
+3. **One-host recovery artifact:** export a powered-off, already validated
+   router VM only as a protected recovery artifact for the same deployment.
+   Never treat it as a public or generic template.
+
+For configuration-assisted installation:
+
+- Keep the real `config.xml` outside the repository because it can contain
+  interface addresses, password hashes, package configuration, VPN material,
+  certificates, SSH data, and other secrets.
+- Commit only a sanitized schema or checklist with placeholders when one is
+  needed for documentation.
+- Match the backup to a compatible pfSense configuration version. Restoring a
+  complete older configuration to a newer release is generally supported, but
+  restoring a newer configuration to an older release is not.
+- Reconfirm the exact WAN/LAN vNIC-to-port-group and MAC mapping before restore.
+  A restored interface assignment is unsafe when adapter order or identity has
+  changed.
+- Keep the WAN disconnected or the VM powered off until the unique public-IP
+  owner, registered virtual MAC, `/32`, non-local gateway, firewall defaults,
+  and GUI/SSH exposure have been reviewed.
+- Replace deployment-specific administrator credentials and regenerate any
+  identity material that was intentionally excluded from the backup.
+- After first boot, verify the running release, official update repositories,
+  package list, interface assignments, route table, firewall rules, listening
+  services, DNS, NAT, and observed egress address before trusting the restored
+  system.
+
+Do not clone a running installed firewall as a reusable golden image. Cloning
+can duplicate public address ownership, provider virtual MAC use, credentials,
+host keys, VPN identities, and certificates. A recovery export must never be powered on alongside the original VM.
 
 ## Read-only preflight
 
@@ -340,6 +423,8 @@ console if management degrades.
 - [Cloudflare: DNS proxy status](https://developers.cloudflare.com/dns/proxy-status/)
 - [Netgate: gateway settings](https://docs.netgate.com/pfsense/en/latest/routing/gateway-configure.html)
 - [Netgate: virtualize pfSense on ESXi](https://docs.netgate.com/pfsense/en/latest/recipes/virtualize-esxi.html)
+- [Netgate: restore configuration during installation](https://docs.netgate.com/pfsense/en/latest/backup/restore-during-install.html)
+- [Netgate: restore configurations across versions](https://docs.netgate.com/pfsense/en/latest/backup/restore-different-version.html)
 - [Netgate: Open-VM-Tools package](https://docs.netgate.com/pfsense/en/latest/packages/open-vm-tools.html)
 - [Netgate: outbound NAT](https://docs.netgate.com/pfsense/en/latest/nat/outbound.html)
 - [Broadcom: VMkernel static routes and default gateway](https://knowledge.broadcom.com/external/article/308786/configuring-static-routes-for-vmkernel-p.html)
