@@ -36,6 +36,7 @@ This documentation set describes safe, experimental ESXi operations for humans a
 - [`../references/agent-communication-contract.md`](../references/agent-communication-contract.md) — communication contract for AI agents
 - [`../references/backup-restore.md`](../references/backup-restore.md) — backup and restore workflow guidance
 - [`../references/host-configuration-backup.md`](../references/host-configuration-backup.md) — host configuration bundle backup/restore scope and R3 safeguards
+- [`../references/it-foundations-for-esxi.md`](../references/it-foundations-for-esxi.md) — curated cross-layer IT foundations and compact Hermes diagnostic loop
 - [`../references/capability-probe.md`](../references/capability-probe.md) — probe order for REST, SSH, VM inventory, datastore, network, and guest tools
 - [`../references/validated-interaction-methods.md`](../references/validated-interaction-methods.md) — tested standalone ESXi interaction paths and fallback decisions
 - [`../references/certificates-letsencrypt.md`](../references/certificates-letsencrypt.md) — certificate handling and trust guidance
