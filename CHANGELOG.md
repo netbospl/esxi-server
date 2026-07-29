@@ -19,6 +19,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Single-public-IP router migration runbook.
 - Dedibox dual-public IPv4 router-VM runbook, sanitized local-profile template,
   topology-specific change-plan template, and policy regression test.
+- Curated ESXi-focused IT foundations from the companion certification
+  knowledge base, with a compact Hermes diagnostic loop and routing test.
 
 ### Changed
 - Reviewed and clarified ESXi skill safety guidance.

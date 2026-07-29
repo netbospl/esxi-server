@@ -11,6 +11,9 @@ This repository is an experimental, AI-assisted ESXi Server Skill for coding and
    - `references/rest-api.md` for REST authentication, VM lifecycle operations, snapshots, datastores, and networks.
    - `references/file-transfers.md` for ISO, OVF, OVA, VMDK, SCP, and datastore browser transfers.
    - `references/capability-probe.md` before choosing REST, SSH, or SDK access.
+   - `references/it-foundations-for-esxi.md` when a task needs cross-layer
+     hardware, networking, security, cloud, or troubleshooting reasoning; then
+     load only the relevant ESXi task reference.
    - `references/host-configuration-backup.md` for host configuration backup or restore.
    - `references/dedibox-dual-public-router-vm.md` when ESXi keeps its public
      management IP and a provider failover `/32` plus virtual MAC belongs to a
@@ -28,6 +31,9 @@ This repository is an experimental, AI-assisted ESXi Server Skill for coding and
 12. Verify after changes, then summarize what changed and what remains.
 13. Keep documentation edits concise, practical, and consistent with ESXi standalone host behavior.
 14. Test every helper through local mocks only; never point repository tests at an ESXi host.
+15. In Hermes, keep facts, hypotheses, the next bounded R0 check, and any
+    R1-R3 change gate separate. General IT knowledge may select a diagnostic
+    question but never proves ESXi command compatibility or grants approval.
 
 ## Host-profile convention
 

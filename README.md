@@ -20,6 +20,9 @@ Read [`SKILL.md`](SKILL.md) first for the exact workflow, approval rules, host-k
 ## Why this repo exists
 
 - It packages a reusable ESXi safety workflow for humans and agents.
+- It gives Hermes an ESXi-focused foundation for layered networking, storage,
+  security, virtualization, and troubleshooting reasoning without loading a
+  complete certification knowledge base into every task.
 - It keeps generic skill logic separate from host-specific data.
 - It provides sanitized general and dual-public-router profiles plus templates
   for change plans, approvals, rollback notes, and post-change summaries.
@@ -43,6 +46,7 @@ Read [`SKILL.md`](SKILL.md) first for the exact workflow, approval rules, host-k
 │   ├── file-transfers.md
 │   ├── guest-os-autoinstall.md
 │   ├── host-configuration-backup.md
+│   ├── it-foundations-for-esxi.md
 │   ├── network-firewall-ipv4-ipv6.md
 │   ├── dedibox-dual-public-router-vm.md
 │   ├── single-public-ip-router-migration.md
@@ -63,6 +67,7 @@ Read [`SKILL.md`](SKILL.md) first for the exact workflow, approval rules, host-k
 │   ├── test-discovery-capability-matrix.sh
 │   ├── test-discovery-privacy-and-status.sh
 │   ├── test-dual-public-policy.sh
+│   ├── test-it-foundations-routing.sh
 │   └── test-media-generators.sh
 ├── .github/workflows/quality.yml
 ├── lychee.toml
@@ -127,6 +132,13 @@ On Windows, keep Hermes and native ESXi clients such as `curl`, OpenSSH,
 pyVmomi, and optionally VMware `ovftool` on the Windows side. Load this skill
 in Hermes with `/skill esxi-server`; after a local skill refresh, run
 `/reload-skills` and start a new session before relying on the revised guidance.
+
+When a task crosses multiple IT layers, the task router loads
+[`references/it-foundations-for-esxi.md`](references/it-foundations-for-esxi.md)
+before the single relevant ESXi reference. The foundation is curated from the
+A+, Network+, Security+, CCNA, and AZ-900 data in the companion
+`it-certification-knowledge-base` project. It provides diagnostic models, not
+exam guidance or permission to change a host.
 
 Use WSL2 Ubuntu for the repository's Bash helpers, mocked tests, Linux
 validators, and ISO generators. Keep a separate validation clone in the WSL
@@ -241,6 +253,7 @@ Prefer a dedicated local ESXi user named `agent` for automation. Use a dedicated
 - [`references/file-transfers.md`](references/file-transfers.md) — datastore upload/download, OVF/OVA transfer patterns, and SCP notes
 - [`references/backup-restore.md`](references/backup-restore.md) — backup and restore workflow guidance
 - [`references/host-configuration-backup.md`](references/host-configuration-backup.md) — host configuration bundle backup/restore boundary and R3 runbook
+- [`references/it-foundations-for-esxi.md`](references/it-foundations-for-esxi.md) — layered IT reasoning for Hermes across hardware, networking, security, virtualization, and troubleshooting
 - [`references/network-firewall-ipv4-ipv6.md`](references/network-firewall-ipv4-ipv6.md) — network, firewall, and IP-stack checks
 - [`references/dedibox-dual-public-router-vm.md`](references/dedibox-dual-public-router-vm.md) — retained ESXi management plus provider failover `/32`, virtual MAC, isolated LAN, and router-VM gates
 - [`references/single-public-ip-router-migration.md`](references/single-public-ip-router-migration.md) — R3 staged runbook for moving a sole public IPv4 from ESXi management to a router VM

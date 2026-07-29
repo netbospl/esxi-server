@@ -1,6 +1,10 @@
 # Troubleshooting
 
 Use read-only discovery first, then isolate the failure before making changes.
+For symptoms that cross hardware, switching, routing, services, guest OS, or
+security boundaries, load
+[`it-foundations-for-esxi.md`](it-foundations-for-esxi.md) and use its layer map
+to choose one bounded discriminator.
 
 ## First checks
 
@@ -46,3 +50,5 @@ A useful troubleshooting report should include:
 - transport chosen
 - command output summary
 - the exact step that failed
+- observed facts kept separate from hypotheses
+- the next bounded read-only discriminator

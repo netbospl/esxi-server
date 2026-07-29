@@ -100,6 +100,13 @@ cross the Windows/WSL boundary, and do not copy a private Windows profile into
 the repository or WSL checkout. Re-check the current environment and profile
 before every ESXi operation.
 
+For cross-layer diagnosis or explanation, load
+[`references/it-foundations-for-esxi.md`](references/it-foundations-for-esxi.md)
+once, then load only the task-specific reference selected below. In Hermes,
+separate observed facts, hypotheses, the next bounded R0 check, and any
+R1-R3 change gate. General IT knowledge can guide a diagnostic question, but
+it does not establish ESXi command compatibility or authorize a change.
+
 ## Capability probe and transport selection
 
 Probe capabilities before choosing SSH, REST, or SDK-based access. Do not assume that every vCenter-style REST endpoint exists on standalone ESXi.
@@ -152,6 +159,7 @@ invitation to retry authentication aggressively.
 
 | Category | Load | Preflight / transport | Typical risk and STOP condition |
 |---|---|---|---|
+| Cross-layer diagnosis or explanation | `it-foundations-for-esxi.md`, then the relevant task reference | Classify the failing layer and select one bounded read-only discriminator | R0 initially; STOP before turning a general theory into an unverified ESXi command or change. |
 | Inventory/discovery | `capability-probe.md`, `ssh-esxcli.md` | Target identity, TLS/SSH trust; HTTPS or SSH | R0; STOP on reachability/trust ambiguity. |
 | VM lifecycle | `rest-api.md`, `ssh-esxcli.md` | Name, UUID, fresh VMID, power/RAM/datastore/network; REST or SSH | R1–R3; STOP if target identity or power impact is uncertain. |
 | Snapshots | `rest-api.md`, `ssh-esxcli.md`, `backup-restore.md` | Fresh VMID, snapshot tree, datastore free space | R1–R3; STOP without space, backup, or exact approval. |
@@ -223,6 +231,7 @@ This is separate from ESXi host scripted installation. The reference owns the gu
 Load only the reference files needed for the task:
 
 - [`references/agent-communication-contract.md`](references/agent-communication-contract.md)
+- [`references/it-foundations-for-esxi.md`](references/it-foundations-for-esxi.md)
 - [`references/capability-probe.md`](references/capability-probe.md)
 - [`references/validated-interaction-methods.md`](references/validated-interaction-methods.md)
 - [`references/dedicated-agent-user.md`](references/dedicated-agent-user.md)
