@@ -1,0 +1,3 @@
+# Bash helpers and mock tests use here-documents and must retain POSIX line endings.
+*.sh text eol=lf
+Makefile text eol=lf

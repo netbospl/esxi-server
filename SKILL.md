@@ -57,6 +57,49 @@ Prefer the dedicated `agent` account for routine automation. Avoid using `root` 
 
 See [`references/dedicated-agent-user.md`](references/dedicated-agent-user.md) for the recommended model.
 
+## Windows, WSL, and Hermes tool routing
+
+On a Windows Hermes host, load this skill with `/skill esxi-server` (or start a
+new session with `hermes -s esxi-server`). Run `/reload-skills` after updating
+the installed local copy, then start a fresh session before relying on changed
+skill guidance.
+
+Use Windows-native tools for Hermes itself, `curl`, OpenSSH, pyVmomi, and a
+locally installed VMware `ovftool` when an OVF/OVA workflow specifically needs
+it. Prefer WSL2 Ubuntu for this repository's Bash helpers, mock tests, Linux
+validators, and ISO generators. Do not add another POSIX compatibility layer
+beside Git Bash: mixing native Python with Git-Bash `/tmp` paths and CRLF shell
+files can break reports and here-documents.
+
+Keep the validation checkout in the WSL filesystem (for example,
+`~/src/esxi-server`), not under `/mnt/c`, so file permissions, temporary paths,
+and LF line endings behave like CI. Install the local WSL prerequisites with:
+
+```bash
+sudo apt update
+sudo apt install -y make shellcheck libxml2-utils cloud-init cloud-image-utils xorriso
+```
+
+This provides `make`, `cloud-init`, `cloud-localds`, `xorriso`, and
+`genisoimage` for the bundled validation and media-generation helpers. The
+checked-in `.gitattributes` keeps shell files LF when Windows Git checks them
+out. `ovftool` remains an optional VMware-distributed Windows client; it is not
+required for SSH/REST discovery and is not a WSL package requirement.
+
+WSL normally appends the Windows `PATH`. Before running repository validation,
+use a Linux-only `PATH` so a Windows npm/Node executable is not paired with the
+WSL Node runtime:
+
+```bash
+env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin make check
+```
+
+Keep `ESXI_*` secrets and local host profiles inside the environment where a
+command runs. Do not place passwords in a `wsl.exe ...` command line just to
+cross the Windows/WSL boundary, and do not copy a private Windows profile into
+the repository or WSL checkout. Re-check the current environment and profile
+before every ESXi operation.
+
 ## Capability probe and transport selection
 
 Probe capabilities before choosing SSH, REST, or SDK-based access. Do not assume that every vCenter-style REST endpoint exists on standalone ESXi.

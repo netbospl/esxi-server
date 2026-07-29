@@ -121,6 +121,41 @@ ESXi.
 
 > **Warning:** never commit `.env`, private keys, API tokens, session IDs, private hostnames, private IP addresses, passwords, or screenshots/logs containing sensitive ESXi inventory details.
 
+## Windows and WSL tooling
+
+On Windows, keep Hermes and native ESXi clients such as `curl`, OpenSSH,
+pyVmomi, and optionally VMware `ovftool` on the Windows side. Load this skill
+in Hermes with `/skill esxi-server`; after a local skill refresh, run
+`/reload-skills` and start a new session before relying on the revised guidance.
+
+Use WSL2 Ubuntu for the repository's Bash helpers, mocked tests, Linux
+validators, and ISO generators. Keep a separate validation clone in the WSL
+filesystem (for example `~/src/esxi-server`) rather than `/mnt/c`. This avoids
+Git-Bash/native-Python temporary-path mismatches and Windows CRLF conversions
+that can break shell here-documents.
+
+Install the WSL prerequisites in that environment:
+
+```bash
+sudo apt update
+sudo apt install -y make shellcheck libxml2-utils cloud-init cloud-image-utils xorriso
+```
+
+The command supplies `make`, `cloud-init`, `cloud-localds`, `xorriso`, and
+`genisoimage`. Run local checks from the WSL clone with `make check`; optional
+quality tools not installed there are reported as `NOT RUN`. The repository's
+`.gitattributes` forces LF for shell files on Windows checkouts. Never pass an
+`ESXI_PASS` value through a `wsl.exe` command line; configure secrets only in
+the execution environment and retain local host profiles as uncommitted files.
+
+WSL commonly appends the Windows `PATH`. To prevent a Windows npm/Node command
+from being paired with the WSL Node runtime during validation, run checks with
+a Linux-only `PATH`:
+
+```bash
+env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin make check
+```
+
 ## Safe example commands
 
 These examples are intentionally read-only.
