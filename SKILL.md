@@ -260,6 +260,9 @@ When the active model is **NVIDIA Nemotron 3 Ultra 550B A55B** (model ID: `nvidi
 |---|---|---|
 | `skills/nemotron-3-ultra/stable-ssh-shell/SKILL.md` | `skills/stable-ssh-shell/SKILL.md` | Nemotron-tuned SSH workflows: marker protocol, structured tmux control, recovery patterns, ESXi vs Linux target rules |
 | `skills/nemotron-3-ultra/esxi-operations/SKILL.md` | (supplements parent) | Nemotron-tuned ESXi operations: capability probe patterns, version-aware commands, risk framing, validation gates |
+| `skills/nemotron-3-ultra/network-operations/SKILL.md` | (supplements parent + `network-firewall-ipv4-ipv6.md`) | Nemotron-tuned network/firewall/IPv4/IPv6: management-path verification, rollback prep, validation gates |
+| `skills/nemotron-3-ultra/backup-restore/SKILL.md` | (supplements parent + `backup-restore.md`, `host-configuration-backup.md`) | Nemotron-tuned backup/restore: export/import patterns, datastore verification, validation gates |
+| `skills/nemotron-3-ultra/guest-autoinstall/SKILL.md` | (supplements parent + `guest-os-autoinstall.md`) | Nemotron-tuned guest auto-install: ISO/media generation, answer-file validation, post-install verification |
 
 **Routing rule:** If `model.default` contains `nemotron-3-ultra` or the active model ID matches `nvidia/nemotron-3-ultra*`, load the Nemotron sub-skills after their parent skills. Otherwise, use only the model-agnostic skills.
 
