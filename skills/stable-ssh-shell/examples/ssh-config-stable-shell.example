@@ -1,0 +1,34 @@
+# Sanitized host-scoped shape. Store real values outside the repository.
+Host stable-management
+    HostName <VERIFIED_HOSTNAME_OR_ADDRESS>
+    User <DEDICATED_USER>
+    IdentityFile <PROTECTED_KEY_PATH>
+    IdentitiesOnly yes
+    UserKnownHostsFile <DEDICATED_KNOWN_HOSTS_PATH>
+    StrictHostKeyChecking yes
+    ForwardAgent no
+    ServerAliveInterval 30
+    ServerAliveCountMax 3
+    ControlMaster auto
+    ControlPath <PRIVATE_RUNTIME_DIRECTORY>/cm-%C
+    ControlPersist 5m
+
+# Keep jump and final-host trust independent.
+Host stable-private-guest
+    HostName <PRIVATE_GUEST_ADDRESS>
+    User <DEDICATED_GUEST_USER>
+    IdentityFile <PROTECTED_GUEST_KEY_PATH>
+    IdentitiesOnly yes
+    UserKnownHostsFile <DEDICATED_GUEST_KNOWN_HOSTS_PATH>
+    StrictHostKeyChecking yes
+    ForwardAgent no
+    ProxyJump stable-dedicated-jump
+
+Host stable-dedicated-jump
+    HostName <VERIFIED_JUMP_ENDPOINT>
+    User <DEDICATED_JUMP_USER>
+    IdentityFile <PROTECTED_JUMP_KEY_PATH>
+    IdentitiesOnly yes
+    UserKnownHostsFile <DEDICATED_JUMP_KNOWN_HOSTS_PATH>
+    StrictHostKeyChecking yes
+    ForwardAgent no

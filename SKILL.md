@@ -161,6 +161,7 @@ invitation to retry authentication aggressively.
 |---|---|---|---|
 | Cross-layer diagnosis or explanation | `it-foundations-for-esxi.md`, then the relevant task reference | Classify the failing layer and select one bounded read-only discriminator | R0 initially; STOP before turning a general theory into an unverified ESXi command or change. |
 | Inventory/discovery | `capability-probe.md`, `ssh-esxcli.md` | Target identity, TLS/SSH trust; HTTPS or SSH | R0; STOP on reachability/trust ambiguity. |
+| Persistent or interactive SSH | `skills/stable-ssh-shell/SKILL.md`, then the target-specific reference | Verify host trust, target class, shell/tmux/PTY capability, and required persistence mode | R0 for detection; inherit the target operation risk. STOP on changed key, unsupported target, ambiguous prompt, or unknown command state. |
 | VM lifecycle | `rest-api.md`, `ssh-esxcli.md` | Name, UUID, fresh VMID, power/RAM/datastore/network; REST or SSH | R1–R3; STOP if target identity or power impact is uncertain. |
 | Snapshots | `rest-api.md`, `ssh-esxcli.md`, `backup-restore.md` | Fresh VMID, snapshot tree, datastore free space | R1–R3; STOP without space, backup, or exact approval. |
 | Datastore/storage | `file-transfers.md`, `ssh-esxcli.md` | Datastore UUID/free space/mounted state | R0–R3; STOP before overwrite/delete. |
@@ -249,6 +250,7 @@ Load only the reference files needed for the task:
 - [`references/vm-import-export.md`](references/vm-import-export.md)
 - [`references/guest-os-autoinstall.md`](references/guest-os-autoinstall.md)
 - [`references/troubleshooting.md`](references/troubleshooting.md)
+- [`skills/stable-ssh-shell/SKILL.md`](skills/stable-ssh-shell/SKILL.md)
 
 ## Completion checklist
 
