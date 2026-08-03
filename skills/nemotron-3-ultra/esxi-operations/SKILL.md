@@ -9,7 +9,7 @@ description: "Nemotron-optimized ESXi host operations: capability probing, inven
 
 Model-specific tuning for the **NVIDIA Nemotron 3 Ultra 550B A55B** running in Hermes. This sub-skill wraps the model-agnostic `esxi-server` skill with Nemotron-optimized patterns for ESXi host operations.
 
-**Parent skill:** [`../../SKILL.md`](../../SKILL.md) — load it first. This variant only adds Nemotron-specific guidance; all core procedures, task router, and references remain in the parent.
+**Parent skill:** [`../../../SKILL.md`](../../../SKILL.md) — load it first. This variant only adds Nemotron-specific guidance; all core procedures, task router, and references remain in the parent.
 
 ## Nemotron Model Profile
 
@@ -192,6 +192,6 @@ vim-cmd vmsvc/power.on "${VM_ROUTER_VMID}"
 
 **See also:**
 
-- Parent: [`../../SKILL.md`](../../SKILL.md)
+- Parent: [`../../../SKILL.md`](../../../SKILL.md)
 - All references in parent's reference list
 - Stable SSH Shell Nemotron variant: [`../stable-ssh-shell/SKILL.md`](../stable-ssh-shell/SKILL.md)

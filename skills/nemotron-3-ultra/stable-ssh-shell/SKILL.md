@@ -17,7 +17,7 @@ Model-specific tuning for the **NVIDIA Nemotron 3 Ultra 550B A55B** running in H
 - Context efficiency (batch reads, progressive disclosure)
 - Validation before success (post-change verification gates)
 
-**Parent skill:** [`../../stable-ssh-shell/SKILL.md`](../../stable-ssh-shell/SKILL.md) — load it first. This variant only adds Nemotron-specific guidance; all core procedures remain in the parent.
+**Parent skill:** [`../../../skills/stable-ssh-shell/SKILL.md`](../../../skills/stable-ssh-shell/SKILL.md) — load it first. This variant only adds Nemotron-specific guidance; all core procedures remain in the parent.
 
 ## Nemotron Model Profile
 
@@ -170,6 +170,6 @@ Before reporting any SSH task complete:
 
 **See also:**
 
-- Parent: [`../../stable-ssh-shell/SKILL.md`](../../stable-ssh-shell/SKILL.md)
-- References: [`../../stable-ssh-shell/references/`](../../stable-ssh-shell/references/)
-- Scripts: [`../../stable-ssh-shell/scripts/`](../../stable-ssh-shell/scripts/)
+- Parent: [`../../../skills/stable-ssh-shell/SKILL.md`](../../../skills/stable-ssh-shell/SKILL.md)
+- References: [`../../../skills/stable-ssh-shell/references/`](../../../skills/stable-ssh-shell/references/)
+- Scripts: [`../../../skills/stable-ssh-shell/scripts/`](../../../skills/stable-ssh-shell/scripts/)
