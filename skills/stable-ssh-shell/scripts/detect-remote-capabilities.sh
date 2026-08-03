@@ -54,6 +54,8 @@ ssh_opts=(
 )
 [[ -z $identity ]] || ssh_opts+=(-i "$identity" -o IdentitiesOnly=yes)
 
+# Expand these variables on the remote host, not in this local controller.
+# shellcheck disable=SC2016
 probe='target=unknown
 if command -v vmware >/dev/null 2>&1 || test -f /etc/vmware-release; then target=esxi
 elif test -f /etc/os-release; then target=linux
