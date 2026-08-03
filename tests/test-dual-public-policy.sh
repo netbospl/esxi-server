@@ -5,6 +5,7 @@ repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 reference="$repo_root/references/dedibox-dual-public-router-vm.md"
 profile="$repo_root/profiles/example-dual-public-router.md"
 template="$repo_root/templates/dual-public-router-plan.md"
+guest_access="$repo_root/references/private-guest-access-via-pfsense.md"
 
 fail() {
   printf 'FAIL: %s\n' "$*" >&2
@@ -14,6 +15,8 @@ fail() {
 for file in "$reference" "$profile" "$template"; do
   [[ -f $file ]] || fail "missing dual-public artifact: $file"
 done
+
+[[ -f $guest_access ]] || fail "missing private guest access reference"
 
 for token in \
   '<ESXI_MANAGEMENT_IPV4>' \
@@ -59,8 +62,18 @@ grep -Fq 'Linux guest guidance only' "$reference" ||
   fail 'provider Linux IPv6 guidance boundary is missing'
 grep -Fq 'WebGUI and SSH closed on WAN' "$reference" ||
   fail 'WAN management exposure guard is missing'
+grep -Fq 'Do not use the pfSense shell as a general-purpose SSH bastion' "$guest_access" ||
+  fail 'pfSense bastion boundary is missing'
+grep -Fq 'WireGuard or OpenVPN on pfSense' "$guest_access" ||
+  fail 'VPN-first private guest path is missing'
+grep -Fq 'A pfSense change approval does not authorize an ESXi or guest change' "$guest_access" ||
+  fail 'cross-target approval boundary is missing'
+grep -Fq 'StrictHostKeyChecking yes' "$guest_access" ||
+  fail 'nested SSH host-key policy is missing'
+grep -Fq 'GUEST_KNOWN_HOSTS' "$guest_access" ||
+  fail 'dedicated guest known-hosts contract is missing'
 
-for file in "$reference" "$profile" "$template"; do
+for file in "$reference" "$profile" "$template" "$guest_access"; do
   if grep -Eq '(^|[^0-9])([0-9]{1,3}\.){3}[0-9]{1,3}([^0-9]|$)' "$file"; then
     fail "concrete IPv4 address found in sanitized artifact: $file"
   fi

@@ -167,6 +167,7 @@ invitation to retry authentication aggressively.
 | Backup/restore | `host-configuration-backup.md`, `backup-restore.md` | Build/UUID, backup integrity, maintenance window | R2–R3; STOP on incompatibility or missing out-of-band access. |
 | Networking | `network-firewall-ipv4-ipv6.md`, `ssh-esxcli.md` | Management VMkernel/uplink/vSwitch/VLAN/IPv4/IPv6 and console path | R2–R3; STOP without a proven management rollback path. |
 | Dedibox dual-public router VM | `dedibox-dual-public-router-vm.md`, `network-firewall-ipv4-ipv6.md` | Primary/failover IP ownership, allocation-specific gateway/vMAC, forward/PTR identity, isolated LAN, OOB console | R2–R3; STOP on source conflict, duplicate IP ownership, MAC/DNS mismatch, or management drift. |
+| Private guest access through pfSense | `private-guest-access-via-pfsense.md`, `dedibox-dual-public-router-vm.md` | Proven router WAN/LAN, VPN or dedicated jump path, exact guest identity, independent host-key trust | R0 for discovery; R1–R3 for access-path or guest changes. STOP before broad WAN exposure, using pfSense as a general bastion, or conflating ESXi, router, and guest approval. |
 | Single-public-IP router migration | `single-public-ip-router-migration.md`, `network-firewall-ipv4-ipv6.md` | Current owner of the public IP, OOB console, staged management and WAN/LAN design | R3; STOP without independent console access and tested rollback. |
 | Certificates | `certificates-letsencrypt.md` | Hostname/SAN, expiry, config backup, client verification | R1–R3; STOP if rollback cert/config is missing. |
 | File transfer | `file-transfers.md` | TLS trust, datastore path/free space/checksum | R1–R2; STOP on overwrite or checksum mismatch. |
@@ -242,6 +243,7 @@ Load only the reference files needed for the task:
 - [`references/host-configuration-backup.md`](references/host-configuration-backup.md)
 - [`references/network-firewall-ipv4-ipv6.md`](references/network-firewall-ipv4-ipv6.md)
 - [`references/dedibox-dual-public-router-vm.md`](references/dedibox-dual-public-router-vm.md)
+- [`references/private-guest-access-via-pfsense.md`](references/private-guest-access-via-pfsense.md)
 - [`references/single-public-ip-router-migration.md`](references/single-public-ip-router-migration.md)
 - [`references/certificates-letsencrypt.md`](references/certificates-letsencrypt.md)
 - [`references/vm-import-export.md`](references/vm-import-export.md)

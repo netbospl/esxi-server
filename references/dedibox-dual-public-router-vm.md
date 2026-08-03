@@ -358,12 +358,17 @@ After installation:
 2. Verify LAN addressing, DHCP, DNS forwarding, outbound NAT, and default
    inbound blocking with an isolated test guest. Confirm WebGUI and SSH are not
    reachable through WAN.
-3. Re-run the two-resolver A/PTR checks for `<ROUTER_FQDN>` without opening
+3. If an external agent must administer private guests, load
+   [`private-guest-access-via-pfsense.md`](private-guest-access-via-pfsense.md)
+   and build a separately approved VPN-first access path. Do not turn pfSense
+   SSH into a general jump service or expose guest management ports merely to
+   make automation convenient.
+4. Re-run the two-resolver A/PTR checks for `<ROUTER_FQDN>` without opening
    WebGUI or SSH on WAN.
-4. Verify the primary ESXi management path and confirm its route did not
+5. Verify the primary ESXi management path and confirm its route did not
    change.
-5. Confirm `<FAILOVER_IPV4>` remains absent from all VMkernel adapters.
-6. Save an encrypted/protected pfSense `config.xml` backup outside the VM and
+6. Confirm `<FAILOVER_IPV4>` remains absent from all VMkernel adapters.
+7. Save an encrypted/protected pfSense `config.xml` backup outside the VM and
    repository.
 
 ## Autostart and shutdown
