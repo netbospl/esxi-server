@@ -7,6 +7,11 @@ mocked tests, ISO-media generators, a Makefile, and a GitHub Actions quality
 workflow. It contains no real credentials, hostnames, private IPs, passwords,
 tokens, or SSH keys.
 
+It also includes the optional
+[`stable-ssh-shell`](skills/stable-ssh-shell/SKILL.md) child skill for reliable
+one-shot SSH, persistent Linux shells, deterministic tmux/PTY control,
+detached jobs, and recovery without unsafe command replay.
+
 ## Safety-first operating model
 
 1. Start with read-only discovery.
@@ -62,6 +67,12 @@ Read [`SKILL.md`](SKILL.md) first for the exact workflow, approval rules, host-k
 │       └── packer/ (vCenter vSphere-ISO templates)
 ├── scripts/
 │   └── esxi-readonly-discovery.sh
+├── skills/
+│   └── stable-ssh-shell/
+│       ├── SKILL.md
+│       ├── references/
+│       ├── scripts/
+│       └── examples/
 ├── tests/
 │   ├── test-esxi-readonly-discovery.sh
 │   ├── test-discovery-rest-state.sh
@@ -130,6 +141,21 @@ For agent access to guests on the private LAN, use
 The preferred path is a scoped VPN terminated on pfSense, followed by direct
 guest authentication. The secondary public address is the VPN endpoint; it is
 not itself a route or credential for a private VM.
+
+## Stable SSH shell child skill
+
+Load [`skills/stable-ssh-shell/SKILL.md`](skills/stable-ssh-shell/SKILL.md)
+when a task needs more than a stateless SSH command. It separates connection
+reuse from remote process persistence and selects one of five modes: atomic
+one-shot, stateful persistent shell, interactive PTY, detached job, or
+unsupported/restricted.
+
+For Hermes, direct ESXi access uses the local terminal to invoke guarded
+OpenSSH because a generic SSH environment may require remote Bash and file
+synchronisation. A verified Linux management VM, dedicated jump host, or guest
+can use persistent tmux control when the task truly needs it. The child skill
+never installs tmux on ESXi and never repeats a command whose completion state
+is unknown.
 
 > **Warning:** never commit `.env`, private keys, API tokens, session IDs, private hostnames, private IP addresses, passwords, or screenshots/logs containing sensitive ESXi inventory details.
 
@@ -233,6 +259,8 @@ Prefer a dedicated local ESXi user named `agent` for automation. Use a dedicated
 - [`tests/`](tests/) contains mock-only tests; no test connects to a real ESXi host.
 - [`lychee.toml`](lychee.toml) keeps the documented link-checker exception precise.
 - [`scripts/esxi-readonly-discovery.sh`](scripts/esxi-readonly-discovery.sh) performs bounded, read-only discovery only.
+- [`skills/stable-ssh-shell/`](skills/stable-ssh-shell/SKILL.md) provides
+  capability-aware SSH/session routing and mock-tested tmux command helpers.
 - [`templates/`](templates/) contains structured prompts for plans, approvals, rollback notes, and summaries.
 
 ## Safety notes

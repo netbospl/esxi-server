@@ -21,6 +21,10 @@ This repository is an experimental, AI-assisted ESXi Server Skill for coding and
    - `references/private-guest-access-via-pfsense.md` when an external agent
      must reach a guest on the router's private LAN by VPN or a dedicated jump
      host.
+   - `skills/stable-ssh-shell/SKILL.md` when SSH work needs persistent remote
+     state, deterministic tmux/PTY control, detached execution, or recovery
+     after a transport loss. Direct ESXi remains one-shot/restricted; never
+     install persistence tooling on the hypervisor.
    - `references/single-public-ip-router-migration.md` only when the router
      takes the sole public IP away from ESXi.
 4. Start with read-only discovery and do not modify ESXi during inventory checks.
@@ -37,6 +41,9 @@ This repository is an experimental, AI-assisted ESXi Server Skill for coding and
 15. In Hermes, keep facts, hypotheses, the next bounded R0 check, and any
     R1-R3 change gate separate. General IT knowledge may select a diagnostic
     question but never proves ESXi command compatibility or grants approval.
+16. In Hermes, use the local terminal plus guarded OpenSSH for direct ESXi.
+    Hermes SSH environments that require remote Bash or file synchronisation
+    are for verified compatible management or guest hosts, not ESXi.
 
 ## Host-profile convention
 

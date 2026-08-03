@@ -23,6 +23,8 @@ This documentation set describes safe, experimental ESXi operations for humans a
 - [`../examples/guest-autoinstall/scripts/validate-inputs.sh`](../examples/guest-autoinstall/scripts/validate-inputs.sh) — shared placeholder and output-path validation
 - [`../examples/guest-autoinstall/windows/oobe-local-account-notes.md`](../examples/guest-autoinstall/windows/oobe-local-account-notes.md) — Windows 11 local-account and OOBE fallback notes for lab VMs
 - [`../scripts/esxi-readonly-discovery.sh`](../scripts/esxi-readonly-discovery.sh) — bounded read-only discovery helper with explicit SSH host-key acceptance
+- [`../skills/stable-ssh-shell/SKILL.md`](../skills/stable-ssh-shell/SKILL.md) — capability-aware router for atomic SSH, persistent shells, interactive PTYs, detached jobs, and recovery
+- [`../skills/stable-ssh-shell/references/esxi-hermes-compatibility.md`](../skills/stable-ssh-shell/references/esxi-hermes-compatibility.md) — direct ESXi restrictions and Hermes local/SSH terminal routing
 - [`../tests/`](../tests/) — mock-only tests; no test contacts an ESXi host
 - [`../templates/change-plan.md`](../templates/change-plan.md) — structured change-plan template
 - [`../templates/dual-public-router-plan.md`](../templates/dual-public-router-plan.md) — topology-specific plan for a failover `/32` and provider virtual MAC

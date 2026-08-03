@@ -21,6 +21,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   topology-specific change-plan template, and policy regression test.
 - Curated ESXi-focused IT foundations from the companion certification
   knowledge base, with a compact Hermes diagnostic loop and routing test.
+- `stable-ssh-shell` child skill with atomic, persistent, PTY, detached, and
+  restricted modes; strict SSH transport guidance; deterministic tmux command
+  markers; recovery rules; sanitized examples; and mock-only tests.
 
 ### Changed
 - Reviewed and clarified ESXi skill safety guidance.
@@ -40,3 +43,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   provider evidence rather than an adjacent-address assumption, and documented
   trusted pfSense installation, `config.xml` restore, and recovery-image
   boundaries without publishing real infrastructure addresses.
+- Routed Hermes direct ESXi work through guarded local OpenSSH while reserving
+  Bash-dependent SSH environments and remote persistence for verified
+  compatible Linux management, jump, or guest hosts.
