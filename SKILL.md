@@ -222,7 +222,7 @@ REST sessions expire. A deliberate task may re-authenticate once after a `401`; 
 
 Treat guest installation as a companion module, not the default host-operations path. Load [`references/guest-os-autoinstall.md`](references/guest-os-autoinstall.md) and only the relevant files under `examples/guest-autoinstall/`.
 
-If the user asks about Windows 11 local accounts, OOBE bypass, offline install, Microsoft account avoidance during setup, or an `I don’t have internet` rescue flow, also load [`examples/guest-autoinstall/windows/oobe-local-account-notes.md`](examples/guest-autoinstall/windows/oobe-local-account-notes.md). Prefer the matching committed unattended answer-file variant; treat manual OOBE commands as version-dependent fallback methods.
+If the user asks about Windows 11 local accounts, OOBE bypass, offline install, Microsoft account avoidance during setup, or an `I don't have internet` rescue flow, also load [`examples/guest-autoinstall/windows/oobe-local-account-notes.md`](examples/guest-autoinstall/windows/oobe-local-account-notes.md). Prefer the matching committed unattended answer-file variant; treat manual OOBE commands as version-dependent fallback methods.
 
 Refuse any request that tries to bypass Windows activation or licensing.
 
@@ -252,6 +252,17 @@ Load only the reference files needed for the task:
 - [`references/troubleshooting.md`](references/troubleshooting.md)
 - [`skills/stable-ssh-shell/SKILL.md`](skills/stable-ssh-shell/SKILL.md)
 
+## Nemotron 3 Ultra 550B A55B Model-Specific Sub-Skills
+
+When the active model is **NVIDIA Nemotron 3 Ultra 550B A55B** (model ID: `nvidia/nemotron-3-ultra-550b-a55b` or provider-specific equivalent), load the following Nemotron-optimized sub-skills **in addition to** the model-agnostic parent skills. These variants add structured reasoning, tool-calling patterns, and validation gates tuned for Nemotron's strengths (multi-step reasoning, code generation, instruction following, tool use).
+
+| Sub-skill | Load Instead Of | Purpose |
+|---|---|---|
+| `skills/nemotron-3-ultra/stable-ssh-shell/SKILL.md` | `skills/stable-ssh-shell/SKILL.md` | Nemotron-tuned SSH workflows: marker protocol, structured tmux control, recovery patterns, ESXi vs Linux target rules |
+| `skills/nemotron-3-ultra/esxi-operations/SKILL.md` | (supplements parent) | Nemotron-tuned ESXi operations: capability probe patterns, version-aware commands, risk framing, validation gates |
+
+**Routing rule:** If `model.default` contains `nemotron-3-ultra` or the active model ID matches `nvidia/nemotron-3-ultra*`, load the Nemotron sub-skills after their parent skills. Otherwise, use only the model-agnostic skills.
+
 ## Completion checklist
 
 Before reporting an ESXi task complete:
@@ -266,3 +277,148 @@ Before reporting an ESXi task complete:
 - [ ] Post-change state was verified with a read-only command or API call.
 - [ ] No credentials, tokens, private hostnames/IPs, logs, SSH keys, or `.env` files were written to the repository.
 - [ ] Any loaded task module's own completion checks were satisfied.
+
+---
+
+## Nemotron 3 Ultra 550B A55B Model-Specific Instructions
+
+These instructions apply when the active model is **NVIDIA Nemotron 3 Ultra 550B A55B** (model ID: `nvidia/nemotron-3-ultra-550b-a55b` or provider-specific equivalent).
+
+### Model Characteristics
+
+| Characteristic | Value |
+|----------------|-------|
+| Architecture | Mixture-of-Experts (MoE) with 550B total params, 55B active |
+| Context length | 128K tokens |
+| Training focus | Reasoning, coding, instruction following, alignment |
+| Strengths | Multi-step reasoning, code generation, instruction following, tool use |
+| Provider | NVIDIA (via NVIDIA API, NIM, or compatible endpoints) |
+
+### ESXi-Specific Reasoning Guidance for Nemotron
+
+#### 1. **Multi-Step Reasoning Protocol**
+Nemotron excels at multi-step reasoning. When troubleshooting ESXi issues:
+
+- **State facts first**: List observed facts from read-only commands before hypothesizing
+- **Separate hypotheses**: List 2-3 distinct hypotheses with supporting evidence for each
+- **Bounded R0 checks**: Propose exactly ONE read-only command to discriminate between hypotheses
+- **Explicit change gate**: Before any R1-R3 action, state the exact R-level, target object, exact command/API, and rollback
+
+```text
+FACTS:
+- ESXi 7.0U3 build 20036589, 128GB RAM, 2 datastores (local_sas: 45% free, nfs_backup: 78% free)
+- VM "router-vm" (vmid=12) powered off, 4 vCPU, 8GB RAM, 2 NICs (mgmt: vmk0, wan: vmk1)
+- SSH capability probe: PASS (agent user, key auth); REST: PARTIAL (/api/session 404)
+
+HYPOTHESES:
+1. VM won't power on due to insufficient host RAM (host shows 12GB free, VM needs 8GB + overhead)
+2. VM won't power on due to disk lock on nfs_backup datastore (previous backup job may hold lock)
+3. VM won't power on due to VMX config mismatch (vmx-19 hardware version on ESXi 7.0U3)
+
+NEXT R0 CHECK:
+- `vim-cmd vmsvc/get.summary 12 | grep -E \"memory|vmPathName|config.version\"`
+
+CHANGE GATE:
+- R1: Power on VM vmid=12 via `vim-cmd vmsvc/power.on 12` after confirming hypothesis 1 or 2 is root cause and space/lock cleared. ROLLBACK: `vim-cmd vmsvc/power.off 12`.
+```
+
+#### 2. **Structured ESXi Command Construction**
+Nemotron produces reliable command sequences. For ESXi operations:
+
+- **Always use the canonical command forms** from `references/ssh-esxcli.md` and `references/rest-api.md`
+- **Quote all variables**: `"${ESXI_HOST}"`, `"${VM_NAME}"`, `"${DATASTORE}"`
+- **Prefer `esxcli` over `vim-cmd`** for host-level operations; prefer `vim-cmd` for VM lifecycle
+- **Check command availability first**: `esxcli network --help | grep -q firewall` before using firewall subcommands
+
+```bash
+# Preferred pattern for Nemotron output:
+: "${ESXI_HOST:?}" "${ESXI_USER:=agent}" "${ESXI_SSH_KEY:?}"
+ssh -i "${ESXI_SSH_KEY}" -o StrictHostKeyChecking=yes \
+    -o UserKnownHostsFile="${ESXI_KNOWN_HOSTS}" \
+    "${ESXI_USER}@${ESXI_HOST}" \
+    'esxcli system version get && esxcli hardware memory get'
+```
+
+#### 3. **Structured Output Parsing**
+Nemotron handles structured output well. When parsing `esxcli`/`vim-cmd` output:
+
+- Use `--formatter=csv` or `--formatter=json` where available (`esxcli` supports this on 7.0U2+)
+- For `vim-cmd`, pipe through `awk`/`sed` with explicit field delimiters
+- Never rely on column alignment; use field-based extraction
+
+```bash
+# Good: structured, version-resilient
+esxcli storage filesystem list --formatter=csv | awk -F, 'NR>1 && $5 > 10000000000 {print $1}'
+
+# Avoid: brittle column parsing
+esxcli storage filesystem list | awk '$5 > 10000000000 {print $1}'
+```
+
+#### 4. **Risk Classification & Approval Framing**
+Nemotron classifies risk well. Frame every R1-R3 request as:
+
+```text
+RISK CLASS: R2 (service-disruptive: management network reconfiguration)
+TARGET: ESXi host ${ESXI_HOST}, vmk0 (management VMkernel), vSwitch0
+CHANGE: Change vmk0 IP from 192.168.1.50/24 to 10.10.10.50/24, gateway 10.10.10.1
+PREFLIGHT:
+  - Confirm OOB/IPMI access tested within 24h
+  - Verify nfs_backup datastore reachable from new subnet
+  - Confirm no active VM console sessions
+ROLLBACK: `esxcli network ip interface ipv4 set -i vmk0 -I 192.168.1.50 -N 255.255.255.0 -t static`
+VERIFICATION: `esxcli network ip interface ipv4 get -i vmk0` + SSH test from mgmt workstation
+APPROVAL REQUIRED: Explicit "APPROVE R2: vmk0 re-IP to 10.10.10.50/24"
+```
+
+#### 5. **Hermes Tool Use Patterns**
+When operating through Hermes tools:
+
+- **Batch independent reads**: Group `search_files`, `read_file`, `web_search` calls
+- **Use `execute_code` for multi-step local processing** (parsing CSV output, computing datastore %)
+- **Prefer `terminal` for SSH/REST execution** with explicit `command` strings
+- **Use `skill_view` before any ESXi reference lookup** — never guess command syntax
+
+#### 6. **Common Nemotron Failure Modes to Avoid**
+- ❌ Skipping capability probe and assuming REST works on standalone ESXi 7.x
+- ❌ Using `vim-cmd vmsvc/power.on` without confirming VMID via `getallvms` first
+- ❌ Hardcoding datastore names (`datastore1`) instead of using profile variables
+- ❌ Printing `ESXI_PASS` or session tokens in command strings
+- ❌ Proposing R2/R3 changes without verified rollback command and OOB access confirmation
+- ❌ Treating `vim-cmd` output column positions as stable across ESXi versions
+
+#### 7. **ESXi Version-Specific Command Selection**
+Nemotron should reference `references/ssh-esxcli.md` for version-aware commands:
+
+| ESXi Version | Preferred VM List | Preferred Snapshot | Network Config |
+|--------------|-------------------|-------------------|----------------|
+| 7.0 U1-U3 | `vim-cmd vmsvc/getallvms` | `vim-cmd vmsvc/snapshot.*` | `esxcli network` |
+| 8.0+ | REST `/api/vcenter/vm` | REST `/api/vcenter/vm/{vm}/snapshot` | REST `/api/esx/settings/network` |
+| 7.0 (REST incomplete) | SSH + `vim-cmd` | SSH + `vim-cmd` | SSH + `esxcli` |
+
+#### 8. **Profile Variable Substitution Pattern**
+Use the local profile convention from `profiles/example-host.md`:
+
+```bash
+# Load local profile if present
+[[ -f "profiles/${ESXI_HOST}.local.md" ]] && source <(grep -E '^(DATASTORE_|PORTGROUP_|VM_)' "profiles/${ESXI_HOST}.local.md" | sed 's/^/export /')
+
+# Use in commands
+vim-cmd vmsvc/power.on "${VM_ROUTER_VMID}"
+```
+
+---
+
+## Nemotron Quick-Reference Card
+
+| Task | Do This | Don't Do This |
+|------|---------|---------------|
+| Discover host | `esxi-readonly-discovery.sh` → capability matrix | Assume REST works; probe SSH blindly |
+| List VMs | `vim-cmd vmsvc/getallvms` → parse CSV | Guess VMID; use REST without probe |
+| Check space | `esxcli storage filesystem list --formatter=csv` | `df -h` on SSH (wrong filesystem view) |
+| Power on VM | Confirm VMID → `vim-cmd vmsvc/power.on <vmid>` | Power on by name; skip power state check |
+| Change network | R2 approval → preflight → change → verify → rollback test | Change mgmt IP without OOB confirmation |
+| Transfer ISO | `/folder/` with Basic Auth + checksum | SCP to `/tmp` (ramdisk, not persistent) |
+| Snapshot VM | Check space → `vim-cmd vmsvc/snapshot.create` → verify | Snapshot without space check; `removeall` without approval |
+| Troubleshoot | Facts → Hypotheses → 1 R0 check → Update → Plan | Guess → Change → Hope |
+
+---
