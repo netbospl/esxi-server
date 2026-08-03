@@ -61,7 +61,7 @@ rc=$?
 set -e
 [[ $rc -eq 4 ]] || fail 'wait helper missing-session exit mismatch'
 
-grep -Fq 'Never replay a command in `unknown_state`' \
+grep -Fq "Never replay a command in \`unknown_state\`" \
   "$repo_root/skills/stable-ssh-shell/SKILL.md" || fail 'unknown-state replay guard missing'
 
 printf 'PASS: timeout, missing session, pane death, and replay guard\n'
