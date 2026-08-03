@@ -49,6 +49,7 @@ Read [`SKILL.md`](SKILL.md) first for the exact workflow, approval rules, host-k
 │   ├── it-foundations-for-esxi.md
 │   ├── network-firewall-ipv4-ipv6.md
 │   ├── dedibox-dual-public-router-vm.md
+│   ├── private-guest-access-via-pfsense.md
 │   ├── single-public-ip-router-migration.md
 │   ├── rest-api.md
 │   ├── ssh-esxcli.md
@@ -123,6 +124,12 @@ and load
 [`references/dedibox-dual-public-router-vm.md`](references/dedibox-dual-public-router-vm.md).
 This is intentionally separate from moving a sole public address away from
 ESXi.
+
+For agent access to guests on the private LAN, use
+[`references/private-guest-access-via-pfsense.md`](references/private-guest-access-via-pfsense.md).
+The preferred path is a scoped VPN terminated on pfSense, followed by direct
+guest authentication. The secondary public address is the VPN endpoint; it is
+not itself a route or credential for a private VM.
 
 > **Warning:** never commit `.env`, private keys, API tokens, session IDs, private hostnames, private IP addresses, passwords, or screenshots/logs containing sensitive ESXi inventory details.
 
@@ -256,6 +263,7 @@ Prefer a dedicated local ESXi user named `agent` for automation. Use a dedicated
 - [`references/it-foundations-for-esxi.md`](references/it-foundations-for-esxi.md) — layered IT reasoning for Hermes across hardware, networking, security, virtualization, and troubleshooting
 - [`references/network-firewall-ipv4-ipv6.md`](references/network-firewall-ipv4-ipv6.md) — network, firewall, and IP-stack checks
 - [`references/dedibox-dual-public-router-vm.md`](references/dedibox-dual-public-router-vm.md) — retained ESXi management plus provider failover `/32`, virtual MAC, isolated LAN, and router-VM gates
+- [`references/private-guest-access-via-pfsense.md`](references/private-guest-access-via-pfsense.md) — VPN-first or dedicated-jump access from an external agent to private guests without exposing guest management broadly on WAN
 - [`references/single-public-ip-router-migration.md`](references/single-public-ip-router-migration.md) — R3 staged runbook for moving a sole public IPv4 from ESXi management to a router VM
 - [`references/certificates-letsencrypt.md`](references/certificates-letsencrypt.md) — certificate handling and trust guidance
 - [`references/vm-import-export.md`](references/vm-import-export.md) — import/export workflow notes

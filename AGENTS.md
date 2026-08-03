@@ -18,6 +18,9 @@ This repository is an experimental, AI-assisted ESXi Server Skill for coding and
    - `references/dedibox-dual-public-router-vm.md` when ESXi keeps its public
      management IP and a provider failover `/32` plus virtual MAC belongs to a
      router VM.
+   - `references/private-guest-access-via-pfsense.md` when an external agent
+     must reach a guest on the router's private LAN by VPN or a dedicated jump
+     host.
    - `references/single-public-ip-router-migration.md` only when the router
      takes the sole public IP away from ESXi.
 4. Start with read-only discovery and do not modify ESXi during inventory checks.

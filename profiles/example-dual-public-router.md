@@ -19,6 +19,7 @@ Use one of these evidence states for every material fact:
 - [ESXi network topology](#esxi-network-topology)
 - [Router VM](#router-vm)
 - [Network and recovery tests](#network-and-recovery-tests)
+- [Private guest access](#private-guest-access)
 - [Rollback](#rollback)
 
 ## Change boundary
@@ -120,6 +121,23 @@ WAN port-group effective security:
 | Clean shutdown | ESXi guest shutdown completes cleanly | `<STATE_AND_EVIDENCE>` |
 | Router reboot | WAN/LAN/DHCP/DNS/NAT/VPN recover | `<STATE_AND_EVIDENCE>` |
 | Host-boot autostart | Router precedes dependent guests | `unproven until approved host reboot` |
+
+## Private guest access
+
+Keep tunnel keys, SSH keys, passwords, certificates, and populated SSH config
+outside this profile and repository.
+
+| Field | Value | State / evidence |
+|---|---|---|
+| Access mode | `<VPN_OR_DEDICATED_JUMP>` | `<PLANNED_OR_PROVEN>` |
+| Public endpoint | `<ROUTER_FQDN>:<VPN_PORT>` | `<STATE_AND_EVIDENCE>` |
+| VPN client prefix | `<VPN_CLIENT_PREFIX>` | `<STATE_AND_EVIDENCE>` |
+| Allowed guest targets | `<GUEST_ALIASES_OR_PREFIXES>` | `<SCOPED_RULE_EVIDENCE>` |
+| Allowed services | `<SSH_WINRM_RDP_OR_OTHER>` | `<SCOPED_RULE_EVIDENCE>` |
+| Guest identity source | `<VM_UUID_MAC_DHCP_OR_DNS_EVIDENCE>` | `<STATE_AND_EVIDENCE>` |
+| Guest host-key trust | `<OUT_OF_BAND_FINGERPRINT_REFERENCE>` | `<STATE_AND_EVIDENCE>` |
+| Revocation test | `<PEER_OR_KEY_DISABLE_TEST>` | `<STATE_AND_EVIDENCE>` |
+| WAN guest-management exposure | `none` | `<EXTERNAL_PROBE_EVIDENCE>` |
 
 ## Rollback
 

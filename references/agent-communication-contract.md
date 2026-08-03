@@ -16,10 +16,15 @@ This document defines how an AI agent should communicate with a standalone ESXi 
 10. Produce a summary that includes what changed, what was verified, and what remains.
 11. Never hide failed commands.
 12. Never continue after network-lockout risk is detected.
+13. Treat ESXi, pfSense, a jump host, and each private guest as separate trust
+    and approval targets. Reaching one does not authorize changes on another.
 
 ## Communication rules
 
 - State which transport is being used and why.
+- For private guests behind pfSense, state the outer access path (VPN or
+  dedicated jump host) separately from the guest protocol (SSH, WinRM, RDP, or
+  another approved service).
 - If a command fails, report the failure plainly and do not silently skip it.
 - If a host key changes unexpectedly, stop and request human verification.
 - If the target version differs from the local documentation, say so before proceeding.
