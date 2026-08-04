@@ -2,8 +2,6 @@
 set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-backup_skill="$repo_root/skills/nemotron-3-ultra/backup-restore/SKILL.md"
-guest_skill="$repo_root/skills/nemotron-3-ultra/guest-autoinstall/SKILL.md"
 model_profile="$repo_root/skills/nemotron-3-ultra/model-profile.md"
 
 fail() {
@@ -27,11 +25,7 @@ for skill in "$repo_root"/skills/nemotron-3-ultra/*/SKILL.md; do
     fail "Nemotron child does not load shared model profile: $skill"
 done
 
-grep -Fq 'prompt for the password' "$backup_skill" ||
-  fail 'OVF export no longer requires interactive/protected credential input'
-grep -Fq 'SNAPSHOT_ID' "$backup_skill" ||
-  fail 'snapshot revert does not require an observed snapshot ID'
-grep -Fq 'Do not execute placeholder commands' "$guest_skill" ||
-  fail 'guest deployment does not reject placeholder commands'
+"$repo_root/scripts/validate-model-overlays.sh" --repo "$repo_root"
+"$repo_root/scripts/validate-operational-docs.sh" "$repo_root"
 
 printf 'PASS: deferred review safety and Nemotron consistency hardening\n'

@@ -23,6 +23,11 @@ This documentation set describes safe, experimental ESXi operations for humans a
 - [`../examples/guest-autoinstall/scripts/validate-inputs.sh`](../examples/guest-autoinstall/scripts/validate-inputs.sh) — shared placeholder and output-path validation
 - [`../examples/guest-autoinstall/windows/oobe-local-account-notes.md`](../examples/guest-autoinstall/windows/oobe-local-account-notes.md) — Windows 11 local-account and OOBE fallback notes for lab VMs
 - [`../scripts/esxi-readonly-discovery.sh`](../scripts/esxi-readonly-discovery.sh) — bounded read-only discovery helper with explicit SSH host-key acceptance
+- [`../scripts/validate-operational-docs.sh`](../scripts/validate-operational-docs.sh) — rejects unsafe operational examples and guessed standalone API routes
+- [`../scripts/validate-model-overlays.sh`](../scripts/validate-model-overlays.sh) — validates thin model-overlay contracts
+- [`../skills/incident-triage/SKILL.md`](../skills/incident-triage/SKILL.md) — evidence-first incident triage and recovery gating
+- [`../skills/model-overlays/CONTRACT.md`](../skills/model-overlays/CONTRACT.md) — canonical parent/profile/harness/overlay ownership rules
+- [`../skills/model-overlays/harnesses/hermes.md`](../skills/model-overlays/harnesses/hermes.md) — Hermes tool-semantics adapter
 - [`../skills/stable-ssh-shell/SKILL.md`](../skills/stable-ssh-shell/SKILL.md) — capability-aware router for atomic SSH, persistent shells, interactive PTYs, detached jobs, and recovery
 - [`../skills/private-guest-shell/SKILL.md`](../skills/private-guest-shell/SKILL.md) — VPN-first, dedicated-jump, or time-limited recovery routing to independently trusted private guest shells
 - [`../skills/nemotron-3-ultra/model-profile.md`](../skills/nemotron-3-ultra/model-profile.md) — shared model ceiling versus active Hermes context policy for Nemotron children
@@ -48,11 +53,12 @@ This documentation set describes safe, experimental ESXi operations for humans a
 - [`../references/file-transfers.md`](../references/file-transfers.md) — datastore upload/download, OVF/OVA transfer patterns, and SCP notes
 - [`../references/guest-os-autoinstall.md`](../references/guest-os-autoinstall.md) — guest OS unattended install templates, compatibility notes, and safety guidance
 - [`../references/network-firewall-ipv4-ipv6.md`](../references/network-firewall-ipv4-ipv6.md) — network, firewall, and IP-stack checks
+- [`../references/patch-upgrade.md`](../references/patch-upgrade.md) — compatibility, backup, maintenance, apply, rollback, and verification gates for host patching/upgrades
 - [`../references/pfsense-documentation-sources.md`](../references/pfsense-documentation-sources.md) — complete Netgate documentation map, versioned PDF snapshot, CE-focused practical-guide boundary, and retrieval policy
 - [`../references/dedibox-dual-public-router-vm.md`](../references/dedibox-dual-public-router-vm.md) — retained public ESXi management plus a dedicated failover IPv4 on a router VM
 - [`../references/private-guest-access-via-pfsense.md`](../references/private-guest-access-via-pfsense.md) — VPN-first or dedicated-jump access from an external agent to private guests behind pfSense
 - [`../references/single-public-ip-router-migration.md`](../references/single-public-ip-router-migration.md) — staged R3 runbook for a router VM taking ownership of the only public IPv4
-- [`../references/rest-api.md`](../references/rest-api.md) — vSphere REST API sessions, VM lifecycle, snapshots, datastores, networking, and resource checks
+- [`../references/rest-api.md`](../references/rest-api.md) — standalone HTTPS/session capability boundaries, exact-operation selection, and SOAP SDK fallback
 - [`../references/ssh-esxcli.md`](../references/ssh-esxcli.md) — SSH, `esxcli`, `vim-cmd`, networking, datastore, and resource checks
 - [`../references/troubleshooting.md`](../references/troubleshooting.md) — read-only troubleshooting and recovery guidance
 - [`../references/vm-import-export.md`](../references/vm-import-export.md) — import/export workflow notes

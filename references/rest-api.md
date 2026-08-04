@@ -1,55 +1,84 @@
-# ESXi vSphere REST API reference
+# ESXi HTTPS, REST, and SDK capability reference
 
-Start with [`../SKILL.md`](../SKILL.md): its risk model and task router are
-canonical. This reference is for capability-aware REST operations, not a
-promise that standalone ESXi implements the vCenter REST surface.
+Start with [`../SKILL.md`](../SKILL.md) and
+[`capability-probe.md`](capability-probe.md). This reference controls endpoint
+selection; it is not a promise that standalone ESXi implements the vCenter
+Automation API.
 
-- **Supported scope:** standalone ESXi 7.x primary and ESXi 8.x conditional
-  where endpoints exist; ESXi 9.x is unsupported; vCenter has a broader API
-  surface.
-- **Last validated:** static review, 2026-07-22; no live host test was run.
+- **Validated repository evidence:** standalone ESXi 7.x can expose Host Client,
+  `/folder/`, and `/sdk` while rejecting both REST session endpoints.
+- **ESXi 8.x:** conditional; prove each endpoint on the exact standalone build.
+- **ESX 9.x:** out of scope and unvalidated in this revision.
+- **vCenter:** separate target. `/api/vcenter/*` documentation describes vCenter
+  inventory and must not be used as standalone proof.
+
+## Capability classes
+
+| Surface | What success proves | What it does not prove |
+|---|---|---|
+| `GET /ui/` | Host Client HTTPS reachability | Authentication or API support |
+| `GET /folder/` with Basic Auth | Datastore-browser authentication/listing | REST session or VM lifecycle support |
+| `POST /api/session` | Modern session creation on this target | Availability of any unprobed operation |
+| Legacy session endpoint | Legacy session creation on this target | Modern API parity |
+| `/sdk` | SOAP endpoint reachability, including method-limited `405` | A usable SDK operation, REST support, or authorization |
+| SSH | Guarded shell transport | REST/SDK support |
 
 ## TLS and bounded requests
 
-TLS verification is the default. Use a verified CA bundle with `--cacert` when
-needed. `ESXI_INSECURE_TLS=1` is a documented, temporary, explicit exception;
-it does not relax SSH host-key verification. Use bounded `--connect-timeout`
-and `--max-time`. Do not aggressively retry authentication.
+TLS verification is the default. Prefer a verified CA bundle. A temporary
+insecure exception requires explicit acknowledgement, a time limit, and a
+recorded reason; it never weakens SSH host-key validation. Bound connect and
+total time. Do not retry rejected authentication.
 
-`scripts/esxi-readonly-discovery.sh` handles these controls and keeps one
-session for its probe series. It never prints credentials, session IDs, or
-Authorization headers.
+Use a protected credential mechanism that keeps passwords and tokens out of
+process arguments. `scripts/esxi-readonly-discovery.sh` creates mode-0600
+temporary netrc and session-header files, removes them on exit, and suppresses
+credentials and headers from reports.
 
 ## Session handling
 
-A valid REST session requires all of:
+A valid session requires successful transport, expected HTTP `200`/`201`, a
+nonempty conservatively shaped token, and memory-only storage. Classify:
 
-1. successful `curl` exit status;
-2. expected HTTP `200`/`201`;
-3. a nonempty token of expected conservative shape;
-4. in-memory-only storage; never logs/reports.
+- `401`: authentication/session expiry; stop automatic retries;
+- `403`: authorization; request least-privilege correction;
+- `400`/`404`/`405`/`501`: potentially unsupported endpoint;
+- TLS/DNS/TCP/timeout: transport failure, not endpoint evidence.
 
-Classify `401` as authentication/session expiry, `403` as authorization,
-`400`/`404` as potentially unsupported endpoint, and transport/TLS failures
-separately. On `401` during a series, end the stale session and perform at most
-one deliberate re-authentication after checking the task context. On cleanup,
-attempt `DELETE /api/session` best-effort without exposing the result/token.
+Probe `/folder/` independently before REST. Try the legacy session endpoint
+once only when the modern endpoint is unsupported, never after `401` or `403`.
+Delete a valid session best-effort on cleanup without logging the token.
 
-Standalone ESXi 7.x can return `400` from `POST /api/session` and
-`POST /rest/com/vmware/cis/session` while Host Client and `/folder/` work. That
-is a capability result, not evidence that credentials should be retried.
-Probe `/folder/` independently with Basic Auth before creating a REST session.
-The guarded helper tries the legacy session endpoint exactly once only when the
-modern endpoint is unsupported; it does not fall back after `401` or `403`.
+## Operation selection gate
 
-## Operation controls
+Before any lifecycle, hardware, network, datastore, snapshot, or guest request:
 
-Before any VM lifecycle or snapshot request, fresh discovery must confirm VM
-name, UUID, VMID, current power state, RAM, datastore free space, and intended
-network. Use IDs returned by the target; never assume a VMID is stable. Keep
-operations idempotent where possible. No automatic delete, overwrite, or
-power-off is permitted without explicit approval for the exact target.
+1. Link the exact vendor operation page for the observed product/version.
+2. Prove the endpoint and method on the exact target with an R0 request where
+   one exists; otherwise stop and use a canonical SSH/SDK route.
+3. Record required privileges, request/response schema, idempotency, task/poll
+   behavior, timeout, success response, error mapping, and rollback.
+4. Freshly resolve object IDs and match name plus UUID. Never translate a
+   `vim-cmd` VMID into a REST identifier by assumption.
+5. Apply the root R1-R3 gate before sending a state-changing request.
 
-Guest operations require VMware Tools and guest credentials; keep them separate
-from ESXi/vCenter credentials. See the task router for reference selection and
-risk class.
+This repository intentionally provides no universal standalone REST lifecycle
+or snapshot endpoint. If a target proves a route, record it in a protected
+host profile/task plan and propose a mock-tested, version-scoped reference
+update rather than generalizing it immediately.
+
+## SDK fallback
+
+When `/sdk` is reachable and REST is incomplete, use a pinned pyVmomi/SDK
+version compatible with the observed host. Verify TLS, required privileges,
+managed-object identity, task completion, and faults. A reachable SDK endpoint
+is a capability result, not authorization to mutate the host.
+
+Guest operations additionally require healthy VMware Tools and separately
+protected guest credentials.
+
+## Primary references
+
+- [Broadcom vSphere Automation API](https://developer.broadcom.com/xapis/vsphere-automation-api/latest/)
+- [Broadcom vCenter VM API](https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/vcenter/vm/get/)
+- [Broadcom vSphere Web Services API](https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/)

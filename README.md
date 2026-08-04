@@ -1,6 +1,11 @@
 # ESXi Server Skill
 
-This repository contains an experimental ESXi Server Skill for agentic workflows. It documents how a human or AI operations agent should safely interact with a standalone VMware ESXi host using SSH, `esxcli`, `vim-cmd`, the vSphere REST API, datastore file transfers, and related read-only discovery paths.
+This repository contains an experimental ESXi Server Skill for agentic
+workflows. It documents how a human or AI operations agent should safely
+interact with a standalone VMware ESXi host using guarded SSH, ESXCLI,
+Host Client/datastore HTTPS, proven REST capabilities, the SOAP SDK, OVF Tool,
+and related read-only discovery paths. It does not treat vCenter-only APIs as
+standalone ESXi endpoints.
 
 The repository contains safety documentation plus small local Bash helpers,
 mocked tests, ISO-media generators, a Makefile, and a GitHub Actions quality
@@ -57,6 +62,7 @@ Read [`SKILL.md`](SKILL.md) first for the exact workflow, approval rules, host-k
 │   ├── host-configuration-backup.md
 │   ├── it-foundations-for-esxi.md
 │   ├── network-firewall-ipv4-ipv6.md
+│   ├── patch-upgrade.md
 │   ├── dedibox-dual-public-router-vm.md
 │   ├── private-guest-access-via-pfsense.md
 │   ├── single-public-ip-router-migration.md
@@ -70,8 +76,13 @@ Read [`SKILL.md`](SKILL.md) first for the exact workflow, approval rules, host-k
 │       ├── windows/ (four explicit Windows answer-file variants)
 │       └── packer/ (vCenter vSphere-ISO templates)
 ├── scripts/
-│   └── esxi-readonly-discovery.sh
+│   ├── esxi-readonly-discovery.sh
+│   ├── validate-model-overlays.sh
+│   └── validate-operational-docs.sh
 ├── skills/
+│   ├── incident-triage/
+│   ├── model-overlays/
+│   ├── nemotron-3-ultra/ (thin validated overlays)
 │   └── stable-ssh-shell/
 │       ├── SKILL.md
 │       ├── references/
@@ -225,9 +236,11 @@ ESXI_HOST_FINGERPRINT=SHA256:verified-out-of-band \
 scripts/esxi-readonly-discovery.sh --accept-new-host-key
 ```
 
-The helper validates TLS by default, probes `/folder/` independently with Basic
-Auth before REST, uses one modern session attempt plus a single legacy fallback
-only when appropriate, and never prints credentials or tokens. It suppresses
+The helper validates TLS by default, probes `/folder/` independently with
+credentials held in a mode-0600 temporary netrc file, and uses one modern
+session attempt plus a single legacy fallback only when appropriate. It does
+not probe guessed vCenter inventory endpoints and never prints credentials or
+tokens. It suppresses
 full inventory unless `--include-inventory` is explicitly supplied and reports
 `PASS`, `PARTIAL`, `BLOCKED`, `AUTH_FAILED`, or `AUTHZ_FAILED`. Use a verified
 `ESXI_CA_BUNDLE` when required; `ESXI_INSECURE_TLS=1` is a temporary explicit
@@ -244,12 +257,14 @@ Use the smallest, safest interface for the task.
 |---|---|
 | Host hardware, memory, NIC, vSwitch, VMkernel, or filesystem checks | SSH with `esxcli` |
 | Standalone ESXi VM inspection when REST is insufficient | SSH with `vim-cmd` |
-| VM listing, power state, lifecycle operations, and snapshots | REST API when available and reliable |
+| VM listing, power state, lifecycle operations, and snapshots | An exact REST operation proven for this target; otherwise SOAP SDK or guarded SSH |
 | Datastore browsing through HTTPS | `/folder/` with Basic Auth, independently of REST sessions |
 | ISO, OVF, OVA, and VMDK upload/download | HTTPS datastore browser API, SCP, or `ovftool` where appropriate |
 | Low-level network changes | SSH with `esxcli`, only after confirmation |
 
-If a REST session returns `401`, re-authenticate rather than reusing stale session IDs. If capability detection fails, stop and report the failure instead of guessing.
+If a REST session returns `401`, stop automatic retries and obtain a freshly
+approved credential/session rather than reusing a stale ID. If capability
+detection fails, stop and report the failure instead of guessing.
 
 ## Dedicated agent user guidance
 
@@ -288,7 +303,7 @@ Prefer a dedicated local ESXi user named `agent` for automation. Use a dedicated
 - [`references/validated-interaction-methods.md`](references/validated-interaction-methods.md) — tested standalone ESXi interaction paths and fallback decisions
 - [`references/dedicated-agent-user.md`](references/dedicated-agent-user.md) — least-privilege `agent` user guidance
 - [`references/ssh-esxcli.md`](references/ssh-esxcli.md) — SSH, `esxcli`, `vim-cmd`, networking, datastore, and resource checks
-- [`references/rest-api.md`](references/rest-api.md) — vSphere REST API sessions, VM lifecycle, snapshots, datastores, networking, and resource checks
+- [`references/rest-api.md`](references/rest-api.md) — standalone HTTPS/session capability boundaries, exact-operation selection, and SOAP SDK fallback
 - [`references/file-transfers.md`](references/file-transfers.md) — datastore upload/download, OVF/OVA transfer patterns, and SCP notes
 - [`references/backup-restore.md`](references/backup-restore.md) — backup and restore workflow guidance
 - [`references/host-configuration-backup.md`](references/host-configuration-backup.md) — host configuration bundle backup/restore boundary and R3 runbook

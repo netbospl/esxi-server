@@ -4,8 +4,9 @@ Start with the canonical policy and task router in [`../SKILL.md`](../SKILL.md).
 This is an R0, bounded, sanitised discovery procedure; it does not authorize
 any state change.
 
-- **Supported scope:** standalone ESXi 7.x primary; ESXi 8.x conditional;
-  ESXi 9.x unsupported; vCenter is a distinct target.
+- **Supported scope:** standalone ESXi 7.x legacy; ESXi 8.x primary but
+  conditional on exact-build probing; ESX 9.x out of scope and unvalidated;
+  vCenter is a distinct target.
 - **Last validated:** static documentation review, 2026-07-22.
 - **Lab status:** not tested on a live ESXi host by this repository revision.
 
@@ -20,7 +21,7 @@ repeated credential attempts.
 | TLS failure | Certificate chain/name/CA trust failure | Keep TLS validation; add a verified CA bundle or explicitly document a temporary exception. |
 | Authentication failure | Credentials rejected (`401`) | Stop; do not retry aggressively. |
 | Authorization failure | Valid session lacks privilege (`403`) | Stop and request least-privilege correction. |
-| Endpoint unsupported | `400`/`404` or documented missing surface | Record it and select another verified transport. |
+| Endpoint unsupported | `400`/`404` or documented missing surface | Record it and select another verified transport. A method-specific `405` proves reachability only, not operation support. |
 | Transport unavailable | SSH/HTTPS/SDK path unavailable | Record it; do not infer host state. |
 
 ## Ordered probe matrix
@@ -34,8 +35,13 @@ repeated credential attempts.
    `POST /api/session` once; then the older
    `POST /rest/com/vmware/cis/session` only when the first is unsupported and
    the target/version makes it appropriate. Inspect HTTP status and token shape.
-5. Probe only needed REST inventory endpoints with one valid session.
-6. Record SOAP SDK `/sdk` reachability as a separate capability; it is a
+5. Probe only the needed REST inventory endpoints with one valid session and
+   an exact vendor operation link. Never probe `/api/vcenter/*` merely because
+   the target is ESXi; that namespace is vCenter documentation unless proven
+   otherwise on the exact standalone build.
+6. Record SOAP SDK `/sdk` reachability as a separate capability. An
+   unauthenticated GET may return `405`; record that as reachable but
+   method-limited, not as proof of a usable SDK operation. The SDK is a
    fallback, not evidence that REST is complete.
 7. If SSH is authorized, verify the host key first, then run one read-only
    `esxcli system version get` and one `vim-cmd vmsvc/getallvms` probe.
