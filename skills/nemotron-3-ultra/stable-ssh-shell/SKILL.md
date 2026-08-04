@@ -13,7 +13,8 @@ Model-specific tuning for the **NVIDIA Nemotron 3 Ultra 550B A55B** running in H
 - Structured planning and outputs (facts → hypotheses → R0 check → change gate)
 - SSH and stable-shell workflows (tmux, marker protocol, recovery)
 - Checkpoints and recovery (state capture, verification, rollback)
-- Safe operations (ESXi: one-shot only; pfSense/Linux: full persistence)
+- Safe operations (ESXi: one-shot only; verified Linux guests/jump VMs may use
+  persistence; pfSense remains a router/firewall boundary)
 - Context efficiency (batch reads, progressive disclosure)
 - Validation before success (post-change verification gates)
 
@@ -21,14 +22,8 @@ Model-specific tuning for the **NVIDIA Nemotron 3 Ultra 550B A55B** running in H
 
 ## Nemotron Model Profile
 
-| Property | Value |
-|---|---|
-| Model ID | `nvidia/nemotron-3-ultra-550b-a55b` |
-| Architecture | MoE, 550B total / 55B active |
-| Context | 128K tokens |
-| Strengths | Multi-step reasoning, code generation, instruction following, tool use |
-| Provider | NVIDIA (NIM / integrate.api.nvidia.com) |
-| Hermes config | `model.default: nvidia/nemotron-3-ultra-550b-a55b`, `agent.reasoning_effort: medium` |
+Load [`../model-profile.md`](../model-profile.md). The active Hermes context
+limit—not the published model ceiling—controls batching and disclosure.
 
 ## Tool-Calling Patterns for Nemotron
 
@@ -67,10 +62,14 @@ skill_view(name="esxi-server", file_path="references/ssh-esxcli.md")
 | Target | Mode | Rationale |
 |---|---|---|
 | ESXi (standalone) | **A: atomic one-shot** | ESXi shell is restricted; no tmux, no persistence. Use `esxi-one-shot` example. |
-| Linux jump host / pfSense / guest VM | **B: persistent shell** or **C: PTY** | Full tmux/PTY support. Use `detect-remote-capabilities.sh` first. |
+| Linux jump host / guest VM | **B: persistent shell** or **C: PTY** | Use `detect-remote-capabilities.sh` first; inherit the target operation risk. |
+| pfSense | **E: network boundary** | Load `private-guest-shell`; do not use pfSense as a persistence host or general bastion. |
 | Unknown / restricted | **E: unsupported** | Stop. Do not force. |
 
 **Nemotron rule:** Default to Mode A for ESXi. Only escalate to B/C/D after `detect-remote-capabilities.sh` confirms support on a verified Linux target.
+For a guest behind pfSense, load
+[`../../private-guest-shell/SKILL.md`](../../private-guest-shell/SKILL.md)
+before selecting the stable-shell mode.
 
 ## Structured Workflow (Nemotron Multi-Step Protocol)
 

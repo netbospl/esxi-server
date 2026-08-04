@@ -17,14 +17,8 @@ Model-specific tuning for the **NVIDIA Nemotron 3 Ultra 550B A55B** running in H
 
 ## Nemotron Model Profile
 
-| Property | Value |
-|---|---|
-| Model ID | `nvidia/nemotron-3-ultra-550b-a55b` |
-| Architecture | MoE, 550B total / 55B active |
-| Context | 128K tokens |
-| Strengths | Multi-step reasoning, code generation, instruction following, tool use |
-| Provider | NVIDIA (NIM / integrate.api.nvidia.com) |
-| Hermes config | `model.default: nvidia/nemotron-3-ultra-550b-a55b`, `agent.reasoning_effort: medium` |
+Load [`../model-profile.md`](../model-profile.md). The active Hermes context
+limit—not the published model ceiling—controls batching and disclosure.
 
 ## Guest Auto-Install Reasoning Protocol
 
@@ -128,31 +122,23 @@ scp -i "${ESXI_SSH_KEY}" -o StrictHostKeyChecking=yes \
 
 ### 4. VM Creation and Deployment
 
-```bash
-# Create VM via vim-cmd (R2 - creates VM, allocates disk)
-VMID=$(ssh -i "${ESXI_SSH_KEY}" -o StrictHostKeyChecking=yes \
-    -o UserKnownHostsFile="${ESXI_KNOWN_HOSTS}" \
-    "${ESXI_USER}@${ESXI_HOST}" \
-    "vim-cmd vmsvc/createdummyvm ${VM_NAME} ${VM_DATASTORE} | awk '{print \$NF}'")
+Do not execute placeholder commands, ellipses, guessed `vim-cmd` device
+subcommands, or a partial VMX recipe. Select one proven path for the observed
+environment:
 
-# Configure VM hardware (R2 - reconfig)
-ssh -i "${ESXI_SSH_KEY}" -o StrictHostKeyChecking=yes \
-    -o UserKnownHostsFile="${ESXI_KNOWN_HOSTS}" \
-    "${ESXI_USER}@${ESXI_HOST}" \
-    "vim-cmd vmsvc/device.config ${VMID} ..."
+- use the bundled Packer templates only with compatible vCenter/licensed
+  vSphere API access and successful isolated `packer validate`;
+- otherwise use the ESXi Host Client/manual fallback described in the parent
+  reference, recording the exact firmware, guest type, disk, controllers,
+  vNIC/port group, boot order, OS ISO, and answer-media attachment;
+- use SSH/API automation only when every exact create/reconfigure/attach command
+  is documented for the observed ESXi build and independently validated before
+  approval.
 
-# Attach ISOs: guest OS ISO + answer media (R2)
-ssh -i "${ESXI_SSH_KEY}" -o StrictHostKeyChecking=yes \
-    -o UserKnownHostsFile="${ESXI_KNOWN_HOSTS}" \
-    "${ESXI_USER}@${ESXI_HOST}" \
-    "vim-cmd vmsvc/device.connect ${VMID} cdrom-300 ..."
-
-# Power on (R2 - state change)
-ssh -i "${ESXI_SSH_KEY}" -o StrictHostKeyChecking=yes \
-    -o UserKnownHostsFile="${ESXI_KNOWN_HOSTS}" \
-    "${ESXI_USER}@${ESXI_HOST}" \
-    "vim-cmd vmsvc/power.on ${VMID}"
-```
+VM creation, disk allocation, device attachment, and power-on are R2. A reused
+disk, disk wipe, or external-network attachment is R3. After creation, obtain a
+fresh VM UUID and VMID; never parse an assumed ID from an undocumented command
+shape.
 
 ### 5. Install Monitoring and Verification
 
@@ -224,7 +210,7 @@ PREFLIGHT:
   - Datastore free space > VM provisioned + 20% overhead
   - Port group exists, isolated (no external access during install)
   - VM firmware matches answer file (BIOS vs UEFI)
-ROLLBACK: vim-cmd vmsvc/destroy ${VMID} → delete answer ISO
+ROLLBACK: power off and isolate the new VM; unregister or delete disks only under the separately approved R3 scope; remove answer media after exact-path verification
 VERIFICATION: VM powered on, install screen visible, guest heartbeat (post-Tools)
 APPROVAL REQUIRED: Explicit "APPROVE R2: create and install ${VM_NAME} (${GUEST_OS}) on ${VM_DATASTORE}"
 ```
@@ -258,12 +244,13 @@ APPROVAL REQUIRED: Explicit "APPROVE R3: reinstall ${VM_NAME} and attach to exte
 
 ## Profile Variable Substitution
 
-```bash
-# Load local profile if present
-[[ -f "profiles/${ESXI_HOST}.local.md" ]] && source <(grep -E '^(DATASTORE_|ISO_|PORTGROUP_|VM_)' "profiles/${ESXI_HOST}.local.md" | sed 's/^/export /')
+Treat the local Markdown profile as data, never as shell. Copy only required,
+freshly verified fields into the protected environment:
 
-# Use in commands
-cp examples/guest-autoinstall/windows/${ANSWER_VARIANT} /tmp/guest-autoinstall/${VM_NAME}/Autounattend.xml
+```bash
+: "${ANSWER_VARIANT:?}" "${VM_NAME:?}"
+cp "examples/guest-autoinstall/windows/${ANSWER_VARIANT}" \
+  "/tmp/guest-autoinstall/${VM_NAME}/Autounattend.xml"
 ```
 
 ## Validation Gates (Before Reporting Complete)
@@ -291,7 +278,7 @@ cp examples/guest-autoinstall/windows/${ANSWER_VARIANT} /tmp/guest-autoinstall/$
 | Select variant | Match exact guest OS version + firmware | Guess; use Windows 10 for Windows 11 |
 | Validate answer file | `xmllint`, `cloud-init schema` | Skip validation; embed real secrets |
 | Generate media | Local working dir → ISO → transfer | Generate on ESXi (no tools) |
-| Create VM | `vim-cmd createdummyvm` → configure → attach → power on | Manual Host Client; skip hardware config |
+| Create VM | Proven vCenter/Packer path or documented Host Client fallback | Invent `vim-cmd` device commands; execute ellipses |
 | Monitor install | Poll power state, console, guest heartbeat | Assume 30 min = done |
 | Post-install | Install VMware Tools, verify IP, clean media | Leave answer ISO attached |
 | Network | Isolated port group during install | External network during install |

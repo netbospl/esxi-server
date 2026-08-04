@@ -15,14 +15,8 @@ Model-specific tuning for the **NVIDIA Nemotron 3 Ultra 550B A55B** running in H
 
 ## Nemotron Model Profile
 
-| Property | Value |
-|---|---|
-| Model ID | `nvidia/nemotron-3-ultra-550b-a55b` |
-| Architecture | MoE, 550B total / 55B active |
-| Context | 128K tokens |
-| Strengths | Multi-step reasoning, code generation, instruction following, tool use |
-| Provider | NVIDIA (NIM / integrate.api.nvidia.com) |
-| Hermes config | `model.default: nvidia/nemotron-3-ultra-550b-a55b`, `agent.reasoning_effort: medium` |
+Load [`../model-profile.md`](../model-profile.md). The active Hermes context
+limit—not the published model ceiling—controls batching and disclosure.
 
 ## Network-Specific Reasoning Protocol
 
@@ -157,12 +151,13 @@ APPROVAL REQUIRED: Explicit "APPROVE R3: disable sshServer ruleset for 10 min"
 
 ## Profile Variable Substitution
 
-```bash
-# Load local profile if present
-[[ -f "profiles/${ESXI_HOST}.local.md" ]] && source <(grep -E '^(PORTGROUP_|VLAN_|MGMT_|UPLINK_)' "profiles/${ESXI_HOST}.local.md" | sed 's/^/export /')
+Treat the local Markdown profile as data, never as shell. Copy only a required
+field into the protected environment after matching it to fresh inventory:
 
-# Use in commands
-esxcli network vswitch standard portgroup policy security get -p "${PORTGROUP_MANAGEMENT}"
+```bash
+: "${PORTGROUP_MANAGEMENT:?set from verified profile data and fresh inventory}"
+esxcli network vswitch standard portgroup policy security get \
+  -p "${PORTGROUP_MANAGEMENT}"
 ```
 
 ## Validation Gates (Before Reporting Complete)

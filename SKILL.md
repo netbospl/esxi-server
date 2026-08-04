@@ -169,7 +169,7 @@ invitation to retry authentication aggressively.
 | Networking | `network-firewall-ipv4-ipv6.md`, `ssh-esxcli.md` | Management VMkernel/uplink/vSwitch/VLAN/IPv4/IPv6 and console path | R2–R3; STOP without a proven management rollback path. |
 | pfSense CE documentation lookup | `pfsense-documentation-sources.md`, then one exact Netgate task page | Observe the edition/release/package version; record the current page URL and CE/Plus qualifiers | R0; documentation does not prove current state or grant change approval. STOP on version, edition, package, or source conflict. |
 | Dedibox dual-public router VM | `dedibox-dual-public-router-vm.md`, `pfsense-documentation-sources.md`, `network-firewall-ipv4-ipv6.md` | Primary/failover IP ownership, allocation-specific gateway/vMAC, forward/PTR identity, isolated LAN, OOB console | R2–R3; STOP on source conflict, duplicate IP ownership, MAC/DNS mismatch, or management drift. |
-| Private guest access through pfSense | `private-guest-access-via-pfsense.md`, `pfsense-documentation-sources.md`, `dedibox-dual-public-router-vm.md` | Proven router WAN/LAN, VPN or dedicated jump path, exact guest identity, independent host-key trust | R0 for discovery; R1–R3 for access-path or guest changes. STOP before broad WAN exposure, using pfSense as a general bastion, or conflating ESXi, router, and guest approval. |
+| Private guest shell through pfSense | `skills/private-guest-shell/SKILL.md`, `private-guest-access-via-pfsense.md`, `pfsense-documentation-sources.md`, `dedibox-dual-public-router-vm.md` | Proven router WAN/LAN, `vpn-direct`, `dedicated-jump`, or time-limited `direct-recovery`; exact guest identity and independent host-key trust | R0 for discovery; R1–R3 for access-path or guest changes. STOP before broad WAN exposure, using pfSense as a general bastion, or conflating ESXi, router, and guest approval. |
 | Single-public-IP router migration | `single-public-ip-router-migration.md`, `network-firewall-ipv4-ipv6.md` | Current owner of the public IP, OOB console, staged management and WAN/LAN design | R3; STOP without independent console access and tested rollback. |
 | Certificates | `certificates-letsencrypt.md` | Hostname/SAN, expiry, config backup, client verification | R1–R3; STOP if rollback cert/config is missing. |
 | File transfer | `file-transfers.md` | TLS trust, datastore path/free space/checksum | R1–R2; STOP on overwrite or checksum mismatch. |
@@ -253,12 +253,18 @@ Load only the reference files needed for the task:
 - [`references/guest-os-autoinstall.md`](references/guest-os-autoinstall.md)
 - [`references/troubleshooting.md`](references/troubleshooting.md)
 - [`skills/stable-ssh-shell/SKILL.md`](skills/stable-ssh-shell/SKILL.md)
+- [`skills/private-guest-shell/SKILL.md`](skills/private-guest-shell/SKILL.md)
 
 ## Nemotron 3 Ultra 550B A55B Model-Specific Sub-Skills
 
-When the active model is **NVIDIA Nemotron 3 Ultra 550B A55B** (model ID: `nvidia/nemotron-3-ultra-550b-a55b` or provider-specific equivalent), load the following Nemotron-optimized sub-skills **in addition to** the model-agnostic parent skills. These variants add structured reasoning, tool-calling patterns, and validation gates tuned for Nemotron's strengths (multi-step reasoning, code generation, instruction following, tool use).
+When the active model is **NVIDIA Nemotron 3 Ultra 550B A55B** (model ID:
+`nvidia/nemotron-3-ultra-550b-a55b` or provider-specific equivalent), load
+[`skills/nemotron-3-ultra/model-profile.md`](skills/nemotron-3-ultra/model-profile.md),
+then the model-agnostic parent and only the matching task-specific child below.
+The child supplements the parent with structured reasoning and validation gates;
+it does not replace or duplicate the parent policy.
 
-| Sub-skill | Load Instead Of | Purpose |
+| Sub-skill | Load after | Purpose |
 |---|---|---|
 | `skills/nemotron-3-ultra/stable-ssh-shell/SKILL.md` | `skills/stable-ssh-shell/SKILL.md` | Nemotron-tuned SSH workflows: marker protocol, structured tmux control, recovery patterns, ESXi vs Linux target rules |
 | `skills/nemotron-3-ultra/esxi-operations/SKILL.md` | (supplements parent) | Nemotron-tuned ESXi operations: capability probe patterns, version-aware commands, risk framing, validation gates |
@@ -266,7 +272,11 @@ When the active model is **NVIDIA Nemotron 3 Ultra 550B A55B** (model ID: `nvidi
 | `skills/nemotron-3-ultra/backup-restore/SKILL.md` | (supplements parent + `backup-restore.md`, `host-configuration-backup.md`) | Nemotron-tuned backup/restore: export/import patterns, datastore verification, validation gates |
 | `skills/nemotron-3-ultra/guest-autoinstall/SKILL.md` | (supplements parent + `guest-os-autoinstall.md`) | Nemotron-tuned guest auto-install: ISO/media generation, answer-file validation, post-install verification |
 
-**Routing rule:** If `model.default` contains `nemotron-3-ultra` or the active model ID matches `nvidia/nemotron-3-ultra*`, load the Nemotron sub-skills after their parent skills. Otherwise, use only the model-agnostic skills.
+**Routing rule:** If `model.default` contains `nemotron-3-ultra` or the active
+model ID matches `nvidia/nemotron-3-ultra*`, first load the model-agnostic
+parent, then the shared model profile, then only the task-specific Nemotron
+child. Otherwise, use only model-agnostic skills. A Nemotron child supplements
+and never replaces its parent policy.
 
 ## Completion checklist
 
@@ -288,13 +298,16 @@ Before reporting an ESXi task complete:
 ## Nemotron 3 Ultra 550B A55B Model-Specific Instructions
 
 These instructions apply when the active model is **NVIDIA Nemotron 3 Ultra 550B A55B** (model ID: `nvidia/nemotron-3-ultra-550b-a55b` or provider-specific equivalent).
+Load the shared
+[`skills/nemotron-3-ultra/model-profile.md`](skills/nemotron-3-ultra/model-profile.md)
+and treat the observed Hermes runtime limit as authoritative.
 
 ### Model Characteristics
 
 | Characteristic | Value |
 |----------------|-------|
 | Architecture | Mixture-of-Experts (MoE) with 550B total params, 55B active |
-| Context length | 128K tokens |
+| Context length | Up to 1M model ceiling; current Hermes deployment target is 64K |
 | Training focus | Reasoning, coding, instruction following, alignment |
 | Strengths | Multi-step reasoning, code generation, instruction following, tool use |
 | Provider | NVIDIA (via NVIDIA API, NIM, or compatible endpoints) |
@@ -403,11 +416,12 @@ Nemotron should reference `references/ssh-esxcli.md` for version-aware commands:
 #### 8. **Profile Variable Substitution Pattern**
 Use the local profile convention from `profiles/example-host.md`:
 
-```bash
-# Load local profile if present
-[[ -f "profiles/${ESXI_HOST}.local.md" ]] && source <(grep -E '^(DATASTORE_|PORTGROUP_|VM_)' "profiles/${ESXI_HOST}.local.md" | sed 's/^/export /')
+Treat `profiles/*.local.md` as Markdown data, never executable shell input.
+Read the relevant field, verify it against current R0 discovery, then assign it
+explicitly in the protected execution environment:
 
-# Use in commands
+```bash
+: "${VM_ROUTER_VMID:?set from a verified profile field and fresh inventory}"
 vim-cmd vmsvc/power.on "${VM_ROUTER_VMID}"
 ```
 

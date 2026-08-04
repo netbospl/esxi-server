@@ -6,6 +6,9 @@ VMs attached to the internal LAN behind a pfSense router VM. Load
 the retained-management plus secondary-public-IP topology. Load
 [`pfsense-documentation-sources.md`](pfsense-documentation-sources.md) before
 selecting a pfSense CE VPN, firewall, NAT, routing, or package procedure.
+When the requested outcome is an SSH or persistent guest shell, load
+[`../skills/private-guest-shell/SKILL.md`](../skills/private-guest-shell/SKILL.md)
+for outer-path selection and stable-shell handoff.
 
 The secondary public address is only an outer endpoint on pfSense. It does not
 make private guest addresses Internet-routable, identify a guest, or grant

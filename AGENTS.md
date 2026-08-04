@@ -21,9 +21,10 @@ This repository is an experimental, AI-assisted ESXi Server Skill for coding and
    - `references/dedibox-dual-public-router-vm.md` when ESXi keeps its public
      management IP and a provider failover `/32` plus virtual MAC belongs to a
      router VM.
-   - `references/private-guest-access-via-pfsense.md` when an external agent
-     must reach a guest on the router's private LAN by VPN or a dedicated jump
-     host.
+   - `skills/private-guest-shell/SKILL.md`, then
+     `references/private-guest-access-via-pfsense.md`, when an external agent
+     must open a shell to a guest on the router's private LAN by VPN, a
+     dedicated jump VM, or an approved time-limited recovery mapping.
    - `skills/stable-ssh-shell/SKILL.md` when SSH work needs persistent remote
      state, deterministic tmux/PTY control, detached execution, or recovery
      after a transport loss. Direct ESXi remains one-shot/restricted; never
@@ -39,14 +40,16 @@ This repository is an experimental, AI-assisted ESXi Server Skill for coding and
 10. Follow the canonical R0–R3 model in `SKILL.md`: every R1–R3 state change requires explicit confirmation naming the exact target; R2 requires downtime approval and R3 requires a second data/access-loss acknowledgement.
 11. Validate RAM, datastore free space, networking, and VM power state before making changes.
 12. Verify after changes, then summarize what changed and what remains.
-13. Keep documentation edits concise, practical, and consistent with ESXi standalone host behavior.
-14. Test every helper through local mocks only; never point repository tests at an ESXi host.
-15. In Hermes, keep facts, hypotheses, the next bounded R0 check, and any
+13. Test every helper through local mocks only; never point repository tests at an ESXi host.
+14. In Hermes, keep facts, hypotheses, the next bounded R0 check, and any
     R1-R3 change gate separate. General IT knowledge may select a diagnostic
     question but never proves ESXi command compatibility or grants approval.
-16. In Hermes, use the local terminal plus guarded OpenSSH for direct ESXi.
+15. In Hermes, use the local terminal plus guarded OpenSSH for direct ESXi.
     Hermes SSH environments that require remote Bash or file synchronisation
     are for verified compatible management or guest hosts, not ESXi.
+16. Treat pfSense as a VPN/firewall/router boundary, not a persistent-shell or
+    general SSH-bastion target. Establish the outer route first, then use an
+    independently trusted credential and host key for the final private guest.
 
 ## Host-profile convention
 

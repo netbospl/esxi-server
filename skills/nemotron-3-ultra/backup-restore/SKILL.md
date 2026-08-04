@@ -17,14 +17,8 @@ Model-specific tuning for the **NVIDIA Nemotron 3 Ultra 550B A55B** running in H
 
 ## Nemotron Model Profile
 
-| Property | Value |
-|---|---|
-| Model ID | `nvidia/nemotron-3-ultra-550b-a55b` |
-| Architecture | MoE, 550B total / 55B active |
-| Context | 128K tokens |
-| Strengths | Multi-step reasoning, code generation, instruction following, tool use |
-| Provider | NVIDIA (NIM / integrate.api.nvidia.com) |
-| Hermes config | `model.default: nvidia/nemotron-3-ultra-550b-a55b`, `agent.reasoning_effort: medium` |
+Load [`../model-profile.md`](../model-profile.md). The active Hermes context
+limit—not the published model ceiling—controls batching and disclosure.
 
 ## Backup/Restore-Specific Reasoning Protocol
 
@@ -71,7 +65,7 @@ ssh -i "${ESXI_SSH_KEY}" -o StrictHostKeyChecking=yes \
      esxcli storage filesystem list --formatter=csv | grep <DATASTORE>'
 ```
 
-### 2. VM Export (OVF/OVA) - R1
+### 2. VM Export (OVF/OVA) - R1 or R2
 
 ```bash
 # Get VMID first (never guess)
@@ -80,14 +74,23 @@ VMID=$(ssh -i "${ESXI_SSH_KEY}" -o StrictHostKeyChecking=yes \
     "${ESXI_USER}@${ESXI_HOST}" \
     'vim-cmd vmsvc/getallvms' | awk -v name="${VM_NAME}" '$2==name {print $1}')
 
-# Export - requires VM powered off for consistent state
+# A required power-off is a separate R2 action. Run only after approval and
+# retain the observed pre-change power state for restoration.
 ssh -i "${ESXI_SSH_KEY}" -o StrictHostKeyChecking=yes \
     -o UserKnownHostsFile="${ESXI_KNOWN_HOSTS}" \
     "${ESXI_USER}@${ESXI_HOST}" \
-    "vim-cmd vmsvc/power.off ${VMID} &&
-     ovftool --noSSLVerify 'vi://${ESXI_USER}:${ESXI_PASS}@${ESXI_HOST}/${VMID}' \
-     '/vmfs/volumes/${DATASTORE}/exports/${VM_NAME}.ova'"
+    "vim-cmd vmsvc/power.off ${VMID}"
+
+# Run ovftool on the management workstation, not inside the ESXi shell.
+# Trust the exact ESXi certificate and let ovftool prompt for the password.
+: "${VM_INVENTORY_PATH:?}" "${OVFTOOL_OUTPUT_DIR:?}"
+ovftool "vi://${ESXI_USER}@${ESXI_HOST}/${VM_INVENTORY_PATH}" \
+  "${OVFTOOL_OUTPUT_DIR}/${VM_NAME}.ova"
 ```
+
+Do not embed `ESXI_PASS` in a URI or command line and do not add a TLS-bypass
+flag. STOP if certificate verification fails or the destination already exists
+without explicit overwrite approval.
 
 ### 3. Datastore File Copy - R1
 
@@ -113,13 +116,17 @@ ssh -i "${ESXI_SSH_KEY}" -o StrictHostKeyChecking=yes \
 ssh -i "${ESXI_SSH_KEY}" -o StrictHostKeyChecking=yes \
     -o UserKnownHostsFile="${ESXI_KNOWN_HOSTS}" \
     "${ESXI_USER}@${ESXI_HOST}" \
-    "vim-cmd vmsvc/snapshot.get ${VMID}"
+    "vim-cmd vmsvc/get.snapshot ${VMID}"
+
+# Select the ID from the freshly observed tree and match its name/path to the
+# approved rollback point. Never assume snapshot ID 0.
+: "${SNAPSHOT_ID:?set from fresh get.snapshot output and exact approval}"
 
 # Revert if needed (R2 - service disruptive)
 ssh -i "${ESXI_SSH_KEY}" -o StrictHostKeyChecking=yes \
     -o UserKnownHostsFile="${ESXI_KNOWN_HOSTS}" \
     "${ESXI_USER}@${ESXI_HOST}" \
-    "vim-cmd vmsvc/snapshot.revert ${VMID} 0"
+    "vim-cmd vmsvc/snapshot.revert ${VMID} ${SNAPSHOT_ID} 0"
 ```
 
 ### 5. Structured Output Parsing
@@ -157,7 +164,7 @@ for c in cmds:
 
 | Method | Use Case | Risk | Space Required |
 |---|---|---|---|
-| VM Export (OVF/OVA) | Full VM backup, migration | R1 (export), R2 (import) | 2x VM size on datastore |
+| VM Export (OVF/OVA) | Full VM backup, migration | R1 if already off; R2 for power-off/import | Destination capacity plus working margin |
 | Datastore File Copy | Clone VMDK, move between datastores | R1 (copy), R2 (overwrite) | 1x VM size on destination |
 | Snapshot Staging | Pre-change rollback point | R1 (create), R2 (revert) | Grows with changes |
 | Host Config Backup | ESXi host config only | R2 (restore) | ~10-50MB |
@@ -167,17 +174,17 @@ for c in cmds:
 ## Risk Classification & Approval Framing
 
 ```text
-RISK CLASS: R1 (reversible: VM export to OVF/OVA)
+RISK CLASS: R2 when export requires a service-disruptive VM power-off
 TARGET: ESXi host ${ESXI_HOST}, VM "${VM_NAME}" (VMID=${VMID}), datastore ${DATASTORE}
-CHANGE: Power off VM → ovftool export → power on VM
+CHANGE: Preserve power state → approved power-off → local ovftool export → restore power state
 PREFLIGHT:
   - VM powered off confirmed
-  - Datastore free space > 2x VM provisioned size
+  - Management-workstation destination capacity is sufficient
   - No active snapshots on VM
   - ovftool available on management workstation
-ROLLBACK: Delete exported OVA; power on VM if was on
+ROLLBACK: Remove the incomplete export only after exact-path verification; restore the observed power state
 VERIFICATION: File exists, size > 0, sha256 matches source (if computed)
-APPROVAL REQUIRED: Explicit "APPROVE R1: export ${VM_NAME} to OVA on ${DATASTORE}"
+APPROVAL REQUIRED: Explicit "APPROVE R2: power off and export ${VM_NAME} to ${OVFTOOL_OUTPUT_DIR}"
 ```
 
 ```text
@@ -210,13 +217,15 @@ APPROVAL REQUIRED: Explicit "APPROVE R3: restore ${VM_NAME} from OVA, overwritin
 
 ## Profile Variable Substitution
 
-```bash
-# Load local profile if present
-[[ -f "profiles/${ESXI_HOST}.local.md" ]] && source <(grep -E '^(DATASTORE_|VM_|BACKUP_)' "profiles/${ESXI_HOST}.local.md" | sed 's/^/export /')
+Treat the local Markdown profile as data, never as shell. Copy only required,
+freshly verified fields into the protected management-workstation environment.
+Keep the password out of the URI and let `ovftool` prompt for it:
 
-# Use in commands
-ovftool --noSSLVerify "vi://${ESXI_USER}:${ESXI_PASS}@${ESXI_HOST}/${VM_ROUTER_VMID}" \
-  "/vmfs/volumes/${DATASTORE_BACKUP}/exports/${VM_ROUTER}.ova"
+```bash
+: "${ESXI_HOST:?}" "${ESXI_USER:?}" "${VM_ROUTER:?}" \
+  "${OVFTOOL_OUTPUT_DIR:?}"
+ovftool "vi://${ESXI_USER}@${ESXI_HOST}/${VM_ROUTER}" \
+  "${OVFTOOL_OUTPUT_DIR}/${VM_ROUTER}.ova"
 ```
 
 ## Validation Gates (Before Reporting Complete)

@@ -13,14 +13,8 @@ Model-specific tuning for the **NVIDIA Nemotron 3 Ultra 550B A55B** running in H
 
 ## Nemotron Model Profile
 
-| Property | Value |
-|---|---|
-| Model ID | `nvidia/nemotron-3-ultra-550b-a55b` |
-| Architecture | MoE, 550B total / 55B active |
-| Context | 128K tokens |
-| Strengths | Multi-step reasoning, code generation, instruction following, tool use |
-| Provider | NVIDIA (NIM / integrate.api.nvidia.com) |
-| Hermes config | `model.default: nvidia/nemotron-3-ultra-550b-a55b`, `agent.reasoning_effort: medium` |
+Load [`../model-profile.md`](../model-profile.md). The active Hermes context
+limit—not the published model ceiling—controls batching and disclosure.
 
 ## ESXi-Specific Reasoning Protocol
 
@@ -154,11 +148,11 @@ APPROVAL REQUIRED: Explicit "APPROVE R2: vmk0 re-IP to 10.10.10.50/24"
 
 ## Profile Variable Substitution
 
-```bash
-# Load local profile if present (from profiles/example-host.md convention)
-[[ -f "profiles/${ESXI_HOST}.local.md" ]] && source <(grep -E '^(DATASTORE_|PORTGROUP_|VM_)' "profiles/${ESXI_HOST}.local.md" | sed 's/^/export /')
+Treat the local Markdown profile as data, never as shell. Copy only a required
+field into the protected environment after matching it to fresh inventory:
 
-# Use in commands
+```bash
+: "${VM_ROUTER_VMID:?set from verified profile data and fresh inventory}"
 vim-cmd vmsvc/power.on "${VM_ROUTER_VMID}"
 ```
 
