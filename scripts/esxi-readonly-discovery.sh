@@ -8,6 +8,8 @@ MAX_TIME=${ESXI_MAX_TIME:-30}
 RETRIES=${ESXI_READONLY_RETRIES:-1}
 REPORT_FILE=${ESXI_DISCOVERY_REPORT:-}
 REPORT_JSON=${ESXI_DISCOVERY_REPORT_JSON:-}
+REPORT_FD=''
+REPORT_JSON_FD=''
 ACCEPT_NEW_HOST_KEY=0
 NO_SSH=0
 NO_REST=0
@@ -25,7 +27,9 @@ AUTH_FAILURES=0
 AUTHZ_FAILURES=0
 DISCOVERY_RESULT=BLOCKED
 JSON_RECORDS=$(mktemp "${TMPDIR:-/tmp}/esxi-discovery-records.XXXXXX")
-trap 'rm -f "$JSON_RECORDS"' EXIT
+CURL_NETRC=''
+CURL_SESSION_HEADER=''
+trap 'rm -f "$JSON_RECORDS" "$CURL_NETRC" "$CURL_SESSION_HEADER"' EXIT
 
 usage() {
   cat <<'EOF'
@@ -82,8 +86,8 @@ fi
 
 report() {
   printf '%s\n' "$1"
-  if [[ -n $REPORT_FILE ]]; then
-    printf '%s\n' "$1" >>"$REPORT_FILE"
+  if [[ -n $REPORT_FD ]]; then
+    printf '%s\n' "$1" >&"$REPORT_FD"
   fi
 }
 section() { report ""; report "=== $1 ==="; }
@@ -95,15 +99,22 @@ mark_auth_failure() { AUTH_FAILURES=$((AUTH_FAILURES + 1)); mark_issue; }
 mark_authz_failure() { AUTHZ_FAILURES=$((AUTHZ_FAILURES + 1)); mark_issue; }
 
 prepare_report_path() {
-  local path=$1
+  local path=$1 kind=$2 status was_noclobber=0
   [[ -z $path ]] && return 0
   [[ ! -L $path ]] || stop "refusing symlink report path: $path"
   mkdir -p "$(dirname "$path")"
-  [[ ! -e $path ]] || stop "refusing to overwrite report: $path"
-  : >"$path"
+  [[ -o noclobber ]] && was_noclobber=1
+  set -C
+  case $kind in
+    text) if { exec {REPORT_FD}>"$path"; } 2>/dev/null; then status=0; else status=$?; fi ;;
+    json) if { exec {REPORT_JSON_FD}>"$path"; } 2>/dev/null; then status=0; else status=$?; fi ;;
+    *) status=2 ;;
+  esac
+  (( was_noclobber )) || set +C
+  (( status == 0 )) || stop "refusing to overwrite or follow report path: $path"
 }
-prepare_report_path "$REPORT_FILE"
-prepare_report_path "$REPORT_JSON"
+prepare_report_path "$REPORT_FILE" text
+prepare_report_path "$REPORT_JSON" json
 
 _tls_args=()
 if [[ ${ESXI_INSECURE_TLS:-0} == 1 ]]; then
@@ -111,14 +122,55 @@ if [[ ${ESXI_INSECURE_TLS:-0} == 1 ]]; then
 elif [[ -n ${ESXI_CA_BUNDLE:-} ]]; then
   _tls_args+=(--cacert "$ESXI_CA_BUNDLE")
 fi
-curl_base=(curl --silent --show-error --connect-timeout "$CONNECT_TIMEOUT" --max-time "$MAX_TIME" --retry "$RETRIES" --retry-delay 1 --retry-connrefused)
+curl_base=(curl --silent --show-error --connect-timeout "$CONNECT_TIMEOUT" --max-time "$MAX_TIME")
+
+netrc_quote() {
+  local value=$1
+  [[ $value != *$'\n'* && $value != *$'\r'* ]] || return 1
+  value=${value//\\/\\\\}
+  value=${value//\"/\\\"}
+  printf '"%s"' "$value"
+}
+
+prepare_curl_netrc() {
+  local host_token user_token password_token
+  [[ -n $CURL_NETRC ]] && return 0
+  if ! host_token=$(netrc_quote "$ESXI_HOST") ||
+     ! user_token=$(netrc_quote "$ESXI_USER") ||
+     ! password_token=$(netrc_quote "${ESXI_PASS:?ESXI_PASS is required}"); then
+    printf 'error: ESXi netrc values must not contain CR or LF characters\n' >&2
+    return 1
+  fi
+  CURL_NETRC=$(mktemp "${TMPDIR:-/tmp}/esxi-discovery-netrc.XXXXXX")
+  chmod 600 "$CURL_NETRC"
+  printf 'machine %s\nlogin %s\npassword %s\n' \
+    "$host_token" "$user_token" "$password_token" >"$CURL_NETRC"
+}
+
+prepare_curl_session_header() {
+  local session=$1
+  if [[ -z $CURL_SESSION_HEADER ]]; then
+    CURL_SESSION_HEADER=$(mktemp "${TMPDIR:-/tmp}/esxi-discovery-header.XXXXXX")
+    chmod 600 "$CURL_SESSION_HEADER"
+  fi
+  printf 'vmware-api-session-id: %s\n' "$session" >"$CURL_SESSION_HEADER"
+}
 
 # Sets RESPONSE_BODY and RESPONSE_STATUS. Curl failures are transport/TLS failures.
 http_request() {
-  local method=$1 url=$2 auth=${3:-} session=${4:-} response
+  local method=$1 url=$2 basic_auth=${3:-0} session=${4:-} response
   local -a args=("${curl_base[@]}" "${_tls_args[@]}" -X "$method" -w $'\n%{http_code}')
-  [[ -n $auth ]] && args+=(-u "$auth")
-  [[ -n $session ]] && args+=(-H "vmware-api-session-id: $session")
+  if [[ $method == GET && $RETRIES != 0 ]]; then
+    args+=(--retry "$RETRIES" --retry-delay 1 --retry-connrefused)
+  fi
+  if (( basic_auth )); then
+    prepare_curl_netrc
+    args+=(--netrc-file "$CURL_NETRC")
+  fi
+  if [[ -n $session ]]; then
+    prepare_curl_session_header "$session"
+    args+=(-H "@$CURL_SESSION_HEADER")
+  fi
   response=$("${args[@]}" "$url" 2>&1) || return 1
   RESPONSE_STATUS=${response##*$'\n'}
   RESPONSE_BODY=${response%$'\n'*}
@@ -138,11 +190,38 @@ classify_http() {
 fingerprints_for_file() { ssh-keygen -lf "$1" 2>/dev/null | awk '{print $2}' | sort -u; }
 known_fingerprints() { ssh-keygen -F "$ESXI_HOST" -f "$ESXI_KNOWN_HOSTS" 2>/dev/null | ssh-keygen -lf - 2>/dev/null | awk '{print $2}' | sort -u; }
 
+prepare_known_hosts() {
+  local directory owner mode permissions status was_noclobber=0
+  directory=$(dirname "$ESXI_KNOWN_HOSTS")
+  mkdir -p "$directory"
+  [[ -d $directory && ! -L $directory ]] || stop "refusing unsafe known-hosts directory: $directory"
+  owner=$(stat -c '%u' "$directory")
+  mode=$(stat -c '%a' "$directory")
+  permissions=$((8#$mode))
+  [[ $owner == "$EUID" && $((permissions & 022)) == 0 ]] ||
+    stop "known-hosts directory must be owned by the current user and not group/world writable: $directory"
+  if [[ -e $ESXI_KNOWN_HOSTS || -L $ESXI_KNOWN_HOSTS ]]; then
+    [[ -f $ESXI_KNOWN_HOSTS && ! -L $ESXI_KNOWN_HOSTS ]] ||
+      stop "refusing non-regular or symlink known-hosts path: $ESXI_KNOWN_HOSTS"
+    owner=$(stat -c '%u' "$ESXI_KNOWN_HOSTS")
+    mode=$(stat -c '%a' "$ESXI_KNOWN_HOSTS")
+    permissions=$((8#$mode))
+    [[ $owner == "$EUID" && $((permissions & 022)) == 0 ]] ||
+      stop "known-hosts file must be owned by the current user and not group/world writable: $ESXI_KNOWN_HOSTS"
+    return 0
+  fi
+  [[ -o noclobber ]] && was_noclobber=1
+  set -C
+  if : 2>/dev/null >"$ESXI_KNOWN_HOSTS"; then status=0; else status=$?; fi
+  (( was_noclobber )) || set +C
+  (( status == 0 )) || stop "could not create known-hosts file exclusively: $ESXI_KNOWN_HOSTS"
+}
+
 verify_ssh_host_key() {
   local candidate candidate_fps known candidate_fp
   (( NO_SSH )) && { SSH_DISABLED=1; section 'SSH'; report 'SKIPPED: SSH disabled by --no-ssh.'; record ssh host-key skipped 'disabled by option'; return 0; }
   [[ -n ${ESXI_SSH_KEY:-} ]] || { SSH_DISABLED=1; mark_issue; section 'SSH'; report 'SSH unavailable: ESXI_SSH_KEY is not set.'; record ssh host-key unavailable 'key not configured'; return 0; }
-  mkdir -p "$(dirname "$ESXI_KNOWN_HOSTS")"; touch "$ESXI_KNOWN_HOSTS"
+  prepare_known_hosts
   candidate=$(mktemp "${TMPDIR:-/tmp}/esxi-host-key.XXXXXX")
   if ! ssh-keyscan -T "$CONNECT_TIMEOUT" -H "$ESXI_HOST" >"$candidate" 2>/dev/null || [[ ! -s $candidate ]]; then
     rm -f "$candidate"; SSH_DISABLED=1; mark_issue
@@ -227,7 +306,7 @@ create_rest_session() {
     record rest session disabled 'password not configured'
     return 1
   fi
-  if ! http_request POST "https://$ESXI_HOST/api/session" "$ESXI_USER:$ESXI_PASS"; then
+  if ! http_request POST "https://$ESXI_HOST/api/session" 1; then
     REST_DISABLED=1; mark_issue
     report 'REST: transport/TLS unavailable while creating session.'
     record rest session unavailable 'transport or TLS'
@@ -261,7 +340,7 @@ create_rest_session() {
       return 1
       ;;
   esac
-  if ! http_request POST "https://$ESXI_HOST/rest/com/vmware/cis/session" "$ESXI_USER:$ESXI_PASS"; then
+  if ! http_request POST "https://$ESXI_HOST/rest/com/vmware/cis/session" 1; then
     REST_DISABLED=1; mark_issue
     report 'REST: transport/TLS unavailable on the legacy session endpoint.'
     record rest session unavailable 'legacy transport or TLS'
@@ -305,12 +384,18 @@ run_https_probe() {
         mark_issue; report 'FAILED: reachability/TLS transport unavailable.'; record https "$label" unavailable 'transport or TLS'; return 0
       fi
       ;;
+    sdk)
+      kind=sdk
+      if ! http_request GET "https://$ESXI_HOST$endpoint"; then
+        mark_issue; report 'FAILED: SDK reachability/TLS transport unavailable.'; record sdk "$label" unavailable 'transport or TLS'; return 0
+      fi
+      ;;
     basic)
       kind=https-basic
       if [[ -z ${ESXI_PASS:-} ]]; then
         mark_issue; report 'SKIPPED: ESXI_PASS is required for the Basic Auth probe.'; record "$kind" "$label" skipped 'password not configured'; return 0
       fi
-      if ! http_request GET "https://$ESXI_HOST$endpoint" "$ESXI_USER:$ESXI_PASS"; then
+      if ! http_request GET "https://$ESXI_HOST$endpoint" 1; then
         mark_issue; report 'FAILED: Basic Auth transport/TLS unavailable.'; record "$kind" "$label" unavailable 'transport or TLS'; return 0
       fi
       ;;
@@ -318,12 +403,18 @@ run_https_probe() {
       kind=rest
       (( REST_DISABLED )) && { report 'SKIPPED: REST disabled after the session result.'; record rest "$label" skipped disabled; return 0; }
       [[ -n $REST_SESSION ]] || create_rest_session || { report 'SKIPPED: authenticated REST probe unavailable.'; record rest "$label" skipped unavailable; return 0; }
-      if ! http_request GET "https://$ESXI_HOST$endpoint" '' "$REST_SESSION"; then
+      if ! http_request GET "https://$ESXI_HOST$endpoint" 0 "$REST_SESSION"; then
         mark_issue; report 'FAILED: REST transport/TLS unavailable.'; record rest "$label" unavailable 'transport or TLS'; return 0
       fi
       ;;
     *) stop "internal error: unknown HTTPS auth mode: $auth_mode" ;;
   esac
+  if [[ $auth_mode == sdk && $RESPONSE_STATUS == 405 ]]; then
+    report 'RESULT: reachable, probe method not allowed (HTTP 405).'
+    record sdk "$label" reachable 'method not allowed'
+    mark_safe_path
+    return 0
+  fi
   classification=$(classify_http "$RESPONSE_STATUS")
   report "RESULT: $classification (HTTP $RESPONSE_STATUS)."
   record "$kind" "$label" "$classification" "$RESPONSE_STATUS"
@@ -344,22 +435,21 @@ urlencode() {
 
 cleanup() {
   [[ -z $REST_SESSION || -z $REST_SESSION_ENDPOINT ]] && return 0
-  http_request DELETE "https://$ESXI_HOST$REST_SESSION_ENDPOINT" '' "$REST_SESSION" >/dev/null 2>&1 || true
+  http_request DELETE "https://$ESXI_HOST$REST_SESSION_ENDPOINT" 0 "$REST_SESSION" >/dev/null 2>&1 || true
   REST_SESSION=''
 }
-trap 'cleanup; rm -f "$JSON_RECORDS"' EXIT
+trap 'cleanup; rm -f "$JSON_RECORDS" "$CURL_NETRC" "$CURL_SESSION_HEADER"' EXIT
 
 write_json() {
   [[ -z $REPORT_JSON ]] && return 0
-  python3 - "$JSON_RECORDS" "$REPORT_JSON" "$REPORT_HOST" "$REPORT_USER" "$DISCOVERY_RESULT" <<'PY'
+  python3 - "$JSON_RECORDS" "$REPORT_HOST" "$REPORT_USER" "$DISCOVERY_RESULT" >&"$REPORT_JSON_FD" <<'PY'
 import json, sys
 records=[]
 for line in open(sys.argv[1], encoding='utf-8'):
     kind, label, status, detail = line.rstrip('\n').split('\x1f', 3)
     records.append({'kind': kind, 'label': label, 'status': status, 'detail': detail})
-with open(sys.argv[2], 'w', encoding='utf-8') as output:
-    json.dump({'host': sys.argv[3], 'user': sys.argv[4], 'result': sys.argv[5], 'probes': records}, output, ensure_ascii=False, indent=2)
-    output.write('\n')
+json.dump({'host': sys.argv[2], 'user': sys.argv[3], 'result': sys.argv[4], 'probes': records}, sys.stdout, ensure_ascii=False, indent=2)
+sys.stdout.write('\n')
 PY
 }
 
@@ -396,17 +486,13 @@ run_ssh 'Port groups' 'esxcli network vswitch standard portgroup list'
   folder_endpoint='/folder?dcPath=ha-datacenter'
   if [[ -n ${ESXI_DATASTORE:-} ]]; then folder_endpoint+="&dsName=$(urlencode "$ESXI_DATASTORE")"; fi
   run_https_probe 'Datastore browser' "$folder_endpoint" basic
-  run_https_probe 'HTTPS SDK' '/sdk' none
-  run_https_probe 'REST VM listing' '/api/vcenter/vm' rest
-  if [[ ${RESPONSE_STATUS:-} == 404 && $REST_DISABLED == 0 ]]; then
-    run_https_probe 'Legacy REST VM listing' '/rest/vcenter/vm' rest
-  fi
-  if [[ $REST_SESSION_ENDPOINT == /rest/* ]]; then
-    run_https_probe 'Legacy REST datastore listing' '/rest/vcenter/datastore' rest
-    run_https_probe 'Legacy REST network listing' '/rest/vcenter/network' rest
+  run_https_probe 'HTTPS SDK' '/sdk' sdk
+  section 'REST session capability'
+  if create_rest_session; then
+    report "RESULT: authenticated session creation is supported at $REST_SESSION_ENDPOINT."
+    mark_safe_path
   else
-    run_https_probe 'REST datastore listing' '/api/vcenter/datastore' rest
-    run_https_probe 'REST network listing' '/api/vcenter/network' rest
+    report 'RESULT: no authenticated REST session was established; use the SDK or SSH capability already observed.'
   fi
 }
 (( NO_REST )) && { section 'HTTPS/REST'; report 'SKIPPED: REST disabled by --no-rest.'; record rest all skipped 'disabled by option'; }

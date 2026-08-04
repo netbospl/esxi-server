@@ -20,7 +20,8 @@ esxcli network firewall ruleset list
 For a known standard port group, inspect its effective security overrides:
 
 ```bash
-esxcli network vswitch standard portgroup policy security get -p "<PORTGROUP>"
+: "${PORTGROUP:?set the observed standard port-group name}"
+esxcli network vswitch standard portgroup policy security get -p "$PORTGROUP"
 ```
 
 ## Working rules

@@ -27,8 +27,9 @@ a directory accessible only to the local user.
 Lifecycle:
 
 ```bash
-ssh -S '<CONTROL_PATH>' -O check '<HOST_ALIAS>'
-ssh -S '<CONTROL_PATH>' -O exit '<HOST_ALIAS>'
+: "${CONTROL_PATH:?}" "${HOST_ALIAS:?}"
+ssh -S "$CONTROL_PATH" -O check "$HOST_ALIAS"
+ssh -S "$CONTROL_PATH" -O exit "$HOST_ALIAS"
 ```
 
 Check a socket before reuse. Treat a failed check as stale/unavailable; do not
@@ -51,5 +52,5 @@ Never disable strict host-key checking, direct the known-hosts database to a
 null device, enable agent forwarding by default, or force TTY allocation for
 every connection.
 
-Inspect live `ssh -G <alias>` output before relying on merged configuration,
+Inspect live `ssh -G "$HOST_ALIAS"` output before relying on merged configuration,
 without printing protected identity paths into public reports.

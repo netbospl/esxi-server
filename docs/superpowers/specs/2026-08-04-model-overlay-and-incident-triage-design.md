@@ -1,12 +1,18 @@
 # Model overlay and incident triage design
 
+**Status:** Implemented in the ESXi skill repair worktree. The subsequent
+repair request expanded the focused overlay release to include the first three
+operational backlog items: certificate lifecycle, transfer/import-export, and
+patch/upgrade readiness. The canonical-reference changes follow the same root
+policy and mock-only validation boundaries.
+
 ## Purpose
 
 Extend the repository with a reusable contract for model-specific guidance,
 close the highest-value Nemotron coverage gaps, and add model-agnostic incident
 triage without creating parallel sources of operational truth.
 
-The next release will deliver a focused implementation plus a ranked backlog.
+This release delivers a focused implementation plus a ranked backlog.
 It will preserve the repository's documentation-first design, canonical R0-R3
 approval model, local-only secret handling, and mock-only test boundary.
 
@@ -177,15 +183,12 @@ The focused release contains four workstreams:
 - No attempt to provide complete task overlays for every model and ESXi task.
 - No host-specific data, credentials, private inventory, or generated logs.
 
-## Ranked future backlog
+## Ranked remaining backlog
 
-1. Certificate lifecycle and trust-chain operations.
-2. Artifact transfer plus VM import/export.
-3. ESXi patch/upgrade readiness, maintenance, and rollback planning.
-4. Router/pfSense and single-public-IP migration overlays.
-5. Datastore capacity, snapshot consolidation, and reclamation workflows.
-6. Read-only security posture audit.
-7. Evaluation fixtures for GPT/Codex, Claude, and Gemini, followed by named
+1. Router/pfSense and single-public-IP migration overlays.
+2. Datastore capacity, snapshot consolidation, and reclamation workflows.
+3. Read-only security posture audit.
+4. Evaluation fixtures for GPT/Codex, Claude, and Gemini, followed by named
    profiles only where observed behavior justifies them.
 
 Each backlog item will use its own specification, plan, implementation, and

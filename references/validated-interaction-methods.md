@@ -33,24 +33,44 @@ These checks were validated against a standalone ESXi 7.x host using local crede
 
 ## Safe probe snippets
 
-Do not paste real passwords into chat, logs, or committed files. These examples assume environment variables are already populated from a local secret source.
+Do not paste real passwords into chat, logs, command arguments, or committed
+files. Prefer the guarded discovery helper, which creates and cleans a
+mode-0600 credential file. For a manual protected probe:
 
 ```bash
 : "${ESXI_HOST:?ESXI_HOST is required}"
 : "${ESXI_USER:=agent}"
 : "${ESXI_PASS:?ESXI_PASS is required for HTTPS auth}"
+: "${ESXI_CA_BUNDLE:?a verified CA bundle is required}"
+: "${ESXI_DATASTORE:?set an observed datastore name}"
 
-tls_args=()
-if [[ -n ${ESXI_CA_BUNDLE:-} ]]; then
-  tls_args+=(--cacert "$ESXI_CA_BUNDLE")
-fi
+NETRC_FILE=$(mktemp "${TMPDIR:-/tmp}/esxi-probe-netrc.XXXXXX")
+trap 'rm -f "$NETRC_FILE"' EXIT
+chmod 600 "$NETRC_FILE"
+netrc_quote() {
+  local value=$1
+  [[ $value != *$'\n'* && $value != *$'\r'* ]] || return 1
+  value=${value//\\/\\\\}
+  value=${value//\"/\\\"}
+  printf '"%s"' "$value"
+}
+HOST_TOKEN=$(netrc_quote "$ESXI_HOST") || exit 2
+USER_TOKEN=$(netrc_quote "$ESXI_USER") || exit 2
+PASS_TOKEN=$(netrc_quote "$ESXI_PASS") || exit 2
+printf 'machine %s\nlogin %s\npassword %s\n' \
+  "$HOST_TOKEN" "$USER_TOKEN" "$PASS_TOKEN" >"$NETRC_FILE"
 
-curl --silent --show-error --fail "${tls_args[@]}" \
+curl --silent --show-error --fail --connect-timeout 10 --max-time 30 \
+  --cacert "$ESXI_CA_BUNDLE" \
   "https://$ESXI_HOST/ui/" >/dev/null
 
-curl --silent --show-error --fail "${tls_args[@]}" \
-  -u "$ESXI_USER:$ESXI_PASS" \
-  "https://$ESXI_HOST/folder?dcPath=ha-datacenter&dsName=<datastore>" \
+DATASTORE_QUERY=$(python3 -c \
+  'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' \
+  "$ESXI_DATASTORE")
+curl --silent --show-error --fail --connect-timeout 10 --max-time 30 \
+  --cacert "$ESXI_CA_BUNDLE" \
+  --netrc-file "$NETRC_FILE" \
+  "https://$ESXI_HOST/folder?dcPath=ha-datacenter&dsName=$DATASTORE_QUERY" \
   >/dev/null
 ```
 

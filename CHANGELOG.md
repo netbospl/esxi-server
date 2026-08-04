@@ -31,6 +31,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   or time-limited recovery access with the existing stable-shell helpers.
 - Shared Nemotron 3 Ultra runtime profile that separates the published model
   ceiling from the active Hermes context limit.
+- Host patch/upgrade reference with exact-build compatibility, signed-image,
+  evacuation, backup, out-of-band recovery, rollback, and verification gates.
+- Canonical incident-triage skill, model-overlay contract, Hermes harness
+  adapter, and mock-only policy validators with negative fixtures.
 
 ### Changed
 - Reviewed and clarified ESXi skill safety guidance.
@@ -55,3 +59,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Routed Hermes direct ESXi work through guarded local OpenSSH while reserving
   Bash-dependent SSH environments and remote persistence for verified
   compatible Linux management, jump, or guest hosts.
+- Rebuilt the root skill as the single R0-R3 policy and task router; corrected
+  ESXCLI formatter placement/support and separated standalone ESXi capability
+  discovery from vCenter-only REST inventory routes.
+- Reworked certificate, transfer, OVF import/export, and patch guidance around
+  current Broadcom sources, explicit trust, exact object identity, collision,
+  compatibility, and rollback checks.
+- Removed passwords from curl process arguments by using short-lived mode-0600
+  credential files, and reduced Nemotron task skills to validated reasoning-only
+  overlays over canonical parents.

@@ -20,6 +20,8 @@ status=$?
 set -e
 [[ $status == 0 ]] || { cat "$work/report.txt" >&2; exit "$status"; }
 [[ $(grep -c -- ' -X POST ' "$work/curl.log") == 1 ]] || { echo 'FAIL: REST session attempted more than once' >&2; exit 1; }
+grep -Fq -- '--netrc-file ' "$work/curl.log" || { echo 'FAIL: protected credential file not used' >&2; exit 1; }
+! grep -Fq 'secret-pass' "$work/curl.log" || { echo 'FAIL: password leaked into curl arguments' >&2; exit 1; }
 grep -Fq 'SSH unavailable' "$work/report.txt" || { echo 'FAIL: SSH fallback missing' >&2; exit 1; }
 python3 - "$work/report.json" <<'PY'
 import json, sys

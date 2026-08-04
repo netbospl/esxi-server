@@ -59,4 +59,28 @@ grep -Fq 'SSH host key accepted' "$work_dir/accepted.out" || fail 'acceptance re
 [[ -f "$work_dir/known_hosts" ]] || fail 'accepted host key was not persisted'
 [[ -e "$work_dir/marker" ]] || fail 'mocked transport was not exercised after acceptance'
 
+printf 'do-not-modify\n' >"$work_dir/known-target"
+ln -s "$work_dir/known-target" "$work_dir/known-symlink"
+set +e
+env "${base_env[@]}" ESXI_KNOWN_HOSTS="$work_dir/known-symlink" \
+  "$script" --no-rest >"$work_dir/known-symlink.out" 2>&1
+status=$?
+set -e
+[[ $status -ne 0 ]] || fail 'symlink known-hosts path was accepted'
+grep -Fq 'refusing non-regular or symlink known-hosts path' \
+  "$work_dir/known-symlink.out" || fail 'known-hosts symlink stop message missing'
+[[ $(<"$work_dir/known-target") == do-not-modify ]] ||
+  fail 'known-hosts symlink target was modified'
+
+printf 'report-target\n' >"$work_dir/report-target"
+ln -s "$work_dir/report-target" "$work_dir/report-symlink"
+set +e
+ESXI_HOST=mock.example.test "$script" --no-ssh --no-rest \
+  --report "$work_dir/report-symlink" >"$work_dir/report-symlink.out" 2>&1
+status=$?
+set -e
+[[ $status -ne 0 ]] || fail 'symlink report path was accepted'
+[[ $(<"$work_dir/report-target") == report-target ]] ||
+  fail 'report symlink target was modified'
+
 printf 'PASS: mocked discovery host-key safety\n'

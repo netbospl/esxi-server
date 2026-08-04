@@ -15,6 +15,12 @@ This repository is an experimental, AI-assisted ESXi Server Skill for coding and
      hardware, networking, security, cloud, or troubleshooting reasoning; then
      load only the relevant ESXi task reference.
    - `references/host-configuration-backup.md` for host configuration backup or restore.
+   - `references/patch-upgrade.md` before planning any host patch, image,
+     upgrade, maintenance-mode, or remediation workflow.
+   - `skills/incident-triage/SKILL.md` when a host, management path,
+     datastore, network, or VM is degraded and evidence must precede recovery.
+   - `skills/model-overlays/CONTRACT.md` before using a model-specific overlay;
+     overlays adapt reasoning and never own operational procedures.
    - `references/pfsense-documentation-sources.md` before any pfSense-specific
      procedure, then only the exact current Netgate page required for the
      observed CE release and package version.

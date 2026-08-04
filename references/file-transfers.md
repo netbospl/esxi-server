@@ -1,80 +1,84 @@
-# ESXi file transfer reference
+# ESXi file transfers
 
-Start from [`../SKILL.md`](../SKILL.md) for policy, approval rules, and local-profile conventions.
+Start with [`../SKILL.md`](../SKILL.md) and use exact datastore/path values from
+a protected local profile. Transfer data and remote names are untrusted.
 
-Use datastore names from a local profile or an approved plan. Do not hardcode real host-specific datastore names into generic documentation.
+## Preflight and risk
 
-## Preconditions
+Confirm target identity, TLS or SSH trust, datastore UUID, mounted state, free
+space, destination path, file type/size/digest, overwrite behavior, and VM
+power state. Uploading a new file is normally R1; overwriting a datastore object
+or transferring a live VM disk can be R2/R3. Never copy an active VMDK as if it
+were a consistent backup.
 
-Before uploading or restoring anything, verify:
+Prefer, in order, the Host Client datastore browser, a proven authenticated
+`/folder/` route, OVF Tool for OVF/OVA, or guarded SCP when SSH is already an
+approved capability. `/folder/` success does not prove REST API support.
 
-- target datastore free space
-- target path
-- whether overwrite would occur
-- whether the requested transfer is read-only or destructive
+## Protected HTTPS credentials
 
-## HTTP datastore browser examples
+Do not put a password in a URL, command argument, report, or shell history. Use
+a secret manager or a mode-0600 temporary netrc file created inside the
+protected execution environment, and remove it on exit:
 
 ```bash
-tls_args=()
-if [[ -n ${ESXI_CA_BUNDLE:-} ]]; then
-  tls_args+=(--cacert "$ESXI_CA_BUNDLE")
-fi
-
-curl --fail --show-error "${tls_args[@]}" -T /local/path/to/file.iso \
-  "https://$ESXI_HOST/folder/isos/file.iso?dcPath=ha-datacenter&dsName=<transfer-datastore>" \
-  -u "$ESXI_USER:$ESXI_PASS"
-
-curl --fail --show-error "${tls_args[@]}" -o /local/output/file.vmdk \
-  "https://$ESXI_HOST/folder/myvms/file.vmdk?dcPath=ha-datacenter&dsName=<vm-datastore>" \
-  -u "$ESXI_USER:$ESXI_PASS"
+: "${ESXI_HOST:?}" "${ESXI_USER:?}" "${ESXI_PASS:?}" "${ESXI_CA_BUNDLE:?}"
+: "${LOCAL_FILE:?}" "${REMOTE_URL:?}"
+NETRC_FILE=$(mktemp "${TMPDIR:-/tmp}/esxi-transfer-netrc.XXXXXX")
+trap 'rm -f "$NETRC_FILE"' EXIT
+chmod 600 "$NETRC_FILE"
+netrc_quote() {
+  local value=$1
+  [[ $value != *$'\n'* && $value != *$'\r'* ]] || return 1
+  value=${value//\\/\\\\}
+  value=${value//\"/\\\"}
+  printf '"%s"' "$value"
+}
+HOST_TOKEN=$(netrc_quote "$ESXI_HOST") || exit 2
+USER_TOKEN=$(netrc_quote "$ESXI_USER") || exit 2
+PASS_TOKEN=$(netrc_quote "$ESXI_PASS") || exit 2
+printf 'machine %s\nlogin %s\npassword %s\n' \
+  "$HOST_TOKEN" "$USER_TOKEN" "$PASS_TOKEN" >"$NETRC_FILE"
+curl --fail --show-error --cacert "$ESXI_CA_BUNDLE" \
+  --netrc-file "$NETRC_FILE" --upload-file "$LOCAL_FILE" "$REMOTE_URL"
 ```
 
-These `-u` examples are intentionally simple. Do not log or share commands that contain real passwords.
+Construct `REMOTE_URL` from separately validated datastore and path values.
+Do not copy query strings from untrusted output. A narrowly approved temporary
+TLS exception must use a verified certificate fingerprint and a protected
+network; it is never the default.
 
-## Browsing datastore contents
-
-```bash
-curl --fail --show-error "${tls_args[@]}" \
-  "https://$ESXI_HOST/folder?dcPath=ha-datacenter&dsName=<vm-datastore>" \
-  -u "$ESXI_USER:$ESXI_PASS"
-```
-
-This `/folder` listing path is a practical first check for standalone ESXi when the Host Client is reachable but REST session creation fails. A `200` response with an HTML listing confirms that credentials and datastore-browser access work; it does not prove that vCenter-style REST endpoints are available.
-
-## OVF / OVA import and export
+## SCP
 
 ```bash
-ovftool \
-  --acceptAllEulas \
-  --name="my-imported-vm" \
-  --datastore=<vm-datastore> \
-  --network="<portgroup>" \
-  /local/path/to/vm.ova \
-  "vi://$ESXI_USER@$ESXI_HOST"
-```
-
-Import and export are approval-gated when they overwrite or create inventory objects. Capture the original path, name, and network mapping before making changes.
-Let `ovftool` prompt for the password instead of embedding it in the URI. Trust
-the exact ESXi certificate before transfer. Do not add `--noSSLVerify` to the
-safe default; document a temporary exception separately when no trusted path is
-available and the user explicitly accepts the TLS risk.
-
-## SCP examples
-
-```bash
+: "${ESXI_HOST:?}" "${ESXI_USER:?}" "${ESXI_SSH_KEY:?}"
+: "${ESXI_KNOWN_HOSTS:?}" "${LOCAL_FILE:?}" "${REMOTE_PATH:?}"
+[[ $ESXI_HOST =~ ^[A-Za-z0-9.-]+$ ]] || exit 2
+[[ $ESXI_USER =~ ^[A-Za-z0-9._-]+$ ]] || exit 2
+[[ $LOCAL_FILE == /* && -f $LOCAL_FILE && ! -L $LOCAL_FILE ]] || exit 2
+[[ $REMOTE_PATH =~ ^/vmfs/volumes/[A-Za-z0-9._/-]+$ ]] || exit 2
+[[ $REMOTE_PATH != *'/../'* && $REMOTE_PATH != *'/..' ]] || exit 2
 scp -i "$ESXI_SSH_KEY" \
   -o UserKnownHostsFile="$ESXI_KNOWN_HOSTS" \
   -o StrictHostKeyChecking=yes \
-  /local/file.iso \
-  "$ESXI_USER@$ESXI_HOST:/vmfs/volumes/<transfer-datastore>/isos/file.iso"
+  -- "$LOCAL_FILE" "$ESXI_USER@$ESXI_HOST:$REMOTE_PATH"
 ```
 
-## Tips
+Legacy SCP can pass the remote path through a remote command parser. The
+example therefore rejects whitespace and metacharacters and only permits an
+absolute datastore path. It also requires an absolute, existing regular local
+file and rejects local symlinks, preventing SCP from interpreting a colon in a
+source as another remote host. For other names or symlink policies, use the
+Host Client, authenticated HTTPS, or a structured SFTP client after proving its
+path semantics; do not weaken the validation ad hoc.
 
-- Verify file size after upload.
-- Compare checksums when practical.
-- Prefer a dedicated transfer datastore if the local profile provides one.
-- Use `--progress-bar` or a checksum step for large or important files.
-- If SSH/SFTP auth is flaky, prefer the HTTPS `/folder/` endpoint instead of repeating retries.
-- If SSH port 22 is closed or unreachable, do not retry SCP/SFTP loops. Use the HTTPS Host Client or `/folder/` endpoint and record SSH as unavailable for the session.
+Do not loop on closed port 22, auth failure, or a changed host key. Use an
+already-proven alternative and record why.
+
+## Verification and cleanup
+
+Compare byte size and a strong digest at both ends when the interface allows
+it. For an OVF package, also verify its manifest/signature and every referenced
+disk. Re-check datastore free space and ensure no partial file is mistaken for
+a complete artifact. Delete a partial or superseded remote object only under
+its own exact-target approval.

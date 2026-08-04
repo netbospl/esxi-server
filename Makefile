@@ -15,7 +15,7 @@ bash:
 shellcheck:
 	@set -e; $(MAKE) require-tool TOOL=shellcheck REQUIRE_TOOLS=$(REQUIRE_TOOLS); if command -v shellcheck >/dev/null 2>&1; then git ls-files '*.sh' | xargs -r shellcheck -x -P examples/guest-autoinstall/scripts; echo 'PASS: ShellCheck with sourced helper analysis'; fi
 tests:
-	@set -euo pipefail; for test in tests/test-*.sh; do bash "$$test"; done
+	@set -euo pipefail; command -v rg >/dev/null 2>&1 || { echo 'FAIL: required tool missing: rg'; exit 127; }; for test in tests/test-*.sh; do bash "$$test"; done
 xml:
 	@set -e; $(MAKE) require-tool TOOL=xmllint REQUIRE_TOOLS=$(REQUIRE_TOOLS); if command -v xmllint >/dev/null 2>&1; then for file in examples/guest-autoinstall/windows/*.xml; do xmllint --noout "$$file"; done; echo 'PASS: XML well-formedness'; fi
 yaml:
