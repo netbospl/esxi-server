@@ -24,7 +24,7 @@ for token in \
   'Documentation can establish syntax and vendor guidance' \
   'current router state or grant R1-R3 approval' \
   'never copy its VMware Workstation' \
-  'provider-confirmed failover `/32`' \
+  "provider-confirmed failover \`/32\`" \
   'Do not commit or redistribute the attached binary'; do
   grep -Fq "$token" "$source_map" ||
     fail "source policy missing required boundary: $token"
@@ -67,7 +67,7 @@ grep -Fq 'pfsense-documentation-sources.md' "$router_runbook" ||
   fail 'dual-public runbook does not load the source map'
 grep -Fq 'Do not use the pfSense shell as a general-purpose SSH bastion' "$guest_access" ||
   fail 'pfSense bastion boundary regressed'
-grep -Fq '| Router edition | `pfSense CE` |' "$example_profile" ||
+grep -Fq "| Router edition | \`pfSense CE\` |" "$example_profile" ||
   fail 'sanitized profile does not record the pfSense CE edition'
 grep -Fq '<PFSENSE_CE_RELEASE>' "$example_profile" ||
   fail 'sanitized profile does not record the observed pfSense CE release'
