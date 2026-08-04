@@ -46,6 +46,7 @@ This documentation set describes safe, experimental ESXi operations for humans a
 - [`../references/file-transfers.md`](../references/file-transfers.md) — datastore upload/download, OVF/OVA transfer patterns, and SCP notes
 - [`../references/guest-os-autoinstall.md`](../references/guest-os-autoinstall.md) — guest OS unattended install templates, compatibility notes, and safety guidance
 - [`../references/network-firewall-ipv4-ipv6.md`](../references/network-firewall-ipv4-ipv6.md) — network, firewall, and IP-stack checks
+- [`../references/pfsense-documentation-sources.md`](../references/pfsense-documentation-sources.md) — complete Netgate documentation map, versioned PDF snapshot, CE-focused practical-guide boundary, and retrieval policy
 - [`../references/dedibox-dual-public-router-vm.md`](../references/dedibox-dual-public-router-vm.md) — retained public ESXi management plus a dedicated failover IPv4 on a router VM
 - [`../references/private-guest-access-via-pfsense.md`](../references/private-guest-access-via-pfsense.md) — VPN-first or dedicated-jump access from an external agent to private guests behind pfSense
 - [`../references/single-public-ip-router-migration.md`](../references/single-public-ip-router-migration.md) — staged R3 runbook for a router VM taking ownership of the only public IPv4

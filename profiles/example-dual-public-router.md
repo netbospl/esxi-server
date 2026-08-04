@@ -95,7 +95,10 @@ WAN port-group effective security:
 |---|---|---|
 | VM UUID / current VMID | `<ROUTER_VM_UUID>` / `<CURRENT_VMID>` | `observed / <TIMESTAMP>` |
 | Power state | `powered off before topology edits` | `observed` |
-| Guest / virtual hardware | `<PFSENSE_VERSION>` / `<VM_HW_VERSION>` | `planned` |
+| Router edition | `pfSense CE` | `observed / <TIMESTAMP>` |
+| Router release | `<PFSENSE_CE_RELEASE>` | `observed / <TIMESTAMP>` |
+| Relevant package versions | `<PACKAGE_NAMES_AND_VERSIONS>` | `observed / <TIMESTAMP>` |
+| Guest / virtual hardware | `FreeBSD / <VM_HW_VERSION>` | `planned` |
 | CPU | `1 vCPU, 1 socket` | `planned / measure before expansion` |
 | Memory | `2048 MiB` | `planned / measure before expansion` |
 | Disk | `20 GiB thin, <DISK_BACKING_PATH>` | `observed / blank-target proof` |
