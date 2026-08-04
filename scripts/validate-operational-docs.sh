@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+command -v rg >/dev/null 2>&1 || {
+  printf 'FAIL: required tool missing: rg\n' >&2
+  exit 127
+}
+
 fail() {
   printf 'FAIL: %s\n' "$*" >&2
   exit 1

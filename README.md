@@ -198,7 +198,7 @@ Install the WSL prerequisites in that environment:
 
 ```bash
 sudo apt update
-sudo apt install -y make shellcheck libxml2-utils cloud-init cloud-image-utils xorriso
+sudo apt install -y make shellcheck ripgrep libxml2-utils cloud-init cloud-image-utils xorriso
 ```
 
 The command supplies `make`, `cloud-init`, `cloud-localds`, `xorriso`, and
