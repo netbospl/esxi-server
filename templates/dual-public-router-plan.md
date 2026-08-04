@@ -58,6 +58,10 @@ STOP if any provider source disagrees or is stale.
 ## Router VM and disk gate
 
 - Powered-off proof:
+- Observed router edition: pfSense CE
+- Observed pfSense CE release and timestamp:
+- Relevant installed package versions and timestamp:
+- Documentation page/release applicability check:
 - Guest/hardware compatibility:
 - WAN vNIC / port group / configured MAC:
 - LAN vNIC / internal port group:

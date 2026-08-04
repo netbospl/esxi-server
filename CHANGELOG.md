@@ -24,6 +24,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `stable-ssh-shell` child skill with atomic, persistent, PTY, detached, and
   restricted modes; strict SSH transport guidance; deterministic tmux command
   markers; recovery rules; sanitized examples; and mock-only tests.
+- Complete pfSense documentation source map with live Netgate routing, the
+  official 2026-07-16 PDF snapshot, a bounded pfSense CE practical guide, and
+  edition/version-aware source policy.
 
 ### Changed
 - Reviewed and clarified ESXi skill safety guidance.

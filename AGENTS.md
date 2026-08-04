@@ -15,6 +15,9 @@ This repository is an experimental, AI-assisted ESXi Server Skill for coding and
      hardware, networking, security, cloud, or troubleshooting reasoning; then
      load only the relevant ESXi task reference.
    - `references/host-configuration-backup.md` for host configuration backup or restore.
+   - `references/pfsense-documentation-sources.md` before any pfSense-specific
+     procedure, then only the exact current Netgate page required for the
+     observed CE release and package version.
    - `references/dedibox-dual-public-router-vm.md` when ESXi keeps its public
      management IP and a provider failover `/32` plus virtual MAC belongs to a
      router VM.

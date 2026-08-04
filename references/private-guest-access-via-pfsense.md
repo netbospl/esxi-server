@@ -3,7 +3,9 @@
 Use this module when an automation agent outside the ESXi host must administer
 VMs attached to the internal LAN behind a pfSense router VM. Load
 [`dedibox-dual-public-router-vm.md`](dedibox-dual-public-router-vm.md) first for
-the retained-management plus secondary-public-IP topology.
+the retained-management plus secondary-public-IP topology. Load
+[`pfsense-documentation-sources.md`](pfsense-documentation-sources.md) before
+selecting a pfSense CE VPN, firewall, NAT, routing, or package procedure.
 
 The secondary public address is only an outer endpoint on pfSense. It does not
 make private guest addresses Internet-routable, identify a guest, or grant
@@ -207,6 +209,9 @@ management address or default route as compensation.
 
 ## Primary documentation
 
+- [Complete pfSense documentation source map](pfsense-documentation-sources.md)
+- [Netgate: complete pfSense documentation index](https://docs.netgate.com/pfsense/en/latest/index.html)
+- [Bogdan Caraman: pfSense CE practical guide (secondary installation guidance)](https://blog.bogdancaraman.com/getting-started-with-pfsense-ce-a-practical-guide/)
 - [Netgate: WireGuard remote access](https://docs.netgate.com/pfsense/en/latest/recipes/wireguard-ra.html)
 - [Netgate: OpenVPN remote access](https://docs.netgate.com/pfsense/en/latest/recipes/openvpn-ra.html)
 - [Netgate: VPN firewall rules](https://docs.netgate.com/pfsense/en/latest/vpn/firewall-rules.html)

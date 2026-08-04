@@ -215,6 +215,13 @@ blindly; treat a reservation as a separate resource-allocation decision.
 
 ## Trusted installation and recovery media
 
+Load [`pfsense-documentation-sources.md`](pfsense-documentation-sources.md)
+before selecting a pfSense procedure. This deployment uses pfSense CE; verify
+the observed release and installer screen, then use the exact current Netgate
+page. The linked CE practical guide may clarify the visual installer flow but
+must not replace this runbook's provider-specific `/32`, virtual-MAC,
+non-local-gateway, isolated-LAN, or retained-management requirements.
+
 Netgate's current ESXi procedure creates a new VM and installs pfSense from the
 official installer ISO. It does not provide a general-purpose, preconfigured
 ESXi OVA or VMDK as the documented installation path.
@@ -423,6 +430,7 @@ console if management degrades.
 
 ## Primary documentation
 
+- [Complete pfSense documentation source map](pfsense-documentation-sources.md)
 - [Scaleway: configure a VM network on a Dedibox host](https://www.scaleway.com/en/docs/dedibox-ip-failover/how-to/configure-network-virtual-machine/)
 - [Scaleway: create a virtual MAC for a failover IP](https://www.scaleway.com/en/docs/dedibox-ip-failover/how-to/create-virtual-mac/)
 - [Cloudflare: DNS proxy status](https://developers.cloudflare.com/dns/proxy-status/)
