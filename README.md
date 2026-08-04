@@ -11,6 +11,10 @@ It also includes the optional
 [`stable-ssh-shell`](skills/stable-ssh-shell/SKILL.md) child skill for reliable
 one-shot SSH, persistent Linux shells, deterministic tmux/PTY control,
 detached jobs, and recovery without unsafe command replay.
+The [`private-guest-shell`](skills/private-guest-shell/SKILL.md) child composes
+that stable-shell behavior with a verified VPN, dedicated jump VM, or bounded
+recovery mapping to reach internal guests without turning pfSense into a
+bastion.
 
 ## Safety-first operating model
 

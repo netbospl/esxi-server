@@ -27,9 +27,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Complete pfSense documentation source map with live Netgate routing, the
   official 2026-07-16 PDF snapshot, a bounded pfSense CE practical guide, and
   edition/version-aware source policy.
+- `private-guest-shell` child skill that composes VPN-first, dedicated-jump,
+  or time-limited recovery access with the existing stable-shell helpers.
+- Shared Nemotron 3 Ultra runtime profile that separates the published model
+  ceiling from the active Hermes context limit.
 
 ### Changed
 - Reviewed and clarified ESXi skill safety guidance.
+- Hardened deferred Nemotron examples for credentials, TLS, local profile
+  parsing, snapshot identity, guest deployment, and parent/child routing.
 - Clarified that Windows 11 OOBE bypass commands are version-dependent manual fallbacks, not licensing bypasses.
 - Hardened SSH host-key acceptance, REST/TLS session handling, ISO generators, Windows answer templates, guest examples, and Packer defaults.
 - Made datastore-browser discovery independent of REST sessions with Basic Auth.
