@@ -32,7 +32,7 @@ packer: packer-contract
 markdown:
 	@set -e; $(MAKE) require-tool TOOL=markdownlint-cli2 REQUIRE_TOOLS=$(REQUIRE_TOOLS); if command -v markdownlint-cli2 >/dev/null 2>&1; then markdownlint-cli2 '**/*.md'; echo 'PASS: markdownlint-cli2'; fi
 secrets:
-	@set -e; $(MAKE) require-tool TOOL=gitleaks REQUIRE_TOOLS=$(REQUIRE_TOOLS); if command -v gitleaks >/dev/null 2>&1; then gitleaks detect --no-banner --source .; echo 'PASS: gitleaks'; fi
+	@set -e; $(MAKE) require-tool TOOL=gitleaks REQUIRE_TOOLS=$(REQUIRE_TOOLS); if command -v gitleaks >/dev/null 2>&1; then gitleaks detect --no-banner --redact --verbose --source .; echo 'PASS: gitleaks'; fi
 links:
 	@set -e; $(MAKE) require-tool TOOL=lychee REQUIRE_TOOLS=$(REQUIRE_TOOLS); if command -v lychee >/dev/null 2>&1; then lychee --no-progress $$(git ls-files '*.md'); echo 'PASS: lychee'; fi
 actionlint:
