@@ -4,18 +4,35 @@ This documentation set describes safe, experimental ESXi operations for humans a
 
 ## Start here
 
-- [`../SKILL.md`](../SKILL.md) — top-level skill behavior, local-profile conventions, and operational rules
+- [`../SKILL.md`](../SKILL.md) — top-level skill behavior, local-profile conventions, canonical R0–R3 policy, and task routing
 - [`../AGENTS.md`](../AGENTS.md) — concise instructions for AI agents using this repository
 - [`../README.md`](../README.md) — repository overview, quick start, safety notes, and maintenance guidance
-- [`../NOTICE.md`](../NOTICE.md) — AI-assisted / vibe-coded experimental-use notice
+- [`ARCHITECTURE.md`](ARCHITECTURE.md) — authority layers, trust boundaries, verification flow, and change lifecycle
+- [`inventory.txt`](inventory.txt) — machine-checked inventory for references, skills, overlays, validators, tests, evaluations, and Packer templates
 - [`safety-workflow.md`](safety-workflow.md) — concise summary of discovery, planning, confirmation, rollback, and prompt-injection resistance
+- [`../NOTICE.md`](../NOTICE.md) — AI-assisted / vibe-coded experimental-use notice
 
-## Profiles, templates, scripts
+## Maintainer assurance
+
+- [`../references/source-verification-policy.md`](../references/source-verification-policy.md) — official-source hierarchy, exact-version evidence records, conflict handling, and unverified-material rules
+- [`../evals/README.md`](../evals/README.md) — baseline-versus-candidate behavioural evaluation workflow
+- [`../evals/evals.json`](../evals/evals.json) — runner-neutral safety-critical behavioural prompts and assertions
+- [`../scripts/validate-behavioural-evals.sh`](../scripts/validate-behavioural-evals.sh) — validates evaluation schema and required safety coverage
+- [`../scripts/validate-documentation-inventory.sh`](../scripts/validate-documentation-inventory.sh) — validates the tracked repository inventory, prose reference links, and historical status redirects
+- [`../scripts/validate-packer-contract.sh`](../scripts/validate-packer-contract.sh) — validates committed Packer skeleton boundaries and non-committed local variable files
+- [`reviews/2026-08-05-adversarial-review.md`](reviews/2026-08-05-adversarial-review.md) — adversarial findings and dispositions for the adoption change
+- [`decisions/0001-standalone-esxi-boundary.md`](decisions/0001-standalone-esxi-boundary.md) — standalone ESXi versus vCenter capability boundary
+- [`decisions/0002-canonical-risk-model.md`](decisions/0002-canonical-risk-model.md) — one canonical R0–R3 policy and R3 review requirements
+- [`decisions/0003-documentation-and-evaluation-gates.md`](decisions/0003-documentation-and-evaluation-gates.md) — inventory, lifecycle, and behavioural-evaluation CI gates
+- [`design-history/stable-ssh-shell/README.md`](design-history/stable-ssh-shell/README.md) — lifecycle map for the implemented stable-shell plan and source review
+
+## Profiles, templates, scripts, and skills
 
 - [`../profiles/README.md`](../profiles/README.md) — local-only profile naming and usage notes
 - [`../profiles/example-host.md`](../profiles/example-host.md) — sanitized example host profile
 - [`../profiles/example-dual-public-router.md`](../profiles/example-dual-public-router.md) — sanitized retained-management plus failover-IP router profile
 - [`../examples/guest-autoinstall/README.md`](../examples/guest-autoinstall/README.md) — guest OS unattended install templates and helper scripts
+- [`../examples/guest-autoinstall/packer/README.md`](../examples/guest-autoinstall/packer/README.md) — reviewed-skeleton contract and safe local Packer workflow
 - [`../examples/guest-autoinstall/windows/autounattend-win10-bios-mbr.xml`](../examples/guest-autoinstall/windows/autounattend-win10-bios-mbr.xml) — Windows 10 BIOS/MBR answer file
 - [`../examples/guest-autoinstall/windows/autounattend-win10-uefi-gpt.xml`](../examples/guest-autoinstall/windows/autounattend-win10-uefi-gpt.xml) — Windows 10 UEFI/GPT answer file
 - [`../examples/guest-autoinstall/windows/autounattend-win11-uefi-gpt.xml`](../examples/guest-autoinstall/windows/autounattend-win11-uefi-gpt.xml) — Windows 11 UEFI/GPT answer file
@@ -62,10 +79,11 @@ This documentation set describes safe, experimental ESXi operations for humans a
 - [`../references/ssh-esxcli.md`](../references/ssh-esxcli.md) — SSH, `esxcli`, `vim-cmd`, networking, datastore, and resource checks
 - [`../references/troubleshooting.md`](../references/troubleshooting.md) — read-only troubleshooting and recovery guidance
 - [`../references/vm-import-export.md`](../references/vm-import-export.md) — import/export workflow notes
+- [`../references/source-verification-policy.md`](../references/source-verification-policy.md) — maintainer evidence hierarchy and uncertainty policy
 
 ## Security, license, and contribution guidance
 
 - [`../SECURITY.md`](../SECURITY.md) — secret handling, destructive-operation confirmation, TLS notes, and private reporting guidance
-- [`../CONTRIBUTING.md`](../CONTRIBUTING.md) — documentation style and contribution expectations
+- [`../CONTRIBUTING.md`](../CONTRIBUTING.md) — documentation style, source, test, lifecycle, evaluation, and review expectations
 - [`../CHANGELOG.md`](../CHANGELOG.md) — unreleased changes
 - [`../LICENSE`](../LICENSE) — MIT License
