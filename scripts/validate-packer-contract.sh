@@ -38,12 +38,17 @@ while (($#)); do
   esac
 done
 
-for template in "$packer_dir"/*-vsphere-iso.pkr.hcl; do
-  grep -Fq 'TEMPLATE ONLY.' "$template" || fail "missing template warning: ${template#$repo_root/}"
-  grep -Fq 'BUILD CONTRACT: reviewed-skeleton' "$template" || fail "missing reviewed-skeleton contract: ${template#$repo_root/}"
-  grep -Fq 'UNATTENDED MEDIA: intentionally not attached' "$template" || fail "missing unattended-media boundary: ${template#$repo_root/}"
-  grep -Fq 'standalone ESXi is not supported' "$template" || fail "missing standalone ESXi boundary: ${template#$repo_root/}"
-  grep -Fq 'vCenter' "$template" || fail "missing vCenter boundary: ${template#$repo_root/}"
+shopt -s nullglob
+templates=("$packer_dir"/*-vsphere-iso.pkr.hcl)
+((${#templates[@]} > 0)) || fail "no Packer templates found in $packer_dir"
+
+for template in "${templates[@]}"; do
+  relative_template=${template#"$repo_root"/}
+  grep -Fq 'TEMPLATE ONLY.' "$template" || fail "missing template warning: $relative_template"
+  grep -Fq 'BUILD CONTRACT: reviewed-skeleton' "$template" || fail "missing reviewed-skeleton contract: $relative_template"
+  grep -Fq 'UNATTENDED MEDIA: intentionally not attached' "$template" || fail "missing unattended-media boundary: $relative_template"
+  grep -Fq 'standalone ESXi is not supported' "$template" || fail "missing standalone ESXi boundary: $relative_template"
+  grep -Fq 'vCenter' "$template" || fail "missing vCenter boundary: $relative_template"
 done
 
 [[ -n $vars_file ]] || {
@@ -59,7 +64,7 @@ fi
 
 required=(vcenter_server username password datacenter cluster host datastore network iso_path iso_checksum vm_name)
 for key in "${required[@]}"; do
-  line=$(rg -n "^[[:space:]]*$key[[:space:]]*=" "$vars_file" | head -n 1 || true)
+  line=$(rg -n "^[[:space:]]*${key}[[:space:]]*=" "$vars_file" | head -n 1 || true)
   [[ -n $line ]] || fail "missing required Packer variable: $key"
   value=${line#*=}
   value=${value//[[:space:]\"]/}
