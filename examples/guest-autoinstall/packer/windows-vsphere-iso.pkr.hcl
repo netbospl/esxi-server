@@ -1,4 +1,9 @@
 // TEMPLATE ONLY.
+// BUILD CONTRACT: reviewed-skeleton.
+// UNATTENDED MEDIA: intentionally not attached in the committed example.
+// Copy this file to a private work directory and attach a reviewed
+// Autounattend.xml plus communicator bootstrap before packer validate/build;
+// see this directory's README.md.
 // This skeleton shows how a Packer vsphere-iso build can drive a Windows guest install.
 // This is a vCenter path: datacenter and cluster inventory are required below.
 // Do not treat free/standalone ESXi as a supported builder target. Create the VM
@@ -113,11 +118,11 @@ source "vsphere-iso" "windows" {
   winrm_password = var.guest_winrm_password
   winrm_timeout  = "6h"
 
-  // Adapt these boot commands to the media layout you actually use.
+  // These commands are illustrative until a local copy attaches an answer file
+  // that performs the install and configures this exact WinRM account.
   boot_wait    = "5s"
   boot_command = ["<spacebar>"]
 
-  // If you generate an answer ISO or floppy image locally, document the attachment step here.
   shutdown_command    = "shutdown /s /t 10 /f"
   convert_to_template = false
 }

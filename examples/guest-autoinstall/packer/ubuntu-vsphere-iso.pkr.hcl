@@ -1,4 +1,8 @@
 // TEMPLATE ONLY.
+// BUILD CONTRACT: reviewed-skeleton.
+// UNATTENDED MEDIA: intentionally not attached in the committed example.
+// Copy this file to a private work directory and attach reviewed NoCloud seed
+// media before packer validate/build; see this directory's README.md.
 // This skeleton shows how a Packer vsphere-iso build can drive an Ubuntu Server autoinstall.
 // This is a vCenter path: datacenter and cluster inventory are required below.
 // Do not treat free/standalone ESXi as a supported builder target. Create the VM
@@ -113,8 +117,8 @@ source "vsphere-iso" "ubuntu" {
   ssh_password = var.guest_ssh_password
   ssh_timeout  = "6h"
 
-  // Adapt the boot parameter to the Ubuntu release you are testing.
-  // Example pattern: autoinstall ds=nocloud;s=/cdrom/
+  // This boot parameter is illustrative until a local copy attaches matching
+  // user-data/meta-data through cd_files/cd_label or another reviewed transport.
   boot_wait    = "5s"
   boot_command = ["<esc><wait>autoinstall ds=nocloud;s=/cdrom/<enter>"]
 
