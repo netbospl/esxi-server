@@ -11,7 +11,7 @@ fail() {
   exit 1
 }
 
-"$validator" >"$work_dir/valid.out" || fail 'committed behavioural evaluations did not validate'
+bash "$validator" >"$work_dir/valid.out" || fail 'committed behavioural evaluations did not validate'
 grep -Fq 'PASS:' "$work_dir/valid.out" || fail 'valid evaluation run did not report PASS'
 
 python3 - "$repo_root/evals/evals.json" "$work_dir/duplicate.json" <<'PY'
@@ -23,7 +23,7 @@ json.dump(payload, open(sys.argv[2], "w", encoding="utf-8"), indent=2)
 PY
 
 set +e
-"$validator" "$work_dir/duplicate.json" >"$work_dir/duplicate.out" 2>&1
+bash "$validator" "$work_dir/duplicate.json" >"$work_dir/duplicate.out" 2>&1
 status=$?
 set -e
 [[ $status -ne 0 ]] || fail 'validator accepted a duplicate evaluation id'
@@ -38,7 +38,7 @@ json.dump(payload, open(sys.argv[2], "w", encoding="utf-8"), indent=2)
 PY
 
 set +e
-"$validator" "$work_dir/missing.json" >"$work_dir/missing.out" 2>&1
+bash "$validator" "$work_dir/missing.json" >"$work_dir/missing.out" 2>&1
 status=$?
 set -e
 [[ $status -ne 0 ]] || fail 'validator accepted removal of a required safety evaluation'
