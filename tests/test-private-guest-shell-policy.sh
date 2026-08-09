@@ -4,13 +4,9 @@ set -euo pipefail
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 guest_skill="$repo_root/skills/private-guest-shell/SKILL.md"
 parent_skill="$repo_root/SKILL.md"
-agent_rules="$repo_root/AGENTS.md"
 nemotron_shell="$repo_root/skills/nemotron-3-ultra/stable-ssh-shell/SKILL.md"
 
-fail() {
-  printf 'FAIL: %s\n' "$*" >&2
-  exit 1
-}
+fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
 
 [[ -f $guest_skill ]] || fail 'missing private-guest-shell skill'
 
@@ -33,8 +29,6 @@ done
 
 grep -Fq 'skills/private-guest-shell/SKILL.md' "$parent_skill" ||
   fail 'root task router does not load private-guest-shell'
-grep -Fq 'skills/private-guest-shell/SKILL.md' "$agent_rules" ||
-  fail 'agent rules do not load private-guest-shell'
 
 if grep -Fq 'Linux jump host / pfSense / guest VM' "$nemotron_shell"; then
   fail 'Nemotron routing still treats pfSense as a persistent-shell target'

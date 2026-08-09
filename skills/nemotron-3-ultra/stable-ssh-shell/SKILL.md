@@ -9,24 +9,14 @@ description: Use when Nemotron 3 Ultra needs persistent remote state or determin
 
 **Model profile:** [`../model-profile.md`](../model-profile.md)
 
-**Load order:** root policy → canonical stable-shell skill and task reference →
-model profile → optional Hermes adapter → this overlay.
+**Load order:** root policy → canonical parent → model profile → overlay.
 
 ## Scope boundaries
 
-This overlay defines no transport command, persistence mechanism, marker
-protocol, credential rule, risk, approval, or recovery action. Direct ESXi
-remains restricted and one-shot. pfSense remains a router/firewall boundary.
+Reasoning only. The parent owns transport, persistence, completion markers, credentials, risk, approval, and recovery. Direct ESXi remains restricted/one-shot.
 
 ## Adaptation
 
-Track transport state separately from remote process state. At each checkpoint
-record target identity, verified host-key state, selected parent mode, remote
-session identifier if applicable, last proven completion marker, current
-directory/environment assumptions, and whether an operation may still be
-running.
+Track transport state separately from remote process state. At checkpoints retain target identity, verified trust state, selected parent mode, session identifier when applicable, last proven completion marker, relevant environment assumptions, and whether work may still be running.
 
-After loss of transport or context, recover observation first. Never replay an
-operation until the parent protocol proves it did not complete. If the target
-cannot support the selected mode or identity changes, downgrade to a supported
-mode or stop.
+After transport/context loss, recover observation first. Never replay an operation until the parent protocol proves it did not complete. If capability or identity changes, downgrade safely or stop.

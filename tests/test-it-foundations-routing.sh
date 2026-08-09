@@ -28,20 +28,18 @@ for token in \
     fail "IT foundations reference missing guard or section: $token"
 done
 
-for file in SKILL.md AGENTS.md README.md docs/index.md references/troubleshooting.md; do
+for file in SKILL.md README.md docs/index.md references/troubleshooting.md; do
   grep -Fq 'it-foundations-for-esxi.md' "$repo_root/$file" ||
     fail "$file does not route to the IT foundations reference"
 done
 
-grep -Fq 'Cross-layer diagnosis or explanation' "$repo_root/SKILL.md" ||
+grep -Fq 'Cross-layer diagnosis' "$repo_root/SKILL.md" ||
   fail 'SKILL task router is missing the cross-layer route'
-grep -Fq 'then the relevant task reference' "$repo_root/SKILL.md" ||
+grep -Fq 'then one task module only if needed' "$repo_root/SKILL.md" ||
   fail 'SKILL task router does not preserve progressive disclosure'
-grep -Fq 'General IT knowledge may select a diagnostic' "$repo_root/AGENTS.md" ||
-  fail 'AGENTS.md is missing the command-compatibility boundary'
 
 if grep -Eiq '(passing score|exam price|retirement date).*[0-9]' "$reference"; then
   fail 'volatile certification metadata leaked into operational guidance'
 fi
 
-printf 'PASS: IT foundations are routed for Hermes with ESXi safety boundaries\n'
+printf 'PASS: IT foundations are routed with progressive disclosure and ESXi safety boundaries\n'

@@ -59,8 +59,6 @@ done
 
 grep -Fq 'pfsense-documentation-sources.md' "$repo_root/SKILL.md" ||
   fail 'task router does not load the pfSense documentation source map'
-grep -Fq 'pfsense-documentation-sources.md' "$repo_root/AGENTS.md" ||
-  fail 'agent instructions do not load the pfSense documentation source map'
 grep -Fq 'pfsense-documentation-sources.md' "$guest_access" ||
   fail 'private guest access does not load the source map'
 grep -Fq 'pfsense-documentation-sources.md' "$router_runbook" ||

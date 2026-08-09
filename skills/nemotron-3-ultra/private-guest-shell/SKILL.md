@@ -9,23 +9,14 @@ description: Use when Nemotron 3 Ultra must reason about reaching a private gues
 
 **Model profile:** [`../model-profile.md`](../model-profile.md)
 
-**Load order:** root policy → canonical private-guest skill and network
-reference → model profile → optional Hermes adapter → this overlay.
+**Load order:** root policy → canonical parent → model profile → overlay.
 
 ## Scope boundaries
 
-This overlay defines no route, firewall rule, credential, tunnel, transport
-command, risk, approval, or persistence mode. pfSense is never converted into
-a general bastion or persistence host.
+Reasoning only. The parent owns routes, firewall rules, credentials, tunnels, transport, risk, approval, and persistence mode.
 
 ## Adaptation
 
-Model access as two independent trust layers: the approved outer route through
-the boundary, then the final guest's credential and verified host key. Record
-which layer each failure belongs to and do not reuse boundary identity as proof
-of guest identity.
+Model two independent trust layers: approved outer route, then final guest identity/credential. Record which layer each failure belongs to; boundary identity never proves guest identity.
 
-Prefer the canonical VPN path, then an approved dedicated jump host. Keep any
-time-limited recovery mapping visibly scoped with owner, expiry, source,
-destination, cleanup verification, and rollback. After context or transport
-loss, revalidate both layers before continuing.
+Prefer the canonical VPN path, then an approved dedicated jump host. Keep any recovery mapping visibly scoped with owner, expiry, source, destination, cleanup verification, and rollback. After context or transport loss, revalidate both layers before continuing.

@@ -1,47 +1,24 @@
-# Model overlay contract
+# Model overlay authoring contract
 
-Model overlays adapt presentation and reasoning behavior. Canonical parent
-skills and references exclusively own commands, API routes, risk classes,
-approval gates, rollback, and verification.
+This file is for maintainers and validators. **Do not load it during normal ESXi task execution.** Runtime ownership and load order are already defined by `SKILL.md`.
 
-## Required load order
-
-```text
-root policy → canonical task reference/skill → model profile
-            → optional harness adapter → matching task overlay
-```
-
-An overlay must not be loaded by itself. If any parent or model profile cannot
-be loaded, continue with model-agnostic guidance or stop; never reconstruct the
-missing procedure from the overlay.
+Canonical task references/skills exclusively own commands, endpoints, risk classes, approval, rollback, and verification. Overlays may only adapt reasoning, context budgeting, checkpointing, and output structure.
 
 ## Required fields
 
-Every overlay is a `SKILL.md` with:
+Every overlay `SKILL.md` must contain:
 
-- a frontmatter description beginning with `Use when`;
-- `Canonical parent`, `Model profile`, and `Load order` declarations;
+- frontmatter `description` beginning with `Use when`;
+- local `Canonical parent` and `Model profile` links;
+- `Load order` stating root → canonical parent → model profile → overlay;
 - a `Scope boundaries` section;
-- no more than 500 words.
+- no operational command catalog;
+- no more than **250 words**; target **80-180 words**.
 
-The canonical parent declaration must name the exact task skill or reference.
-An overlay may add bounded evidence framing, context budgeting, checkpointing,
-or output structure. It may not duplicate executable operational commands,
-endpoint catalogs, credentials, host facts, risk tables, or approval wording.
+Parent policy always wins. If a parent/profile is missing or conflicts with an overlay, ignore the overlay. After compaction, transport recovery, approval expiry, or state change, refresh volatile facts from current evidence.
 
-## Conflict and stale-context rules
+Validate authoring changes with:
 
-Parent policy always wins. On conflict, report the mismatch and ignore the
-overlay. Re-read fresh target identity and task facts after context compaction,
-transport recovery, approval expiry, or any state change. A model-generated
-summary is not approval or proof of current ESXi state.
-
-Harness adapters describe tool semantics only. They cannot relax target trust,
-make a restricted hypervisor shell persistent, infer whether a lost command
-completed, or convert a read-only result into change authorization.
-
-## Validation
-
-Run `scripts/validate-model-overlays.sh --repo .`. The validator rejects
-missing declarations, command duplication, non-trigger descriptions, and
-oversized overlays. All repository tests remain local and mock-only.
+```bash
+scripts/validate-model-overlays.sh --repo .
+```

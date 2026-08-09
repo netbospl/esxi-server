@@ -21,7 +21,12 @@ references/private-guest-access-via-pfsense.md
 references/rest-api.md
 references/single-public-ip-router-migration.md
 references/source-verification-policy.md
+references/ssh-discovery.md
 references/ssh-esxcli.md
+references/ssh-networking.md
+references/ssh-snapshots.md
+references/ssh-storage.md
+references/ssh-vm-lifecycle.md
 references/troubleshooting.md
 references/validated-interaction-methods.md
 references/vm-import-export.md
@@ -63,3 +68,4 @@ tests/test-stable-ssh-recovery.sh
 tests/test-stable-ssh-restricted-fallback.sh
 tests/test-stable-ssh-session.sh
 tests/test-stable-ssh-transport.sh
+tests/test-token-budget.sh

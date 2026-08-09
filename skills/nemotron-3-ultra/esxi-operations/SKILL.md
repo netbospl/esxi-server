@@ -1,37 +1,22 @@
 ---
 name: nemotron-3-ultra-esxi-operations
-description: Use when Nemotron 3 Ultra is handling a general ESXi task after the canonical root policy and task reference have been selected.
+description: Use when Nemotron 3 Ultra is handling a general ESXi task after one canonical task module has been selected.
 ---
 
 # Nemotron 3 Ultra ESXi operations overlay
 
-**Canonical parent:** [`../../../SKILL.md`](../../../SKILL.md), followed by the
-single task reference chosen by its router.
+**Canonical parent:** [`../../../SKILL.md`](../../../SKILL.md)
 
 **Model profile:** [`../model-profile.md`](../model-profile.md)
 
-**Load order:** root policy → canonical task reference/skill → model profile →
-optional Hermes adapter → this overlay.
+**Load order:** root policy → canonical parent/task module → model profile → overlay.
 
 ## Scope boundaries
 
-This overlay adds reasoning structure only. It owns no command, API route,
-risk classification, approval, rollback, or verification rule. On conflict or
-missing parent context, ignore this overlay.
+Reasoning only. Commands, endpoints, risk, approval, rollback, and verification come from the canonical parent/task module.
 
 ## Adaptation
 
-Maintain a compact ledger with four blocks:
+Maintain four compact blocks: fresh facts, competing hypotheses, next bounded R0 discriminator, and change gate. Keep only exact IDs and volatile state relevant to the task. Batch independent read-only checks only when source/time attribution stays clear.
 
-1. Fresh facts: exact target, build, transport/trust state, task object, and
-   relevant capacity/power/network state.
-2. Hypotheses: two or three distinct explanations, each tied to observed
-   evidence and an explicit uncertainty.
-3. Next discriminator: one bounded R0 check from the canonical reference.
-4. Change gate: parent risk class, exact target, approval state, rollback,
-   abort condition, and post-change evidence.
-
-Batch independent read-only observations only when that preserves clear source
-and timestamp attribution. After compaction, interruption, approval expiry, or
-a tool result that changes state, refresh the ledger from current evidence.
-Never infer success from a plausible narrative.
+After compaction, interruption, approval expiry, transport recovery, or state change, refresh affected facts from current evidence. Never infer success from narrative coherence.

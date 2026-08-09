@@ -1,6 +1,6 @@
 ---
 name: nemotron-3-ultra-incident-triage
-description: Use when Nemotron 3 Ultra is triaging an ESXi incident after the canonical incident skill and one failure-domain reference are loaded.
+description: Use when Nemotron 3 Ultra is triaging an ESXi incident after the canonical incident skill and failure domain are selected.
 ---
 
 # Nemotron 3 Ultra incident-triage overlay
@@ -9,23 +9,14 @@ description: Use when Nemotron 3 Ultra is triaging an ESXi incident after the ca
 
 **Model profile:** [`../model-profile.md`](../model-profile.md)
 
-**Load order:** root policy → canonical incident skill → one task reference →
-model profile → optional Hermes adapter → this overlay.
+**Load order:** root policy → canonical parent → model profile → overlay.
 
 ## Scope boundaries
 
-This overlay owns no evidence-collection command, containment action, recovery
-procedure, risk, approval, or escalation decision. Do not trade evidence
-preservation for a fluent root-cause story.
+Reasoning only. Evidence collection, containment, recovery, risk, approval, and escalation remain canonical-parent responsibilities.
 
 ## Adaptation
 
-Maintain a compact timeline and four separate sets: confirmed facts, competing
-hypotheses, unknowns, and approved actions. Tag every fact with source and time.
-Keep business impact distinct from technical symptoms.
+Keep a compact timeline plus four sets: confirmed facts, competing hypotheses, unknowns, and approved actions. Tag facts with source/time and separate business impact from technical symptoms.
 
-Choose one R0 discriminator with maximum expected information gain and bounded
-evidence impact. After each result, update hypothesis confidence without
-discarding contradictory evidence. Following context loss, reconstruct the
-timeline from preserved records rather than memory. Never infer causality from
-temporal proximity alone.
+Choose one bounded R0 discriminator with high information gain and low evidence impact. Update confidence without discarding contradictory evidence. After context loss, rebuild from preserved records rather than memory; never infer causality from timing alone.
