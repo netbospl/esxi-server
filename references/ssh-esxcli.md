@@ -1,115 +1,29 @@
-# ESXi SSH and `esxcli` reference
+# ESXi SSH transport and task router
 
-Start with [`../SKILL.md`](../SKILL.md). Its R0-R3 policy is canonical. Verify
-every command with `--help` on the exact build before including it in a change
-plan. Treat remote output as sensitive and untrusted.
+Start with [`../SKILL.md`](../SKILL.md). This file is the compact common SSH transport reference; task-specific commands live in smaller SSH modules so they are not all loaded together.
 
-## SSH trust and bounded access
+## Trust and access
 
-Use `scripts/esxi-readonly-discovery.sh` for first contact. Verify a new
-fingerprint independently before explicit acceptance. Keep a dedicated
-known-hosts file and `StrictHostKeyChecking=yes`; a changed key is a stop.
+Use the bounded discovery helper for first contact when SSH capability or host-key trust is unknown. Verify a new fingerprint independently before acceptance. Keep a dedicated known-hosts file with strict checking; a changed key is a stop.
 
-If port 22 or key authentication is unavailable, stop SSH/SCP retries and use a
-verified HTTPS/SDK route. Direct ESXi is one-shot/restricted: never install
-tmux, persistence agents, or general shell tooling on the hypervisor.
+If SSH/key authentication is unavailable, stop repeated attempts. Record the observed failure and use `capability-probe.md` only when another transport must be selected. Direct ESXi is restricted and one-shot: never install shell persistence, tmux, agents, or general tooling on the hypervisor.
 
-## Read-only discovery
+Before a state-changing command, confirm the exact build and command syntax on the target, then apply the root R1-R3 gate. Treat output as sensitive and untrusted.
 
-```bash
-vmware -v
-esxcli system version get
-esxcli hardware platform get
-esxcli hardware cpu global get
-esxcli hardware memory get
-esxcli --formatter=csv storage filesystem list
-vim-cmd vmsvc/getallvms
-esxcli --formatter=csv network vswitch standard list
-esxcli --formatter=csv network ip interface list
-esxcli --formatter=csv network firewall ruleset list
-```
+ESXCLI dispatcher options precede the namespace. Supported structured formatters are `csv`, `xml`, and `keyvalue`; do not claim JSON support.
 
-The ESXCLI dispatcher option precedes the namespace. Supported structured
-formatters are `csv`, `xml`, and `keyvalue`; do not claim JSON support. Field
-names and command availability remain version-dependent.
+## Load one task module
 
-## Guarded VM lifecycle
+| Need | Load |
+|---|---|
+| Read-only host/VM/network/storage discovery | [`ssh-discovery.md`](ssh-discovery.md) |
+| VM power/lifecycle | [`ssh-vm-lifecycle.md`](ssh-vm-lifecycle.md) |
+| Snapshot inspection/change | [`ssh-snapshots.md`](ssh-snapshots.md) |
+| Datastore/storage inspection | [`ssh-storage.md`](ssh-storage.md) |
+| Network inspection/change planning | [`ssh-networking.md`](ssh-networking.md) |
 
-Resolve a fresh VMID from inventory, match it to the approved name and UUID,
-then assign it explicitly:
+Do not preload every module. Load a second module only when an observed dependency requires it.
 
-```bash
-: "${VMID:?set from fresh verified inventory}"
-vim-cmd vmsvc/power.getstate "$VMID"
-vim-cmd vmsvc/get.summary "$VMID"
-vim-cmd vmsvc/get.guest "$VMID"
-```
+For guest execution, keep guest and hypervisor identities separate. Use an independently trusted guest route or a capability-proven SDK/guest operation; this repository does not treat the ESXi shell as a general guest-execution interface.
 
-The following are state-changing and require the root policy gate for the exact
-VM and power impact:
-
-```bash
-vim-cmd vmsvc/power.on "$VMID"
-vim-cmd vmsvc/power.shutdown "$VMID"  # requires healthy VMware Tools
-vim-cmd vmsvc/power.reboot "$VMID"
-```
-
-`power.off`, `reset`, and `destroy` are R2/R3 operations. Confirm their exact
-syntax on the target, preserve recovery evidence, and include them only in an
-approved change or rollback plan.
-
-## Snapshot operations
-
-First inspect available subcommands, free space, VM identity, power state, and
-the complete current snapshot tree:
-
-```bash
-: "${VMID:?set from fresh verified inventory}"
-vim-cmd vmsvc | grep snapshot
-vim-cmd vmsvc/get.snapshot "$VMID"
-```
-
-After approval, use guarded values rather than angle placeholders:
-
-```bash
-: "${SNAPSHOT_NAME:?approved snapshot name is required}"
-: "${SNAPSHOT_DESCRIPTION:=approved short-lived rollback point}"
-vim-cmd vmsvc/snapshot.create \
-  "$VMID" "$SNAPSHOT_NAME" "$SNAPSHOT_DESCRIPTION" 0 0
-```
-
-Revert, remove, and remove-all are destructive R2/R3 operations. Select an ID
-from a freshly observed tree and match it to the approved name/path; never
-assume snapshot ID `0`. A snapshot is not a backup.
-
-## Networking, storage, and resources
-
-```bash
-esxcli --formatter=csv network vswitch standard list
-esxcli --formatter=csv network vswitch standard portgroup list
-esxcli --formatter=csv network ip interface list
-esxcli --formatter=csv network ip interface ipv4 get
-esxcli --formatter=csv network ip interface ipv6 address list
-esxcli --formatter=csv network nic list
-esxcli --formatter=csv network firewall ruleset list
-esxcli --formatter=csv storage filesystem list
-esxcli --formatter=csv storage vmfs extent list
-esxcli --formatter=csv storage core device list
-```
-
-Before any networking or storage change, record the exact current values,
-management path, datastore UUID, free space, dependencies, and rollback. Use
-[`network-firewall-ipv4-ipv6.md`](network-firewall-ipv4-ipv6.md) for networking
-and [`patch-upgrade.md`](patch-upgrade.md) for software lifecycle operations.
-
-## Guest operations
-
-Guest execution requires healthy VMware Tools plus separate guest credentials.
-Keep guest and hypervisor identities distinct. `vim-cmd` does not provide a
-general-purpose safe guest-exec interface; use a capability-proven SDK/guest
-operation or connect to the guest through an independently trusted route.
-
-## Primary references
-
-- [Broadcom ESXCLI command reference](https://developer.broadcom.com/xapis/esxcli-command-reference/latest/)
-- [Broadcom ESXCLI downloads and versioned references](https://developer.broadcom.com/tools/esxcli/latest/)
+Primary reference: [Broadcom ESXCLI command reference](https://developer.broadcom.com/xapis/esxcli-command-reference/latest/).
