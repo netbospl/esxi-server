@@ -60,6 +60,7 @@ tests/test-model-overlay-contract.sh
 tests/test-operational-doc-safety.sh
 tests/test-packer-contract.sh
 tests/test-pfsense-documentation-policy.sh
+tests/test-ponytail-skill.sh
 tests/test-private-guest-shell-policy.sh
 tests/test-stable-ssh-capabilities.sh
 tests/test-stable-ssh-command-protocol.sh
