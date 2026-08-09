@@ -41,7 +41,7 @@ validate_overlay() {
     fail "$file: model overlay duplicates an operational command catalog"; return 1
   fi
   words=$(wc -w <"$file")
-  (( words <= 500 )) || { fail "$file: overlay exceeds 500 words ($words)"; return 1; }
+  (( words <= 250 )) || { fail "$file: overlay exceeds 250 words ($words)"; return 1; }
   if (( check_links )); then
     if [[ -n $scope_root ]]; then root_real=$(realpath -m -- "$scope_root"); fi
     while IFS= read -r link; do

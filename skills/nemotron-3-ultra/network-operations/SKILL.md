@@ -1,6 +1,6 @@
 ---
 name: nemotron-3-ultra-network-operations
-description: Use when Nemotron 3 Ultra is reasoning about ESXi management networking, switching, firewall, IPv4, or IPv6 after canonical network guidance is loaded.
+description: Use when Nemotron 3 Ultra is reasoning about ESXi networking after one canonical network task reference is selected.
 ---
 
 # Nemotron 3 Ultra network overlay
@@ -9,24 +9,14 @@ description: Use when Nemotron 3 Ultra is reasoning about ESXi management networ
 
 **Model profile:** [`../model-profile.md`](../model-profile.md)
 
-**Load order:** root policy → canonical network reference → model profile →
-optional Hermes adapter → this overlay.
+**Load order:** root policy → canonical parent → model profile → overlay.
 
 ## Scope boundaries
 
-This overlay owns no network command, address, topology fact, provider rule,
-risk class, approval, or rollback. Never infer a gateway, VLAN, route, virtual
-MAC, or public-address owner from naming or adjacency.
+Reasoning only. The parent owns commands, topology facts, provider rules, risk, approval, and rollback. Never infer gateway, VLAN, route, virtual MAC, or public-address ownership from naming or adjacency.
 
 ## Adaptation
 
-Represent the management path as a short dependency chain: operator source →
-provider boundary → physical uplink → virtual switch/port group → management
-interface → host service. Attach each observed address, VLAN, route, and link
-state to its evidence source.
+Represent the management path as a short dependency chain and attach each address, VLAN, route, and link state to an evidence source. Keep the independent out-of-band path visible for R2/R3.
 
-Keep the independent out-of-band path visible in every R2/R3 reasoning block.
-When facts conflict, prefer authoritative provider/allocation evidence and fresh
-host state over remembered topology. Select one read-only discriminator from
-the parent reference; do not propose a change until management ownership,
-return path, and rollback reachability are unambiguous.
+When facts conflict, prefer authoritative allocation/provider evidence and fresh host state. Select one read-only discriminator; do not propose a change until management ownership, return path, and rollback reachability are unambiguous.

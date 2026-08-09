@@ -1,36 +1,22 @@
 ---
 name: nemotron-3-ultra-backup-restore
-description: Use when Nemotron 3 Ultra is reasoning about an ESXi VM or host backup, export, import, or restore after canonical guidance is loaded.
+description: Use when Nemotron 3 Ultra is reasoning about an ESXi backup, export, import, or restore after canonical backup guidance is selected.
 ---
 
-# Nemotron 3 Ultra backup and restore overlay
+# Nemotron 3 Ultra backup/restore overlay
 
 **Canonical parent:** [`../../../references/backup-restore.md`](../../../references/backup-restore.md)
-and, for host configuration, [`../../../references/host-configuration-backup.md`](../../../references/host-configuration-backup.md).
 
 **Model profile:** [`../model-profile.md`](../model-profile.md)
 
-**Load order:** root policy → canonical backup/restore reference → model profile
-→ optional Hermes adapter → this overlay.
+**Load order:** root policy → canonical parent → model profile → overlay.
 
 ## Scope boundaries
 
-This overlay does not define backup commands, snapshot behavior, credentials,
-risk, approval, overwrite semantics, or restore compatibility. Parent guidance
-always wins.
+Reasoning only. The parent owns backup/restore procedures, identity, compatibility, risk, approval, overwrite semantics, and verification.
 
 ## Adaptation
 
-Keep artifact identity separate from protected scope. For each artifact record:
-source object/UUID, exact build where relevant, creation time, consistency
-method, size, digest, storage location class, encryption/access controls, and
-independent verification status.
+Track only artifact identity, protected scope, source object/UUID, relevant build, creation/consistency method, size/digest, location, and independent verification. Distinguish host configuration bundles, VM backups, snapshots, exports, and raw copies; state what each cannot restore.
 
-Before presenting recovery as viable, explicitly test the distinction between
-a host configuration bundle, VM backup, snapshot, portable export, and raw
-file copy. State what the artifact cannot restore.
-
-For restore reasoning, reserve context for mismatch evidence: target UUID,
-build, datastore capacity, existing-object collisions, network mappings, VM
-power state, and rollback ownership. If any identity or integrity fact is
-missing, propose one R0 discriminator and stop before constructing a change.
+For restore reasoning, retain mismatch evidence only: target identity, compatibility, capacity, collisions, network mapping, power state, and rollback owner. If integrity or identity is missing, choose one R0 discriminator and stop before constructing a change.
